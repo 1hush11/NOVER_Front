@@ -1,9 +1,9 @@
 <template>
-  <div class="flex flex-1 flex-col p-4">
+  <div class="flex flex-1 flex-col p-4 cursor-pointer overflow-y-auto">
     <div class="flex-col flex">
       <div>
         <h2 class="text-xl font-bold mb-4">Жанры</h2>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 ">
           <div class="flex overflow-hidden transition gap-2 rounded-lg shadow p-2">
             <button @click="prev" :disabled="currentPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
 
@@ -66,9 +66,27 @@ const prev = () => {
 }
 
 const popularSongs = [
-  { title: 'Astronaut In The Ocean', artist: 'Masked Wolf', cover: '/src/icons/NOVER_icon.ico' },
-  { title: 'Stay', artist: 'The Kid LAROI & Justin Bieber', cover: '/src/icons/NOVER_icon.ico' },
-  { title: 'Industry Baby', artist: 'Lil Nas X', cover: '/src/icons/NOVER_icon.ico' },
+  { title: 'Life Goes On', artist: 'BTS', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
+  { title: 'Like Crazy', artist: 'Jimin', cover: '/src/resources/trackCovers/like_crazy.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+
 ]
 
 const track = {

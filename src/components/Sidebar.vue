@@ -1,8 +1,8 @@
 <template>
-  <div class="w-64 bg-black text-white p-4 flex flex-col justify-between">
+  <div class="w-64 bg-black text-white p-4 flex flex-col justify-between cursor-pointer">
     <div>
       <div class="logo-container">
-        <img class="logo" src="/src/icons/NOVER_icon_transparent.ico" alt="Logo">
+        <img class="logo" src="/src/icons/NOVER_logo_transparent.png" alt="Logo">
       </div>
       <nav>
         <p class="text-sm mb-2 uppercase text-bold">Меню</p>
@@ -106,7 +106,7 @@
         <span class="text-xs">3:30</span>
       </div>
         
-      <div class="player-container">
+      <div class="player-container cursor-pointer">
         <div class="play-button-wrapper">
           <button class="play-button" @click="togglePlay">
             <span v-if="!isPlaying">
@@ -115,7 +115,7 @@
               </svg>
             </span>
             <span v-else>
-              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
                 <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
               </svg>
             </span>
@@ -132,10 +132,10 @@
             </svg>
           </button>
           <div class="song-box">
-            <img src="/src/icons/NOVER_icon.ico" class="cover-image" />
+            <img src="/src/resources/trackCovers/life_goes_on.jpg" class="cover-image" />
             <div class="song-info">
-              <div class="title">Life of Bachelor....</div>
-              <div class="artist">Bachelor</div>
+              <div class="title">Life Goes On</div>
+              <div class="artist">BTS</div>
             </div>
           </div>
 
@@ -160,6 +160,16 @@
   function togglePlay() {
     isPlaying.value = !isPlaying.value;
   }
+
+  import { useRouter } from 'vue-router'
+
+  const router = useRouter()
+
+  function goToTrackPage() {
+    const trackId = 1 
+    router.push(`/track/${trackId}`)
+  }
+
 </script>
 
 

@@ -8,6 +8,10 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
+a {
+    text-decoration: none;
+}
+
 .bg-black {
     background-color: #1c1c1c;
 }
@@ -58,6 +62,18 @@ body {
 
 .text-bold {
     font-weight: bold;
+}
+
+.h-screen {
+    height: 100vh;
+} 
+
+.t-0 {
+    top: 0;
+}
+
+.z-10 {
+    z-index: 10;
 }
 
 .w-full {
@@ -115,6 +131,10 @@ body {
 
 .mr-4 {
     margin-right: 1rem;
+}
+
+.ml-4 {
+    margin-left: 8rem;
 }
 
 .gap-6 {
@@ -195,10 +215,6 @@ button:hover {
     opacity: 0.8;
 }
 
-.border-none {
-    border: 0px;
-}
-
 .cursor-pointer {
     cursor: pointer;
 }
@@ -219,8 +235,16 @@ button:hover {
     color: white;
 }
 
+.border-b {
+    border-bottom: 1px solid #ccc;
+}
+
 .border-l {
     border-left: 1px solid #ccc;
+}
+
+.border-none {
+    border: 0px;
 }
 
 .hover\:underline:hover {
@@ -361,4 +385,16 @@ material-symbols-outlined {
 
 .object-cover {
     object-fit: cover;
+}
+
+.header {
+    position: sticky;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-y-auto {
+    overflow-y: auto;
 }

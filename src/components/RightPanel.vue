@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 mr-4 cursor-pointer">
-    <h2 class="text-xl font-bold mb-4">Top Artist</h2>
-    <div class="flex flex-col gap-4">
+    <h2 class="text-xl font-bold mb-4">ТОП исполнители</h2>
+    <div class="flex flex-col gap-4 transition gap-2 rounded-lg shadow">
       <div
         v-for="(artist, index) in topArtists"
         :key="index"
@@ -28,7 +28,6 @@
               {{ artist.followers }}
             </span>
             
-            <span class="flex items-center justify-center text-xs text-gray-400 select-none">•</span>
 
             <span>
               <svg width="16" height="16" viewBox="0 0 255 200" fill="#1c1c1c" xmlns="http://www.w3.org/2000/svg">

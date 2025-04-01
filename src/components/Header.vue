@@ -1,5 +1,5 @@
 <template>
-  <header class="flex justify-between items-center p-4 bg-white">
+  <header class="flex justify-between items-center p-4 border-b">
     <!-- Лого -->
     <div class="flex items-center gap-4">
       <h1 class="text-l uppercase cursor-pointer font-bold">Nover</h1>
