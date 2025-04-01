@@ -2,7 +2,7 @@
   <header class="flex justify-between items-center p-4 bg-white">
     <!-- Лого -->
     <div class="flex items-center gap-4">
-      <h1 class="text-l uppercase font-bold">Nover</h1>
+      <h1 class="text-l uppercase cursor-pointer font-bold">Nover</h1>
     </div>
 
 
@@ -15,7 +15,7 @@
       </div>
       <div>
         <input type="file" id="file" />
-        <label for="file">
+        <label class="cursor-pointer" for="file">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 32" class="w-6 h-6 fill-white" width="35px" height="35px" fill="#9483a8" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
             <path d="M33.958,12.988C33.531,6.376,28.933,0,20.5,0C12.787,0,6.839,5.733,6.524,13.384
               C2.304,14.697,0,19.213,0,22.5C0,27.561,4.206,32,9,32h6.5c0.276,0,0.5-0.224,0.5-0.5S15.776,31,15.5,31H9

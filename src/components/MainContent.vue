@@ -4,7 +4,7 @@
       <div>
         <h2 class="text-xl font-bold mb-4">Жанры</h2>
         <div class="flex items-center gap-2">
-          <div class="flex overflow-hidden transition gap-6 rounded-lg shadow p-2">
+          <div class="flex overflow-hidden transition gap-2 rounded-lg shadow p-2">
             <button @click="prev" :disabled="currentPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
 
             <div
@@ -36,17 +36,19 @@
 import TrackCard from './TrackCard.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 
-const itemsPerPage = 4
+const itemsPerPage = 5
 const currentPage = ref(0)
 
 const genres = [
-  { name: 'Pop', image: '/src/icons/NOVER_icon.ico' },
-  { name: 'Phonk', image: '/src/icons/NOVER_icon.ico' },
-  { name: 'Hip Hop', image: '/src/icons/NOVER_icon.ico' },
-  { name: 'Rock', image: '/src/icons/NOVER_icon.ico' },
-  { name: 'EDM', image: '/src/icons/NOVER_icon.ico' },
-  { name: 'Country', image: '/src/icons/NOVER_icon.ico' },
-  { name: 'Jazz', image: '/src/icons/NOVER_icon.ico' },
+  { name: 'Pop', image: '/src/resources/genreCovers/pop.png' },
+  { name: 'K-Pop', image: '/src/resources/genreCovers/kpop.png' },
+  { name: 'Классика', image: '/src/resources/genreCovers/classical.png' },
+  { name: 'Фонк', image: '/src/resources/genreCovers/phonk.png' },
+  { name: 'Hip Hop', image: '/src/resources/genreCovers/hiphop.png' },
+  { name: 'Rock', image: '/src/resources/genreCovers/rock.png' },
+  { name: 'EDM', image: '/src/resources/genreCovers/edm.png' },
+  { name: 'Country', image: '/src/resources/genreCovers/country.png' },
+  { name: 'Jazz', image: '/src/resources/genreCovers/jazz.png' },
 ]
 
 const pagedGenres = computed(() => genres.slice(currentPage.value, currentPage.value + itemsPerPage))
