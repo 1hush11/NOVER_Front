@@ -90,7 +90,7 @@ const topArtists = [
 .cover-image {
   width: 69px;
   height: 69px;
-  border-radius: 25%;
+  border-radius: 99%;
   object-fit: cover;
 }
 </style>

@@ -2,10 +2,10 @@
   <div class="flex flex-1 flex-col p-4 cursor-pointer overflow-y-auto">
     <div class="flex-col flex">
       <div>
-        <h2 class="text-xl font-bold mb-4">Жанры</h2>
+        <button class="text-xl font-bold mb-4 bg-transparent border-none" @click="goGenresPage">Жанры</button>
         <div class="flex items-center gap-2 ">
           <div class="flex overflow-hidden transition gap-2 rounded-lg shadow p-2">
-            <button @click="prev" :disabled="currentPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
+            <button @click="prev" :disabled="currentPage === 0" class="text-2xl text-bold p-4 bg-transparent border-none">‹</button>
 
             <div
               v-for="(genre, index) in pagedGenres"
@@ -17,14 +17,14 @@
               <p class="text-sm text-gray-600">Top 50</p>
             </div>
             
-            <button @click="next" :disabled="currentPage + pagedGenres.length >= genres.length" class="text-2xl text-bold bg-transparent border-none">›</button>
+            <button @click="next" :disabled="currentPage + pagedGenres.length >= genres.length" class="text-2xl text-bold p-4 bg-transparent border-none">›</button>
           </div>
         </div>
         </div>
       </div>
 
     <div class="mt-6">
-      <h2 class="text-xl font-bold mb-4">Популярное сейчас</h2>
+      <button class="text-xl font-bold mb-4 bg-transparent border-none">Популярно сейчас</button>
       <div class="flex flex-col gap-3">
         <TrackCard v-for="(song, index) in popularSongs" :key="index" :track="song" :index="index" />
       </div>
@@ -35,8 +35,9 @@
 <script setup>
 import TrackCard from './TrackCard.vue'
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-const itemsPerPage = 5
+const itemsPerPage = 4
 const currentPage = ref(0)
 
 const genres = [
@@ -89,11 +90,9 @@ const popularSongs = [
 
 ]
 
-const track = {
-  title: 'METAMORPHOSIS Slowed - Reverb',
-  artist: 'INTERWORLD',
-  cover: 'https://your-cover-image.jpg',
-  plays: '69k',
+  const router = useRouter()
+function goGenresPage() {
+  router.push('/genres')
 }
 </script>
 

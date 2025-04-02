@@ -55,12 +55,12 @@
           <!-- Play / Pause -->
           <button class="play-button" @click="togglePlay" title="Воспроизвести / Пауза">
             <span v-if="!isPlaying">
-              <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
+              <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M8 5v14l11-7-11-7z" />
               </svg>
             </span>
             <span v-else>
-              <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
+              <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
               </svg>
             </span>
@@ -213,8 +213,8 @@ const toggleRepeat = () => {}
 }
 
 .play-button {
-  width: 45px;
-  height: 45px;
+  width: 65px;
+  height: 65px;
   background: #1c1c1c;
   color: white;
   border: none;

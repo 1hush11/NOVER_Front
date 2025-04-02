@@ -8,7 +8,7 @@
         <p class="text-sm mb-2 uppercase text-bold">Меню</p>
         <ul class="no-list-style">
           <li class="mb-2">
-            <button class="menu-btn">
+            <button class="menu-btn" @click="goHome">
               <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
               viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve" width="30" height="30">
                 <polyline fill="none" stroke="#FFFFFF" opacity="0.25" stroke-width="2" stroke-miterlimit="10" points="3,17 16,4 29,17 "/>
@@ -19,7 +19,7 @@
             </button>
           </li>
           <li class="mb-2">
-            <button class="menu-btn">
+            <button class="menu-btn" @click="goGenresPage">
               <svg width="30" height="30" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <g id="icomoon-ignore"/>
                 <path d="M16.003 22.377c3.231 0 5.851-2.619 5.851-5.851v-10.639c0-3.231-2.62-5.85-5.851-5.85s-5.851 2.619-5.851 5.85v10.639c0 3.231 2.62 5.851 5.851 5.851zM11.216 5.888c0-2.639 2.147-4.786 4.787-4.786s4.787 2.147 4.787 4.786v10.639c0 2.64-2.147 4.787-4.787 4.787s-4.787-2.147-4.787-4.787v-10.639z" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1"/>
@@ -29,22 +29,7 @@
             </button>
           </li>
           <li class="mb-2">
-            <button class="menu-btn">
-              <svg width="30" height="30" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                  <g id="页面-1" stroke="none" fill="none" fill-rule="evenodd">
-                      <g id="Media" fill-rule="nonzero">
-                          <g id="album_line">
-                              <path d="M24,0 L24,24 L0,24 L0,0 L24,0 Z M12.5934901,23.257841 L12.5819402,23.2595131 L12.5108777,23.2950439 L12.4918791,23.2987469 L12.4918791,23.2987469 L12.4767152,23.2950439 L12.4056548,23.2595131 C12.3958229,23.2563662 12.3870493,23.2590235 12.3821421,23.2649074 L12.3780323,23.275831 L12.360941,23.7031097 L12.3658947,23.7234994 L12.3769048,23.7357139 L12.4804777,23.8096931 L12.4953491,23.8136134 L12.4953491,23.8136134 L12.5071152,23.8096931 L12.6106902,23.7357139 L12.6232938,23.7196733 L12.6232938,23.7196733 L12.6266527,23.7031097 L12.609561,23.275831 C12.6075724,23.2657013 12.6010112,23.2592993 12.5934901,23.257841 L12.5934901,23.257841 Z M12.8583906,23.1452862 L12.8445485,23.1473072 L12.6598443,23.2396597 L12.6498822,23.2499052 L12.6498822,23.2499052 L12.6471943,23.2611114 L12.6650943,23.6906389 L12.6699349,23.7034178 L12.6699349,23.7034178 L12.678386,23.7104931 L12.8793402,23.8032389 C12.8914285,23.8068999 12.9022333,23.8029875 12.9078286,23.7952264 L12.9118235,23.7811639 L12.8776777,23.1665331 C12.8752882,23.1545897 12.8674102,23.1470016 12.8583906,23.1452862 L12.8583906,23.1452862 Z M12.1430473,23.1473072 C12.1332178,23.1423925 12.1221763,23.1452606 12.1156365,23.1525954 L12.1099173,23.1665331 L12.0757714,23.7811639 C12.0751323,23.7926639 12.0828099,23.8018602 12.0926481,23.8045676 L12.108256,23.8032389 L12.3092106,23.7104931 L12.3186497,23.7024347 L12.3186497,23.7024347 L12.3225043,23.6906389 L12.340401,23.2611114 L12.337245,23.2485176 L12.337245,23.2485176 L12.3277531,23.2396597 L12.1430473,23.1473072 Z" id="MingCute" fill-rule="nonzero"/>
-                              <path d="M12,2 C17.5228,2 22,6.47715 22,12 C22,17.5228 17.5228,22 12,22 C6.47715,22 2,17.5228 2,12 C2,6.47715 6.47715,2 12,2 Z M12,4 C7.58172,4 4,7.58172 4,12 C4,16.4183 7.58172,20 12,20 C16.4183,20 20,16.4183 20,12 C20,7.58172 16.4183,4 12,4 Z M12,10 C13.1046,10 14,10.8954 14,12 C14,13.1046 13.1046,14 12,14 C10.8954,14 10,13.1046 10,12 C10,10.8954 10.8954,10 12,10 Z M11.4402,6.50687 C11.6243,7.02759 11.3514,7.59891 10.8306,7.78296 C9.70239,8.18174 8.75788,8.97573 8.1657,9.99943 C7.88916,10.4775 7.27743,10.6409 6.79937,10.3643 C6.32131,10.0878 6.15794,9.47604 6.43449,8.99798 C7.26199,7.56747 8.58138,6.45671 10.1642,5.89728 C10.6849,5.71323 11.2562,5.98615 11.4402,6.50687 Z" id="形状" fill="#FFFFFF" opacity="0.25"/>
-                          </g>
-                      </g>
-                  </g>
-              </svg>
-              Альбомы
-            </button>
-          </li>
-          <li class="mb-2">
-            <button class="menu-btn">
+            <button class="menu-btn" @click="goSingersPage">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clip-path="url(#clip0_429_11111)">
                   <circle cx="12" cy="7" r="3" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.5"/>
@@ -106,9 +91,9 @@
         <span class="text-xs">3:30</span>
       </div>
         
-      <div class="player-container cursor-pointer">
+      <div class="player-container cursor-pointer" @click="goToTrackPage">
         <div class="play-button-wrapper">
-          <button class="play-button" @click="togglePlay">
+          <button class="play-button" @click.stop="togglePlay">
             <span v-if="!isPlaying">
               <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
                 <path d="M8 5v14l11-7-11-7z"/>
@@ -152,7 +137,7 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue';
+  import { ref } from 'vue'
 
   const isPlaying = ref(false);
   const sliderValue = ref(0);
@@ -165,11 +150,20 @@
 
   const router = useRouter()
 
+
+  function goHome () {
+    router.push('/')
+  }
   function goToTrackPage() {
     const trackId = 1 
     router.push(`/track/${trackId}`)
   }
-
+  function goGenresPage() {
+    router.push('/genres')
+  }
+  function goSingersPage() {
+    router.push('/singers')
+  }
 </script>
 
 
@@ -315,6 +309,11 @@ li {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  transition: transform 0.5s ea, box-shadow 0.5s ease-in-out;
+}
+.player-container:hover {
+  transform: scale(1.03); /* немного увеличивает */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* тень для эффекта */
 }
 
 .nav-button {
