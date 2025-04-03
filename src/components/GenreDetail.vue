@@ -14,27 +14,29 @@
     <h2 class="text-xl font-semibold mb-4">Лучшие исполнители</h2>
     <div class="flex flex-wrap gap-4 mb-6">
       <div
-        v-for="artist in genre.artists"
-        :key="artist"
+        v-for="singer in genre.singers"
+        :key="singer"
         class="flex flex-col items-center w-24 cursor-pointer transition hover:scale-105"
+        @click="goToSinger(singer)"
       >
         <img
-          :src="`/src/resources/singerCovers/${artist.replace(/\s+/g, '').toLowerCase()}.jpg`"
-          :alt="artist"
+          :src="singer.image"
+          :alt="singer"
           class="cover-image"
         />
-        <p class="mt-2 text-center text-sm text-gray-700 font-medium mt-2">{{ artist }}</p>
+        <p class="mt-2 text-center text-sm text-gray-700 font-medium mt-2">{{ singer.name }}</p>
       </div>
     </div>
 
     <h2 class="text-xl font-semibold mb-2">Популярные треки</h2>
     <div class="flex flex-col gap-3">
-        <TrackCard v-for="(song, index) in genre.tracks" :key="index" :track="song" :index="index" />
+      <TrackCard v-for="(track, index) in genre.tracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
     </div>
   </div>
 </template>
 <script setup>
 import TrackCard from './TrackCard.vue'
+import SingerDetail from './SingerDetail.vue'
 
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
@@ -42,24 +44,49 @@ import { computed } from 'vue'
 const router = useRouter()
 const route = useRoute()
 
-function toGenresPage() {
-    router.push('/genres')
+function goToTrackPage(track) {
+  router.push(`/track/${track.id}`)
 }
+function toGenresPage() {
+  router.push('/genres')
+}
+function goToSinger(singer) {
+  router.push(`/singers/${singer.id}`)
+  }
 
 const genreMap = {
   1: {
     name: 'Pop',
     description: 'Поп-музыка — это жанр популярной музыки с акцентом на мелодичность и коммерческую привлекательность.',
-    artists: ['Taylor Swift', 'Adele'],
+    singers: [
+      {
+        id: 1,
+        name: 'Taylor Swift',
+        image: '/src/resources/singerCovers/taylor_swift.jpg',
+        listeners: '100M',
+        tracksCount: 150,
+        description: 'Taylor Swift — американская певица и автор песен, икона современной поп-музыки.'
+      },
+      {
+        id: 2,
+        name: 'Adele',
+        image: '/src/resources/singerCovers/adele.jpg',
+        listeners: '80M',
+        tracksCount: 50,
+        description: 'Adele — британская певица с душевным вокалом и мощной эмоциональной подачей.'
+      }
+    ],
     tracks: [
       {
+        id: 1,
         title: 'Shake It Off',
-        artist: 'Taylor Swift',
+        singer: 'Taylor Swift',
         cover: '/src/resources/trackCovers/shake_it_off.jpg'
       },
       {
+        id: 2,
         title: 'Hello',
-        artist: 'Adele',
+        singer: 'Adele',
         cover: '/src/resources/trackCovers/hello.jpg'
       }
     ]
@@ -67,16 +94,35 @@ const genreMap = {
   2: {
     name: 'K-Pop',
     description: 'Южнокорейская поп-музыка с глобальным влиянием.',
-    artists: ['BTS', 'V'],
+    singers: [
+      {
+        id: 3,
+        name: 'BTS',
+        image: '/src/resources/singerCovers/bts.jpg',
+        listeners: '70M',
+        tracksCount: 200,
+        description: 'BTS — всемирно известная K-pop группа из Южной Кореи.'
+      },
+      {
+        id: 4,
+        name: 'V',
+        image: '/src/resources/singerCovers/v.jpg',
+        listeners: '25M',
+        tracksCount: 30,
+        description: 'V — вокалист BTS с бархатистым голосом и уникальным стилем.'
+      }
+    ],
     tracks: [
       {
+        id: 3,
         title: 'Life Goes On',
-        artist: 'BTS',
+        singer: 'BTS',
         cover: '/src/resources/trackCovers/life_goes_on.jpg'
       },
       {
+        id: 4,
         title: 'Rainy Days',
-        artist: 'V',
+        singer: 'V',
         cover: '/src/resources/trackCovers/rainy_days.jpg'
       }
     ]
@@ -84,16 +130,35 @@ const genreMap = {
   3: {
     name: 'Классика',
     description: 'Вечная музыка великих композиторов, вдохновляющая и неподвластная времени.',
-    artists: ['Бетховен', 'Моцарт'],
+    singers: [
+      {
+        id: 5,
+        name: 'Бетховен',
+        image: '/src/resources/singerCovers/beethoven.jpg',
+        listeners: '10M',
+        tracksCount: 100,
+        description: 'Людвиг ван Бетховен — один из величайших классических композиторов.'
+      },
+      {
+        id: 6,
+        name: 'Моцарт',
+        image: '/src/resources/singerCovers/mozart.jpg',
+        listeners: '9M',
+        tracksCount: 200,
+        description: 'Вольфганг Амадей Моцарт — гений эпохи классицизма.'
+      }
+    ],
     tracks: [
       {
+        id: 5,
         title: 'Symphony No. 9',
-        artist: 'Бетховен',
+        singer: 'Бетховен',
         cover: '/src/resources/trackCovers/beethoven_9.jpg'
       },
       {
+        id: 6,
         title: 'Eine kleine Nachtmusik',
-        artist: 'Моцарт',
+        singer: 'Моцарт',
         cover: '/src/resources/trackCovers/mozart_nachtmusik.jpg'
       }
     ]
@@ -101,16 +166,35 @@ const genreMap = {
   4: {
     name: 'Фонк',
     description: 'Грязный бит, ретро вайб и тёмная эстетика улиц.',
-    artists: ['KSLV Noh', 'Freddie Dredd'],
+    singers: [
+      {
+        id: 7,
+        name: 'KSLV Noh',
+        image: '/src/resources/singerCovers/kslv_noh.jpg',
+        listeners: '5M',
+        tracksCount: 45,
+        description: 'KSLV Noh — один из заметных представителей новой волны фонка.'
+      },
+      {
+        id: 8,
+        name: 'Freddie Dredd',
+        image: '/src/resources/singerCovers/freddie_dredd.jpg',
+        listeners: '12M',
+        tracksCount: 60,
+        description: 'Freddie Dredd — трэш-фонк с мрачной подачей и винтажной эстетикой.'
+      }
+    ],
     tracks: [
       {
+        id: 7,
         title: 'Doomshop',
-        artist: 'KSLV Noh',
+        singer: 'KSLV Noh',
         cover: '/src/resources/trackCovers/doomshop.jpg'
       },
       {
+        id: 8,
         title: 'Cha Cha',
-        artist: 'Freddie Dredd',
+        singer: 'Freddie Dredd',
         cover: '/src/resources/trackCovers/cha_cha.jpg'
       }
     ]
@@ -118,16 +202,35 @@ const genreMap = {
   5: {
     name: 'Hip Hop',
     description: 'Культура улиц, глубокие тексты и качающие биты.',
-    artists: ['Kendrick Lamar', 'J. Cole'],
+    singers: [
+      {
+        id: 9,
+        name: 'Kendrick Lamar',
+        image: '/src/resources/singerCovers/kendrick.jpg',
+        listeners: '55M',
+        tracksCount: 90,
+        description: 'Kendrick Lamar — лауреат Пулитцеровской премии, один из лучших рэперов современности.'
+      },
+      {
+        id: 10,
+        name: 'J. Cole',
+        image: '/src/resources/singerCovers/jcole.jpg',
+        listeners: '48M',
+        tracksCount: 85,
+        description: 'J. Cole — рэпер с социальным посланием и глубокими текстами.'
+      }
+    ],
     tracks: [
       {
+        id: 9,
         title: 'HUMBLE.',
-        artist: 'Kendrick Lamar',
+        singer: 'Kendrick Lamar',
         cover: '/src/resources/trackCovers/humble.jpg'
       },
       {
+        id: 10,
         title: 'No Role Modelz',
-        artist: 'J. Cole',
+        singer: 'J. Cole',
         cover: '/src/resources/trackCovers/no_role_modelz.jpg'
       }
     ]
@@ -135,16 +238,35 @@ const genreMap = {
   6: {
     name: 'Rock',
     description: 'Энергия, гитары и культовые рифы от классики до альтернативы.',
-    artists: ['Nirvana', 'Queen'],
+    singers: [
+      {
+        id: 11,
+        name: 'Nirvana',
+        image: '/src/resources/singerCovers/nirvana.jpg',
+        listeners: '35M',
+        tracksCount: 60,
+        description: 'Nirvana — икона гранжа и 90-х.'
+      },
+      {
+        id: 12,
+        name: 'Queen',
+        image: '/src/resources/singerCovers/queen.jpg',
+        listeners: '50M',
+        tracksCount: 100,
+        description: 'Queen — легендарная рок-группа во главе с Фредди Меркьюри.'
+      }
+    ],
     tracks: [
       {
+        id: 11,
         title: 'Smells Like Teen Spirit',
-        artist: 'Nirvana',
+        singer: 'Nirvana',
         cover: '/src/resources/trackCovers/smells_like_teen_spirit.jpg'
       },
       {
+        id: 12,
         title: 'Bohemian Rhapsody',
-        artist: 'Queen',
+        singer: 'Queen',
         cover: '/src/resources/trackCovers/bohemian_rhapsody.jpg'
       }
     ]
@@ -152,16 +274,35 @@ const genreMap = {
   7: {
     name: 'EDM',
     description: 'Электронная музыка для фестивалей и вечеринок.',
-    artists: ['Martin Garrix', 'Avicii'],
+    singers: [
+      {
+        id: 13,
+        name: 'Martin Garrix',
+        image: '/src/resources/singerCovers/garrix.jpg',
+        listeners: '45M',
+        tracksCount: 70,
+        description: 'Martin Garrix — молодой лидер EDM-сцены.'
+      },
+      {
+        id: 14,
+        name: 'Avicii',
+        image: '/src/resources/singerCovers/avicii.jpg',
+        listeners: '60M',
+        tracksCount: 65,
+        description: 'Avicii — новатор электронной сцены и автор хитов на века.'
+      }
+    ],
     tracks: [
       {
+        id: 13,
         title: 'Animals',
-        artist: 'Martin Garrix',
+        singer: 'Martin Garrix',
         cover: '/src/resources/trackCovers/animals.jpg'
       },
       {
+        id: 14,
         title: 'Wake Me Up',
-        artist: 'Avicii',
+        singer: 'Avicii',
         cover: '/src/resources/trackCovers/wake_me_up.jpg'
       }
     ]
@@ -169,21 +310,41 @@ const genreMap = {
   8: {
     name: 'Jazz',
     description: 'Импровизация, глубина и утончённость звука.',
-    artists: ['Miles Davis', 'John Coltrane'],
+    singers: [
+      {
+        id: 15,
+        name: 'Miles Davis',
+        image: '/src/resources/singerCovers/miles.jpg',
+        listeners: '20M',
+        tracksCount: 80,
+        description: 'Miles Davis — пионер модерн-джаза.'
+      },
+      {
+        id: 16,
+        name: 'John Coltrane',
+        image: '/src/resources/singerCovers/coltrane.jpg',
+        listeners: '18M',
+        tracksCount: 75,
+        description: 'John Coltrane — саксофонист и легенда джазовой импровизации.'
+      }
+    ],
     tracks: [
       {
+        id: 15,
         title: 'So What',
-        artist: 'Miles Davis',
+        singer: 'Miles Davis',
         cover: '/src/resources/trackCovers/so_what.jpg'
       },
       {
+        id: 16,
         title: 'My Favorite Things',
-        artist: 'John Coltrane',
+        singer: 'John Coltrane',
         cover: '/src/resources/trackCovers/my_favorite_things.jpg'
       }
     ]
   }
 }
+
 
 const genre = computed(() => {
   const id = Number(route.params.id)

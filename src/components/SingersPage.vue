@@ -42,7 +42,7 @@ const filteredSingers = computed(() =>
   )
 )
 
-    function goToSinger(singer) {
-    router.push(`/singers/:${singer.id}`)
-    }
+function goToSinger(singer) {
+  router.push(`/singers/${singer.id}`)
+}
 </script>

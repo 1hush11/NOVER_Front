@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-between rounded-lg shadow p-4 w-full">
     <div class="flex items-center gap-4">
-      <p class="text-sm text-gray-600 w-4 text-center">0{{ index + 1 }}</p>
+      <p class="text-sm text-gray-600 text-center">0{{ index + 1 }}</p>
 
       <img :src="track.cover" :alt="track.title + ' cover'" class="cover-image" />
       <div>
@@ -13,7 +13,6 @@
     </div>
 
     <div class="flex items-center gap-4">
-      <!-- Прослушивания -->
       <button class="play-button" @click="togglePlay">
         <span v-if="!isPlaying">
           <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">

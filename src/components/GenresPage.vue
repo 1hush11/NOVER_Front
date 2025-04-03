@@ -6,9 +6,13 @@
         <div
           v-for="genre in genres"
           :key="genre.id"
-          class="flex gap-4 p-2 shadow rounded-lg cursor-pointer transition hover:scale-[1.03] hover:shadow"
+          :class="[
+            'flex gap-4 p-2 shadow rounded-lg cursor-pointer transition',
+            activeGenre === genre.id ? 'active bg-purple-600' : 'bg-white text-gray-800'
+          ]"
           @click="goToGenre(genre)"
         >
+
           <img :src="genre.image" alt="genre cover" class="cover-image"/>
           <div v-if="!route.params.id" class="mt-2">
             <h2 class="text-lg font-semibold text-gray-800 mt-4">{{ genre.name }}</h2>
@@ -27,7 +31,9 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+
+const activeGenre = ref(null)
 
 const router = useRouter()
 const route = useRoute()
@@ -86,6 +92,7 @@ const genres = [
 ]
 
 function goToGenre(genre) {
+  activeGenre.value = genre.id
   router.push(`/genres/${genre.id}`)
 }
 </script>

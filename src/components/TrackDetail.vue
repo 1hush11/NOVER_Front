@@ -6,14 +6,14 @@
       <div class="flex-1">
         <h1 class="text-4xl font-bold mb-4 mt-6">{{ track.title }}</h1>
         <p class="text-lg text-gray-700 mb-4">
-          <router-link :to="`/artist/${track.artist}`" class="text-base font-semibold text-gray-700 hover:underline">
+          <span class="text-base font-semibold text-gray-700 hover:underline">
             {{ track.artist }}
-          </router-link>
+          </span>
         </p>
         <p class="text-md text-purple-500 mb-4 mt-1">
-          <router-link :to="`/genre/${track.genre}`" class="text-lg text-gray-500 hover:underline">
+          <span class="text-lg text-gray-500 hover:underline">
             {{ track.genre }}
-          </router-link>
+          </span>
         </p>
         <input
           type="range"
@@ -22,16 +22,14 @@
           v-model="progress"
           class="track-slider"
         />
-          <!-- Progress bar -->
+
         <div class="w-full flex justify-between h-1 bg-gray-300 rounded mt-4">
           <span class="h-1 rounded">00:00</span>
           <span class="h-1 rounded">03:41</span>
         </div>
 
-        <div class="flex justify-center items-center gap-6 mt-6 ml-4">
-          <!-- Shuffle -->
+        <div class="flex items-center gap-6 mt-6 ml-4">
           <button class="bg-transparent border-none"  @click="toggleShuffle" title="Перемешать">
-            <!-- вставка shuffle SVG -->
             <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 fill-rule="evenodd"
@@ -42,7 +40,6 @@
             </svg>
           </button>
 
-          <!-- Previous -->
           <button class="bg-transparent border-none" @click="prevTrack" title="Назад">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g transform="scale(-1,1) translate(-24,0)">
@@ -52,7 +49,6 @@
             </svg>
           </button>
 
-          <!-- Play / Pause -->
           <button class="play-button" @click="togglePlay" title="Воспроизвести / Пауза">
             <span v-if="!isPlaying">
               <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
@@ -66,7 +62,6 @@
             </span>
           </button>
 
-            <!-- Next -->
           <button class="bg-transparent border-none" @click="nextTrack" title="Вперёд">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M3.76 7.22V16.79C3.76 18.75 5.89 19.98 7.59 19L11.74 16.61L15.89 14.21C17.59 13.23 17.59 10.78 15.89 9.8L11.74 7.4L7.59 5.01C5.89 4.03 3.76 5.25 3.76 7.22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -74,7 +69,6 @@
             </svg>
           </button>
 
-          <!-- Repeat -->
           <button class="bg-transparent border-none" @click="toggleRepeat" title="Повтор">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20.924 5.617a.997.997 0 0 0-.217-.324l-3-3a1 1 0 1 0-1.414 1.414L17.586 5H8a5 5 0 0 0-5 5v2a1 1 0 1 0 2 0v-2a3 3 0 0 1 3-3h9.586l-1.293 1.293a1 1 0 0 0 1.414 1.414l3-3a.997.997 0 0 0 .217-1.09zM3 18.383a.997.997 0 0 0 .217 1.09l3 3a1 1 0 0 0 1.414-1.414L6.414 19H16a5 5 0 0 0 5-5v-2a1 1 0 1 0-2 0v2a3 3 0 0 1-3 3H6.414l1.293-1.293a1 1 0 1 0-1.414-1.414l-3 3z"
@@ -82,14 +76,10 @@
             </svg>
           </button>
         </div>
-
-        <!-- Bottom buttons -->
-        
       </div>
     </div>
 
     <div class="flex gap-4 mt-4 mb-6">
-          <!-- Favorite -->
       <button class="btn" title="В избранное">
         <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
           <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
@@ -97,7 +87,6 @@
         В избранное
       </button>
 
-      <!-- Playlist -->
       <button class="btn" title="Добавить в плейлист">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M18 18H20M22 18H20M20 18V16M20 18V20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -109,8 +98,7 @@
         В плейлист
       </button>
 
-      <!-- Album -->
-      <router-link :to="`/album/${track.album}`" class="btn" title="Альбом">
+      <button class="btn" title="Альбом">
         <svg width="30" height="30" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
               <g id="页面-1" stroke="none" fill="none" fill-rule="evenodd">
                   <g id="Media" fill-rule="nonzero">
@@ -122,9 +110,8 @@
               </g>
           </svg>
         Альбом
-      </router-link>
+      </button>
 
-      <!-- Review -->
       <button class="btn">
         <svg fill="#1c1c1" width="25px" height="25px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="0.5">
           <path d="M8.2881437,19.1950792 C8.38869181,19.1783212 8.49195996,19.1926955 8.58410926,19.2362761 C9.64260561,19.7368747 10.8021412,20 12,20 C16.418278,20 20,16.418278 20,12 C20,7.581722 16.418278,4 12,4 C7.581722,4 4,7.581722 4,12 C4,13.7069096 4.53528582,15.3318588 5.51454846,16.6849571 C5.62010923,16.830816 5.63909672,17.022166 5.5642591,17.1859256 L4.34581002,19.8521348 L8.2881437,19.1950792 Z M3.58219949,20.993197 C3.18698783,21.0590656 2.87870208,20.6565881 3.04523765,20.2921751 L4.53592782,17.0302482 C3.54143337,15.5576047 3,13.818993 3,12 C3,7.02943725 7.02943725,3 12,3 C16.9705627,3 21,7.02943725 21,12 C21,16.9705627 16.9705627,21 12,21 C10.707529,21 9.4528641,20.727055 8.30053434,20.2068078 L3.58219949,20.993197 Z"/>
@@ -146,7 +133,7 @@
     <div class="mt-12">
       <h2 class="text-2xl font-bold mb-4">Похожие треки</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <TrackCard v-for="(item, index) in similarTracks" :key="index" :track="item" />
+        <TrackCard v-for="(track, index) in similarTracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
       </div>
     </div>
   </div>
@@ -155,9 +142,14 @@
 <script setup>
 import TrackCard from '@/components/TrackCard.vue'
 import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
+
+function goToTrackPage(track) {
+  router.push(`/track/${track.id}`)
+}
 
 const track = ref({
   id: route.params.id,
@@ -178,8 +170,15 @@ const reviews = ref([
 ])
 
 const similarTracks = ref([
-  { title: 'Track 1', artist: 'Artist', cover: '...' },
-  { title: 'Track 2', artist: 'Artist', cover: '...' }
+  { id: 1, title: 'Life Goes On', artist: 'BTS', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
+  { id: 2, title: 'Like Crazy', artist: 'Jimin', cover: '/src/resources/trackCovers/like_crazy.jpg' },
+  { id: 3, title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
+  { id: 4, title: 'Butter', artist: 'BTS', cover: '/src/resources/trackCovers/butter.jpg' },
+  { id: 5, title: 'Set Me Free Pt.2', artist: 'Jimin', cover: '/src/resources/trackCovers/set_me_free.jpg' },
+  { id: 6, title: 'MORE', artist: 'J-Hope', cover: '/src/resources/trackCovers/more.jpg' },
+  { id: 7, title: 'Dynamite', artist: 'BTS', cover: '/src/resources/trackCovers/dynamite.jpg' },
+  { id: 8, title: 'Seven', artist: 'Jung Kook', cover: '/src/resources/trackCovers/seven.jpg' },
+  { id: 9, title: 'Rainy Days', artist: 'V', cover: '/src/resources/trackCovers/rainy_days.jpg' },
 ])
 
 const isPlaying = ref(false)
@@ -215,8 +214,8 @@ const toggleRepeat = () => {}
 .play-button {
   width: 65px;
   height: 65px;
-  background: #1c1c1c;
-  color: white;
+  background: #e0c8fb;
+  color: #1c1c1c;
   border: none;
   border-radius: 50%;
   font-size: 24px;

@@ -1,19 +1,19 @@
 <template>
-  <div class="p-4 mr-4 cursor-pointer">
-    <h2 class="text-xl font-bold mb-4">ТОП исполнители</h2>
-    <div class="flex flex-col gap-4 transition gap-2 rounded-lg shadow">
+  <div class="p-4 cursor-pointer">
+    <h2 class="text-xl font-bold mb-2">ТОП исполнители</h2>
+    <div class="flex flex-col gap-4 transition rounded-lg shadow">
       <div
-        v-for="(artist, index) in topArtists"
+        v-for="(singer, index) in topSingers"
         :key="index"
-        class="flex items-center gap-4"
+        class="flex items-center" @click="goToSinger(singer)"
       >
         <img
-          :src="artist.image"
-          alt="artist"
-          class="cover-image"
+          :src="singer.image"
+          alt="singer"
+          class="cover-image ml-2"
         />
-        <div class="flex flex-col">
-          <p class="text-base font-semibold hover:underline">{{ artist.name }}</p>
+        <div class="flex flex-col ml-2">
+          <p class="text-base font-semibold hover:underline">{{ singer.name }}</p>
           <div class="text-xs text-gray-500 flex gap-3">
             <span>
               <svg width="16" height="16" viewBox="0 0 48 25" fill="#1c1c1c" xmlns="http://www.w3.org/2000/svg">
@@ -24,8 +24,7 @@
                   d="M5.76618 28.0846C5.14556 28.6486 5 29.0826 5 29.4V33H27V29.4C27 29.0826 26.8544 28.6486 26.2338 28.0846C25.6009 27.5095 24.6268 26.9511 23.3932 26.4645C20.924 25.4906 17.9234 25 16 25C14.0766 25 11.076 25.4906 8.60682 26.4645C7.37322 26.9511 6.39908 27.5095 5.76618 28.0846ZM16 23C11.6612 23 3 25.144 3 29.4V35H29V29.4C29 25.144 20.3387 23 16 23Z"
                   fill="#1c1c1c"/>
               </svg>
-
-              {{ artist.followers }}
+              {{ singer.followers }} Подписаны
             </span>
             
 
@@ -36,7 +35,7 @@
                 <path d="M72.4,235.6H39.5v-94.4h32.9C89.4,185,72.4,235.6,72.4,235.6z"/>
                 <path d="M184.1,141.2H217v94.4h-32.9C167.1,191.8,184.1,141.2,184.1,141.2z"/>
               </svg>
-              {{ artist.plays }}
+              {{ singer.plays }} Прослушали
             </span>
           </div>
         </div>
@@ -46,44 +45,59 @@
 </template>
 
 <script setup>
-const topArtists = [
+import { useRoute, useRouter } from 'vue-router';
+
+const topSingers = [
   {
+    id: 1,
     name: 'Agust D',
-    image: '/src/resources/singerCovers/agustd.jpg',
-    followers: '12k Подписаны',
-    plays: '25M Прослушали',
+    followers: '12k',
+    plays: '25M',
+    image: '/src/resources/singerCovers/agustd.jpg'
   },
   {
+    id: 2,
     name: 'Jimin',
-    image: '/src/resources/singerCovers/jimin.jpg',
-    followers: '50k Подписаны',
-    plays: '2M Прослушали',
+    followers: '50k',
+    plays: '2M',
+    image: '/src/resources/singerCovers/jimin.jpg'
   },
   {
+    id: 3,
     name: 'BTS',
-    image: '/src/resources/singerCovers/bts.jpg',
-    followers: '2.3M Подписаны',
-    plays: '32B Прослушали',
+    followers: '2.3M',
+    plays: '32B',
+    image: '/src/resources/singerCovers/bts.jpg'
   },
   {
+    id: 4,
     name: 'J-Hope',
-    image: '/src/resources/singerCovers/jhope.jpg',
-    followers: '21M Подписаны',
-    plays: '12B Прослушали',
+    followers: '21M',
+    plays: '12B',
+    image: '/src/resources/singerCovers/jhope.jpg'
   },
   {
+    id: 5,
     name: 'Jung Kook',
-    image: '/src/resources/singerCovers/jungkook.jpg',
-    followers: '2M Подписаны',
-    plays: '50M Прослушали',
+    followers: '2M',
+    plays: '50M',
+    image: '/src/resources/singerCovers/jungkook.jpg'
   },
   {
+    id: 6,
     name: 'V',
-    image: '/src/resources/singerCovers/v.jpg',
-    followers: '25M Подписаны',
-    plays: '10B Прослушали',
-  },
+    followers: '25M',
+    plays: '10B',
+    image: '/src/resources/singerCovers/v.jpg'
+  }
 ]
+
+
+const router = useRouter()
+
+function goToSinger(singer) {
+  router.push(`/singers/${singer.id}`)
+}
 </script>
 
 <style>

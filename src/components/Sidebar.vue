@@ -1,7 +1,7 @@
 <template>
-  <div class="w-64 bg-black text-white p-4 flex flex-col justify-between cursor-pointer">
+  <div class="w-3 bg-black text-white p-4 flex flex-col justify-between cursor-pointer">
     <div>
-      <div class="logo-container">
+      <div class="logo-container shadow ">
         <img class="logo" src="/src/icons/NOVER_logo_transparent.png" alt="Logo">
       </div>
       <nav>
@@ -37,11 +37,6 @@
                   <path d="M12.3414 20H6C4.89543 20 4 19.1046 4 18C4 15.7909 5.79086 14 8 14H13.5278" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M20 18V11L22 13" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </g>
-                <defs>
-                  <clipPath id="clip0_429_11111">
-                    <rect width="24" height="24" fill="white"/>
-                  </clipPath>
-                </defs>
               </svg>
               Исполнители
             </button>
@@ -91,7 +86,7 @@
         <span class="text-xs">3:30</span>
       </div>
         
-      <div class="player-container cursor-pointer" @click="goToTrackPage">
+      <div class="player-container cursor-pointer" @click="goToTrack">
         <div class="play-button-wrapper">
           <button class="play-button" @click.stop="togglePlay">
             <span v-if="!isPlaying">
@@ -154,7 +149,7 @@
   function goHome () {
     router.push('/')
   }
-  function goToTrackPage() {
+  function goToTrack() {
     const trackId = 1 
     router.push(`/track/${trackId}`)
   }
@@ -172,10 +167,11 @@
 .logo-container {
   width: 150px;
   height: 150px; 
-  background: radial-gradient(circle, #aa96c1, rgba(184, 164, 207, 0.659), rgba(224, 200, 251, 0.4), #ffffff00, #ffffff00);
+  background: radial-gradient(circle, #aa96c1, rgba(184, 164, 207, 0.659), rgba(224, 200, 251, 0.4), rgba(224, 200, 251, 0.2), rgba(224, 200, 251, 0.05), rgba(224, 200, 251, 0.02), rgba(224, 200, 251, 0.01));
   background-size: cover;
   background-position: center;
-  border-radius: 15px; 
+  border-radius: 99%;
+  border: none; 
   display: flex;
   margin-left: 20%;
   margin-bottom: 1rem;
