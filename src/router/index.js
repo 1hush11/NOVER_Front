@@ -6,6 +6,11 @@ import GenresPage from '@/components/GenresPage.vue'
 import GenreDetail from '@/components/GenreDetail.vue'
 import SingersPage from '@/components/SingersPage.vue'
 import SingerDetail from '@/components/SingerDetail.vue'
+import LibraryPage from '@/components/LibraryPage.vue'
+import PlaylistsPage from '@/components/PlaylistsPage.vue'
+import PlaylistDetail from '@/components/PlaylistDetail.vue'
+import AlbumCard from '@/components/AlbumCard.vue'
+import AlbumDetail from '@/components/AlbumDetail.vue'
 
 
 const routes = [
@@ -23,7 +28,11 @@ const routes = [
             },
             { path: 'singers', name: 'SingersPage', component: SingersPage },
             { path: 'singers/:id', name: 'SingerDetail', component: SingerDetail, props: true },
-            { path: 'track/:id', name: 'TrackDetail', component: TrackDetail }
+            { path: 'track/:id', name: 'TrackDetail', component: TrackDetail },
+            { path: 'library', name: 'LibraryPage', component: LibraryPage },
+            { path: 'playlists', name: 'PlaylistsPage', component: PlaylistsPage},
+            { path: 'playlist/:id', name: 'PlaylistDetail', component: PlaylistDetail},
+            { path: 'albums/:id', name: 'AlbumDetail', component: AlbumDetail},
         ]
     }
 ]

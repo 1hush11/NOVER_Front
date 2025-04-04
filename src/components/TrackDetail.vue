@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-1 overflow-y-auto p-8 bg-white">
+  <div class="flex-1 overflow-y-auto p-8">
     <div class="flex items-start">
       <img :src="track.cover" alt="track cover" class="cover-image m-6" />
 

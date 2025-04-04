@@ -45,27 +45,15 @@
         <p class="text-sm mt-6 mb-2 uppercase text-bold">Медиатека</p>
         <ul class="no-list-style">
           <li class="mb-2">
-            <button class="menu-btn">
+            <button class="menu-btn" @click="goLibraryPage">
               <svg fill="#FFFFFF" opacity="0.25" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
                 <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
               </svg>
-              Избранное
+              Моя медиатека
             </button>
           </li>
           <li class="mb-2">
-            <button class="menu-btn"> 
-              <svg width="30" height="30" viewBox="0 0 512 512" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <g id="Layer_1">
-                  <g id="Layer_2">
-                    <path class="st0" d="M256,43.5C138.64,43.5,43.5,138.64,43.5,256c0,117.36,95.14,212.5,212.5,212.5S468.5,373.36,468.5,256    C468.5,138.64,373.36,43.5,256,43.5z M175.32,340.77h-52.08v-92.02h52.08V340.77z M282.04,340.77h-52.08V141h52.08V340.77z     M388.77,340.77h-52.08V195.64h52.08V340.77z" fill="#FFFFFF" opacity="0.25"/>
-                  </g>
-                </g>
-              </svg>
-              Популярное
-            </button>
-          </li>
-          <li class="mb-2">
-            <button class="menu-btn">
+            <button class="menu-btn" @click="goPlaylistsPage">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2 11L16 11" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M2 17L13 17" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -73,7 +61,7 @@
                 <path d="M20 18.5C20 19.3284 19.3284 20 18.5 20C17.6716 20 17 19.3284 17 18.5C17 17.6716 17.6716 17 18.5 17C19.3284 17 20 17.6716 20 18.5Z" fill="#FFFFFF" opacity="0.25"/>
                 <path d="M20 18.5C20 19.3284 19.3284 20 18.5 20C17.6716 20 17 19.3284 17 18.5C17 17.6716 17.6716 17 18.5 17C19.3284 17 20 17.6716 20 18.5ZM20 18.5V10.6C20 10.2686 20.2686 10 20.6 10H22" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
-              Мои плейлисты
+              Плейлисты
             </button>
           </li>
         </ul>
@@ -158,6 +146,12 @@
   }
   function goSingersPage() {
     router.push('/singers')
+  }
+  function goLibraryPage() {
+    router.push('/library')
+  }
+  function goPlaylistsPage() {
+    router.push('/playlists')
   }
 </script>
 

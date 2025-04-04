@@ -44,11 +44,11 @@
           <h2 class="text-xl font-semibold mb-2">Альбомы</h2>
           <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
             <button @click="prev" :disabled="currentPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
-            <div v-for="(album, index) in pagedAlbums" :key="index" class="text-center cursor-pointer transition hover:shadow-lg rounded-lg p-2 w-24">
-              <img :src="album.cover" alt="Album Cover" class="cover-album-image" />
-              <p class="font-semibold">{{ album.title }}</p>
-              <p class="text-sm text-gray-500">{{ album.year }}</p>
-            </div>
+            <AlbumCard 
+              v-for="(album, index) in pagedAlbums" 
+              :key="album.id"
+              :album="album"
+              @click="goToAlbum(album)"/>
             <button @click="next" :disabled="currentPage + pagedAlbums.length >= albums.length" class="text-2xl text-bold bg-transparent border-none">›</button>
           </div>
         </div>
@@ -56,7 +56,7 @@
         <div class="mb-6">
           <h2 class="text-xl font-semibold mb-4">Похожие исполнители</h2>
           <div class="flex gap-4 overflow-x-auto">
-            <div class="flex flex-col gap-4" style="width: 800px;" >
+            <div class="flex flex-col gap-3 mb-10" style="width: 800px;" >
               <SingerCard
                 v-for="singer in similarArtists"
                 :key="singer.id"
@@ -78,7 +78,7 @@ import { useRoute, useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 import SingerCard from './SingerCard.vue'
 import SingersPage from './SingersPage.vue'
-
+import AlbumCard from './AlbumCard.vue'
 
 const route = useRoute()
 
@@ -202,6 +202,9 @@ function goToSinger(singer) {
 
 function goToTrackPage(track) {
   router.push(`/track/${track.id}`)
+}
+function goToAlbum(album) {
+  router.push(`/albums/${album.id}`)
 }
 
 const scrollToAnchor = (id) => {

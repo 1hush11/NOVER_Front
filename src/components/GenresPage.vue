@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-full">
-    <div class="p-4 overflow-y-auto transition-all duration-300">
+  <div class="flex h-full p-8">
+    <div class="overflow-y-auto transition-all duration-300">
       <h1 class="text-2xl font-bold mb-6">Жанры</h1>
       <div class="grid">
         <div
