@@ -123,10 +123,10 @@ const recommendedPlaylists = [
 const userPlaylists = [
   { id: 1, title: 'Favorites', user: 'You', cover: '/src/resources/playlistCovers/Untitled13.png' },
   { id: 2, title: 'Workout Beats', user: 'You', cover: '/src/resources/playlistCovers/Untitled14.png' },
-  { id: 3, title: 'Lo-Fi Study', user: 'You', cover: '/src/resources/playlistCovers/Untitled15.png' },
-  { id: 4, title: 'Party Mode', user: 'You', cover: '/src/resources/playlistCovers/Untitled16.png' },
-  { id: 5, title: 'Sleep Time', user: 'You', cover: '/src/resources/playlistCovers/Untitled17.png' },
-  { id: 6, title: 'Retro Mix', user: 'You', cover: '/src/resources/playlistCovers/Untitled18.png' }
+  { id: 3, title: 'Lo-Fi Study', user: 'You', cover: '/src/resources/playlistCovers/Untilted15.png' },
+  { id: 4, title: 'Party Mode', user: 'You', cover: '/src/resources/playlistCovers/Untilted16.png' },
+  { id: 5, title: 'Sleep Time', user: 'You', cover: '/src/resources/playlistCovers/Untilted17.jpg' },
+  { id: 6, title: 'Retro Mix', user: 'You', cover: '/src/resources/playlistCovers/Untilted18.jpg' }
 ]
 
 </script>

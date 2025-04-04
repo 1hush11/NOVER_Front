@@ -1,6 +1,5 @@
 <template>
   <header class="flex justify-between items-center p-4 border-b">
-    <!-- Лого -->
     <div class="flex items-center gap-4">
       <h1 class="text-l uppercase cursor-pointer font-bold">Nover</h1>
     </div>
@@ -8,15 +7,26 @@
 
     <div class="flex items-center gap-4">
       <div>
-        <button class="user-button flex items-center gap-2">
-          <img src="/src/icons/NOVER_icon.ico" alt="User avatar" class="cover-image"/>
-          <!-- <span class="text-sm font-medium text-gray-700">Username</span> -->
+        <button class="user-button flex items-center gap-2" @click="openLoginModal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8zm2 10a3 3 0 0 0-3 3 1 1 0 1 1-2 0 5 5 0 0 1 5-5h8a5 5 0 0 1 5 5 1 1 0 1 1-2 0 3 3 0 0 0-3-3H8z" fill="#1c1c1c"/></svg>
         </button>
       </div>
+      <LoginModal
+        :isVisible="showLogin"
+        @close="closeLoginModal"
+        @switchToRegister="openRegisterModal"
+      />
+
+      <SignUpModal
+        :isVisible="showRegister"
+        @close="closeRegisterModal"
+        @switchToLogin="openLoginModal"
+      />
+
       <div>
         <input type="file" id="file" />
         <label class="cursor-pointer" for="file">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 32" class="w-6 h-6 fill-white" width="35px" height="35px" fill="#9483a8" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 32" class="w-6 h-6 fill-white" width="35px" height="35px" fill="#9483a8" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
             <path d="M33.958,12.988C33.531,6.376,28.933,0,20.5,0C12.787,0,6.839,5.733,6.524,13.384
               C2.304,14.697,0,19.213,0,22.5C0,27.561,4.206,32,9,32h6.5c0.276,0,0.5-0.224,0.5-0.5S15.776,31,15.5,31H9
               c-4.262,0-8-3.972-8-8.5C1,19.449,3.674,14,9,14h1.5c0.276,0,0.5-0.224,0.5-0.5S10.776,13,10.5,13H9
@@ -37,33 +47,68 @@
 
 
 <script setup>
+import { ref } from 'vue'
+import LoginModal from './LoginModal.vue';
+import SignUpModal from './SignUpModal.vue';
 
+const showLogin = ref(false)
+const showRegister = ref(false)
+
+function openLoginModal() {
+  showRegister.value = false
+  showLogin.value = true
+}
+
+function closeLoginModal() {
+  showLogin.value = false
+}
+
+function openRegisterModal() {
+  showLogin.value = false
+  showRegister.value = true
+}
+
+function closeRegisterModal() {
+  showRegister.value = false
+}
 </script>
 
 <style scoped>
 .border-purple-200 {
-    border-color: #f3e8ff;
+  border-color: #f3e8ff;
 }
 
 .placeholder-purple-200::placeholder {
-    color: #f3e8ff;
+  color: #f3e8ff;
 }
 
 .w-12 {
-    width: 3rem;
+  width: 3rem;
 }
 
 .h-12 {
-    height: 3rem;
-}
-
-.bg-transparent {
-    background-color: transparent;
+  height: 3rem;
 }
 
 .user-button{
   background: transparent;
   border: transparent;
+  height: 48px;
+  width: 48px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: .5em;
+  justify-items: center;
+  align-content: center;
+  border: .1em solid #e0c8fb;
+  background: #e0c8fb;
+  color: #1c1c1c;
+  border-radius: 5em;
+  transition: 1s;
+  &:hover, &:focus, &:active {
+    background: #1c1c1c;
+    color: #e0c8fb;
+  }
 }
 
 .cover-image {
@@ -77,7 +122,6 @@ button:hover img {
   box-shadow: 0 0 0 2px #e0c8fb;
   transition: box-shadow 0.2s ease;
 }
-
 
 input::placeholder {
   color: #a08eb6;

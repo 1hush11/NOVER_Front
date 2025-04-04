@@ -84,6 +84,10 @@ a {
     width: 300px;
 }
 
+.w-3-5 {
+    width: 350px;
+}
+
 .w-4 {
     width: 400px;
 }
@@ -140,6 +144,10 @@ a {
     margin-top: -1.7rem;
 }
 
+.mt-1 {
+    margin-top: 0.1rem;
+}
+
 .mt-2 {
     margin-top: 0.5rem;
 }
@@ -162,6 +170,10 @@ a {
 
 .ml-4 {
     margin-left: 4.5rem;
+}
+
+.ml-10- {
+    margin-left: 8rem;
 }
 
 .gap-6 {
@@ -412,11 +424,39 @@ button:hover {
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="email"],
+input[type="password"] {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 0.5rem;
     width: 100%;
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    padding: 0.2rem;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #e0c8fb;
+    border-color: #a985d1;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    font-size: 12px;
+    top: 0;
+    left: 3px;
 }
 
 material-symbols-outlined {
