@@ -15,13 +15,20 @@
         :isVisible="showLogin"
         @close="closeLoginModal"
         @switchToRegister="openRegisterModal"
+        @login="loginUser"
       />
+
 
       <SignUpModal
         :isVisible="showRegister"
         @close="closeRegisterModal"
         @switchToLogin="openLoginModal"
+        @register="registerUser"
       />
+
+      <div v-if="user" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
+        Привет, {{ user.username }}
+      </div>
 
       <div>
         <input type="file" id="file" />
@@ -48,11 +55,14 @@
 
 <script setup>
 import { ref } from 'vue'
-import LoginModal from './LoginModal.vue';
-import SignUpModal from './SignUpModal.vue';
+import LoginModal from './LoginModal.vue'
+import SignUpModal from './SignUpModal.vue'
 
 const showLogin = ref(false)
 const showRegister = ref(false)
+
+const user = ref(null)
+const loginError = ref('')
 
 function openLoginModal() {
   showRegister.value = false
@@ -71,6 +81,55 @@ function openRegisterModal() {
 function closeRegisterModal() {
   showRegister.value = false
 }
+
+async function loginUser({ login, password }) {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ login: login, password })
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error(errorText)
+    }
+
+    const data = await res.json()
+    user.value = data
+    loginError.value = ''
+    closeLoginModal()
+
+
+  } catch (err) {
+    loginError.value = err.message || 'Ошибка входа'
+  }
+}
+
+async function registerUser(userData) {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    })
+
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new Error(errText)
+    }
+
+    const registeredUser = await res.json()
+
+    await loginUser({ username: userData.username, login: userData.login, password: userData.passwordHash, avatar: userData.avatar })
+
+    closeRegisterModal()
+  } catch (err) {
+    alert(err.message || 'Ошибка регистрации')
+  }
+}
+
 </script>
 
 <style scoped>

@@ -116,6 +116,11 @@ a {
     padding: 2rem;
 }
 
+.plr-2 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
 .mx-auto {
     margin: auto;
 }
@@ -424,9 +429,14 @@ button:hover {
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
 }
 
+.hidden {
+    display: none;
+}
+
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="file"] {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 0.5rem;

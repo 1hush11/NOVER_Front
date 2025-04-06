@@ -13,7 +13,7 @@
           @click="goToGenre(genre)"
         >
 
-          <img :src="genre.image" alt="genre cover" class="cover-image"/>
+          <img :src="genre.coverUrl" alt="genre cover" class="cover-image"/>
           <div v-if="!route.params.id" class="mt-2">
             <h2 class="text-lg font-semibold text-gray-800 mt-4">{{ genre.name }}</h2>
             <p class="text-sm text-gray-600 mt-4">{{ genre.description }}</p>
@@ -31,71 +31,41 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const activeGenre = ref(null)
+const genres = ref([])
 
 const router = useRouter()
 const route = useRoute()
-
 const isCollapsed = computed(() => !!route.params.id)
 
-const genres = [
-  {
-    id: 1, 
-    name: 'Pop',
-    image: '/src/resources/genreCovers/pop.png',
-    description: 'Поп-музыка — это жанр популярной музыки с акцентом на мелодичность и коммерческую привлекательность.',
-  },
-  {
-    id: 2,
-    name: 'K-Pop',
-    image: '/src/resources/genreCovers/kpop.png',
-    description: 'Южнокорейская поп-культура с мощной энергетикой.',
-  },
-  {
-    id: 3,
-    name: 'Классика',
-    image: '/src/resources/genreCovers/classical.png',
-    description: 'Вечная музыка великих композиторов.',
-  },
-  {
-    id: 4,
-    name: 'Фонк',
-    image: '/src/resources/genreCovers/phonk.png',
-    description: 'Грязный бит, ретро вайб и тёмная эстетика.',
-  },
-  {
-    id: 5,
-    name: 'Hip Hop',
-    image: '/src/resources/genreCovers/hiphop.png',
-    description: 'Биты, рифмы и культура улиц.',
-  },
-  {
-    id: 6,
-    name: 'Rock',
-    image: '/src/resources/genreCovers/rock.png',
-    description: 'От классики до альт-рока — всё здесь.',
-  },
-  {
-    id: 7,
-    name: 'EDM',
-    image: '/src/resources/genreCovers/edm.png',
-    description: 'Электронная танцевальная музыка для рейвов.',
-  },
-  {
-    id: 8,
-    name: 'Jazz',
-    image: '/src/resources/genreCovers/jazz.png',
-    description: 'Импровизация, свинг и глубокий саунд.',
+async function fetchGenres() {
+  try {
+    const res = await fetch('http://localhost:5240/api/genre/genres')
+    if (!res.ok) throw new Error('Ошибка запроса')
+    const data = await res.json()
+    genres.value = data.map(genre => ({
+      id: genre.id,
+      name: genre.name,
+      description: genre.description,
+      coverUrl: genre.coverUrl 
+        ? `/src/resources/genreCovers/${genre.coverUrl}` 
+        : '/src/icons/NOVER_icon.ico'
+    }))
+  } catch (err) {
+    console.error('Ошибка при получении жанров:', err)
   }
-]
+}
 
 function goToGenre(genre) {
   activeGenre.value = genre.id
   router.push(`/genres/${genre.id}`)
 }
+
+onMounted(fetchGenres)
 </script>
+
 
 <style scoped>
 .cover-image {

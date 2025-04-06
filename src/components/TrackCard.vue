@@ -8,7 +8,7 @@
         <p class="text-md font-semibold hover:underline cursor-pointer">
           {{ track.title }}
         </p>
-        <p class="text-sm text-gray-600">{{ track.artist }}</p>
+        <p class="text-sm text-gray-600 cursor-pointer">{{ track.singer }}</p>
       </div>
     </div>
 

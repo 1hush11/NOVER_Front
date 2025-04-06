@@ -47,89 +47,124 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
-const router = useRouter()
 import PlaylistCard from '@/components/PlaylistCard.vue'
 
+const router = useRouter()
+
 function goToPlaylist(playlist) {
+  console.log('sss')
   router.push(`/playlist/${playlist.id}`)
 }
 
 const itemsPerPage = 4
+
 const currentArtistPage = ref(0)
 const currentRecommendedPage = ref(0)
 const currentUserPage = ref(0)
 
-const pagedArtistPlaylists = computed(() => artistPlaylists.slice(currentArtistPage.value, currentArtistPage.value + itemsPerPage))
-const pagedRecommendedPlaylists = computed(() => recommendedPlaylists.slice(currentRecommendedPage.value, currentRecommendedPage.value + itemsPerPage))
-const pagedUserPlaylists = computed(() => userPlaylists.slice(currentUserPage.value, currentUserPage.value + itemsPerPage))
+const artistPlaylists = ref([])
+const recommendedPlaylists = ref([])
+const userPlaylists = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/library/playlists', {
+      credentials: 'include'
+    })
+
+    if (!res.ok) {
+      console.error('Ошибка загрузки плейлистов:', await res.text())
+      return
+    }
+
+    const data = await res.json()
+
+    artistPlaylists.value = (data?.saved ?? []).map(p => ({
+      id: p.id,
+      title: p.title,
+      user: p.creator || 'Неизвестно',
+      cover: `/src/resources/playlistCovers/${p.coverUrl}`
+    }))
+
+    userPlaylists.value = (data?.created ?? []).map(p => ({
+      id: p.id,
+      title: p.title,
+      user: p.creator || 'Вы',
+      cover: `/src/resources/playlistCovers/${p.coverUrl}`
+    }))
+
+    recommendedPlaylists.value = [
+      {
+        id: 100,
+        title: 'Релаксовое утро',
+        user: 'Platform',
+        cover: '/src/resources/playlistCovers/Untitled7.png'
+      },
+      {
+        id: 101,
+        title: 'Бас-буст🔥',
+        user: 'Platform',
+        cover: '/src/resources/playlistCovers/Untitled8.png'
+      },
+      {
+        id: 102,
+        title: 'Late Night Vibes',
+        user: 'Platform',
+        cover: '/src/resources/playlistCovers/Untitled9.png'
+      }
+    ]
+  } catch (e) {
+    console.error('Ошибка получения плейлистов:', e)
+  }
+})
+
+
+const pagedArtistPlaylists = computed(() =>
+  artistPlaylists.value.slice(currentArtistPage.value, currentArtistPage.value + itemsPerPage)
+)
+const pagedRecommendedPlaylists = computed(() =>
+  recommendedPlaylists.value.slice(currentRecommendedPage.value, currentRecommendedPage.value + itemsPerPage)
+)
+const pagedUserPlaylists = computed(() =>
+  userPlaylists.value.slice(currentUserPage.value, currentUserPage.value + itemsPerPage)
+)
 
 const nextArtistPlaylist = () => {
-  if (currentRecommendedPage.value + itemsPerPage < artistPlaylists.length) {
-    currentArtistPage.value += 1
+  if (currentArtistPage.value + itemsPerPage < artistPlaylists.value.length) {
+    currentArtistPage.value++
   }
 }
-
 const prevArtistPlaylist = () => {
-  if (currentRecommendedPage.value > 0) {
-    currentRecommendedPage.value -= 1
+  if (currentArtistPage.value > 0) {
+    currentArtistPage.value--
   }
 }
 
 const nextRecommendedPlaylist = () => {
-  if (currentRecommendedPage.value + itemsPerPage < recommendedPlaylists.length) {
-    currentRecommendedPage.value += 1
+  if (currentRecommendedPage.value + itemsPerPage < recommendedPlaylists.value.length) {
+    currentRecommendedPage.value++
   }
 }
-
 const prevRecommendedPlaylist = () => {
   if (currentRecommendedPage.value > 0) {
-    currentRecommendedPage.value -= 1
-  }
-}
-const nextUserPlaylist = () => {
-  if (currentUserPage.value + itemsPerPage < userPlaylists.length) {
-    currentUserPage.value += 1
+    currentRecommendedPage.value--
   }
 }
 
+const nextUserPlaylist = () => {
+  if (currentUserPage.value + itemsPerPage < userPlaylists.value.length) {
+    currentUserPage.value++
+  }
+}
 const prevUserPlaylist = () => {
   if (currentUserPage.value > 0) {
-    currentUserPage.value -= 1
+    currentUserPage.value--
   }
 }
-
-
-const artistPlaylists = [
-  { id: 1, title: 'K-Pop Hits', user: 'Blackpink', cover: '/src/resources/playlistCovers/Untitled1.jpg' },
-  { id: 2, title: 'Hip-Hop Flow', user: 'Drake', cover: '/src/resources/playlistCovers/Untitled2.jpg' },
-  { id: 3, title: 'Pop Queens', user: 'Ariana Grande', cover: '/src/resources/playlistCovers/Untitled3.jpg' },
-  { id: 4, title: 'RnB Essentials', user: 'The Weeknd', cover: '/src/resources/playlistCovers/Untitled4.jpg' },
-  { id: 5, title: 'Latin Vibes', user: 'Bad Bunny', cover: '/src/resources/playlistCovers/Untitled5.jpg' },
-  { id: 6, title: 'Rock Revival', user: 'Imagine Dragons', cover: '/src/resources/playlistCovers/Untitled6.jpg' }
-]
-
-const recommendedPlaylists = [
-  { id: 1, title: 'Fresh Drops', user: 'Platform', cover: '/src/resources/playlistCovers/Untitled7.png' },
-  { id: 2, title: 'Evening Chill', user: 'Platform', cover: '/src/resources/playlistCovers/Untitled8.png' },
-  { id: 3, title: 'Morning Boost', user: 'Platform', cover: '/src/resources/playlistCovers/Untitled9.png' },
-  { id: 4, title: 'Focus Zone', user: 'Platform', cover: '/src/resources/playlistCovers/Untitled10.png' },
-  { id: 5, title: 'Weekend Vibes', user: 'Platform', cover: '/src/resources/playlistCovers/Untitled11.png' },
-  { id: 6, title: 'Deep House', user: 'Platform', cover: '/src/resources/playlistCovers/Untitled12.png' }
-]
-
-const userPlaylists = [
-  { id: 1, title: 'Favorites', user: 'You', cover: '/src/resources/playlistCovers/Untitled13.png' },
-  { id: 2, title: 'Workout Beats', user: 'You', cover: '/src/resources/playlistCovers/Untitled14.png' },
-  { id: 3, title: 'Lo-Fi Study', user: 'You', cover: '/src/resources/playlistCovers/Untilted15.png' },
-  { id: 4, title: 'Party Mode', user: 'You', cover: '/src/resources/playlistCovers/Untilted16.png' },
-  { id: 5, title: 'Sleep Time', user: 'You', cover: '/src/resources/playlistCovers/Untilted17.jpg' },
-  { id: 6, title: 'Retro Mix', user: 'You', cover: '/src/resources/playlistCovers/Untilted18.jpg' }
-]
-
 </script>
+
 
 <style scoped>
 </style>

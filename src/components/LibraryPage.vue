@@ -19,12 +19,12 @@
         </div>
         <div class="flex flex-col ml-2">
           <div class="text-2xl font-bold mt-6 mb-6">Медиатека</div>
-          <div class="text-lg font-semibold mt-2">@username</div>
-          <div class="text-sm text-gray-600 mt-2">24 трека</div>
+          <div class="text-lg font-semibold mt-2">@{{ user?.username || '...' }}</div>
+          <div class="text-sm text-gray-600 mt-2">{{ formatTrackCount(tracks.length) }}</div>
         </div>
       </div>
 
-      <div class="flex flex-col gap-3 mb-10">
+      <div class="flex flex-col gap-3 mb-10 cursor-pointer">
         <TrackCard v-for="(track, index) in tracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
       </div>
     </div>
@@ -32,33 +32,67 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 
-
 const router = useRouter()
+const user = ref(null)
+
+const tracks = ref([])
+const isPlaying = ref(false)
+
 function goToTrackPage(track) {
   router.push(`/track/${track.id}`)
 }
 
-    const isPlaying = ref(false);
+function togglePlay() {
+  isPlaying.value = !isPlaying.value
+}
 
-    function togglePlay() {
-    isPlaying.value = !isPlaying.value;
+onMounted(async () => {
+  try {
+    const userRes = await fetch('http://localhost:5240/api/user/me', {
+      credentials: 'include'
+    })
+
+    if (userRes.ok) {
+      user.value = await userRes.json()
+    } else {
+      console.warn('Пользователь не авторизован')
     }
 
-const tracks = [
-  { id: 1, title: 'Life Goes On', artist: 'BTS', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-  { id: 2, title: 'Like Crazy', artist: 'Jimin', cover: '/src/resources/trackCovers/like_crazy.jpg' },
-  { id: 3, title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
-  { id: 4, title: 'Butter', artist: 'BTS', cover: '/src/resources/trackCovers/butter.jpg' },
-  { id: 5, title: 'Set Me Free Pt.2', artist: 'Jimin', cover: '/src/resources/trackCovers/set_me_free.jpg' },
-  { id: 6, title: 'MORE', artist: 'J-Hope', cover: '/src/resources/trackCovers/more.jpg' },
-  { id: 7, title: 'Dynamite', artist: 'BTS', cover: '/src/resources/trackCovers/dynamite.jpg' },
-  { id: 8, title: 'Seven', artist: 'Jung Kook', cover: '/src/resources/trackCovers/seven.jpg' },
-  { id: 9, title: 'Rainy Days', artist: 'V', cover: '/src/resources/trackCovers/rainy_days.jpg' },
-]
+    const trackRes = await fetch('http://localhost:5240/api/user/library/tracks', {
+      credentials: 'include'
+    })
+
+    if (!trackRes.ok) {
+      console.error('Ошибка авторизации или загрузки:', await trackRes.text())
+      return
+    }
+
+    const data = await trackRes.json()
+    tracks.value = data.map(t => ({
+      id: t.id,
+      title: t.name,
+      singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      cover: `/src/resources/trackCovers/${t.coverUrl}`
+    }))
+  } catch (error) {
+    console.error('Ошибка при загрузке треков:', error)
+  }
+})
+
+function formatTrackCount(n) {
+  const lastDigit = n % 10
+  const lastTwo = n % 100
+
+  if (lastTwo >= 11 && lastTwo <= 14) return `${n} треков`
+  if (lastDigit === 1) return `${n} трек`
+  if (lastDigit >= 2 && lastDigit <= 4) return `${n} трека`
+  return `${n} треков`
+}
+
 </script>
 
 <style scoped>

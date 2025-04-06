@@ -66,17 +66,24 @@ const prev = () => {
   }
 }
 
-const popularTracks = [
-  { id: 1, title: 'Life Goes On', artist: 'BTS', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-  { id: 2, title: 'Like Crazy', artist: 'Jimin', cover: '/src/resources/trackCovers/like_crazy.jpg' },
-  { id: 3, title: 'Arson', artist: 'J-Hope', cover: '/src/resources/trackCovers/arson.jpg' },
-  { id: 4, title: 'Butter', artist: 'BTS', cover: '/src/resources/trackCovers/butter.jpg' },
-  { id: 5, title: 'Set Me Free Pt.2', artist: 'Jimin', cover: '/src/resources/trackCovers/set_me_free.jpg' },
-  { id: 6, title: 'MORE', artist: 'J-Hope', cover: '/src/resources/trackCovers/more.jpg' },
-  { id: 7, title: 'Dynamite', artist: 'BTS', cover: '/src/resources/trackCovers/dynamite.jpg' },
-  { id: 8, title: 'Seven', artist: 'Jung Kook', cover: '/src/resources/trackCovers/seven.jpg' },
-  { id: 9, title: 'Rainy Days', artist: 'V', cover: '/src/resources/trackCovers/rainy_days.jpg' },
-]
+const popularTracks = ref([])
+
+onMounted(async () => {
+  try {
+    const res = await fetch('http://localhost:5240/api/track/top?count=10')
+    if (!res.ok) throw new Error(await res.text())
+    const data = await res.json()
+
+    popularTracks.value = data.map(track => ({
+      id: track.id,
+      title: track.name,
+      singer: track.singers.length ? track.singers.join(', ') : 'Неизвестный исполнитель',
+      cover: '/src/resources/trackCovers/' + track.coverUrl || '/src/icons/NOVER_icon.ico'
+    }))
+  } catch (err) {
+    console.error('Ошибка при загрузке популярных треков:', err.message)
+  }
+})
 
 
   const router = useRouter()
@@ -84,8 +91,10 @@ function goGenresPage() {
   router.push('/genres')
 }
 function goToTrackPage(track) {
-  router.push(`/track/${track.id}`)
+  console.log('Navigating to track with ID:', track.id); // Логируем ID трека
+  router.push(`/track/${track.id}`);
 }
+
 </script>
 
 

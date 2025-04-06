@@ -8,7 +8,7 @@
         class="flex items-center" @click="goToSinger(singer)"
       >
         <img
-          :src="singer.image"
+          :src="singer.cover"
           alt="singer"
           class="cover-image ml-2"
         />
@@ -24,7 +24,7 @@
                   d="M5.76618 28.0846C5.14556 28.6486 5 29.0826 5 29.4V33H27V29.4C27 29.0826 26.8544 28.6486 26.2338 28.0846C25.6009 27.5095 24.6268 26.9511 23.3932 26.4645C20.924 25.4906 17.9234 25 16 25C14.0766 25 11.076 25.4906 8.60682 26.4645C7.37322 26.9511 6.39908 27.5095 5.76618 28.0846ZM16 23C11.6612 23 3 25.144 3 29.4V35H29V29.4C29 25.144 20.3387 23 16 23Z"
                   fill="#1c1c1c"/>
               </svg>
-              {{ singer.followers }} Подписаны
+              {{ formatNumber(singer.subscribersCount) }} подписчиков
             </span>
             
 
@@ -35,7 +35,7 @@
                 <path d="M72.4,235.6H39.5v-94.4h32.9C89.4,185,72.4,235.6,72.4,235.6z"/>
                 <path d="M184.1,141.2H217v94.4h-32.9C167.1,191.8,184.1,141.2,184.1,141.2z"/>
               </svg>
-              {{ singer.plays }} Прослушали
+              {{ formatNumber(singer.viewCount) }} прослушано
             </span>
           </div>
         </div>
@@ -45,58 +45,45 @@
 </template>
 
 <script setup>
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const topSingers = [
-  {
-    id: 1,
-    name: 'Agust D',
-    followers: '12k',
-    plays: '25M',
-    image: '/src/resources/singerCovers/agustd.jpg'
-  },
-  {
-    id: 2,
-    name: 'Jimin',
-    followers: '50k',
-    plays: '2M',
-    image: '/src/resources/singerCovers/jimin.jpg'
-  },
-  {
-    id: 3,
-    name: 'BTS',
-    followers: '2.3M',
-    plays: '32B',
-    image: '/src/resources/singerCovers/bts.jpg'
-  },
-  {
-    id: 4,
-    name: 'J-Hope',
-    followers: '21M',
-    plays: '12B',
-    image: '/src/resources/singerCovers/jhope.jpg'
-  },
-  {
-    id: 5,
-    name: 'Jung Kook',
-    followers: '2M',
-    plays: '50M',
-    image: '/src/resources/singerCovers/jungkook.jpg'
-  },
-  {
-    id: 6,
-    name: 'V',
-    followers: '25M',
-    plays: '10B',
-    image: '/src/resources/singerCovers/v.jpg'
+const topSingers = ref([]);
+
+onMounted(async () => {
+  try {
+    const response = await fetch('http://localhost:5240/api/singer/top?count=6');
+    
+    if (response.ok) {
+      const data = await response.json();
+      topSingers.value = data.map(singer => ({
+        id: singer.id,
+        name: singer.name,
+        cover: "/src/resources/singerCovers/" + singer.photoUrl,
+        subscribersCount: singer.subscribersCount ?? 0,
+        viewCount: singer.viewCount ?? 0,
+      }));
+    } else {
+      console.error('Ошибка загрузки данных о топ-исполнителях');
+    }
+  } catch (error) {
+    console.error('Ошибка при получении данных:', error);
   }
-]
+});
 
+function formatNumber(value) {
+  const num = Number(value)
+  if (isNaN(num) || value === undefined || value === null) return '0'
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(1) + 'B'
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M'
+  if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K'
+  return num.toString()
+}
 
-const router = useRouter()
+const router = useRouter();
 
 function goToSinger(singer) {
-  router.push(`/singers/${singer.id}`)
+  router.push(`/singers/${singer.id}`);
 }
 </script>
 

@@ -10,37 +10,66 @@
         </div>  
       <h1 class="text-2xl font-bold text-center mb-6">Регистрация</h1>
 
-      <form @submit.prevent="handleRegister" class="flex flex-col gap-4">
+      <form @submit.prevent="handleRegister" class="flex flex-col">
+        <label for="username" class="p-2 mt-2 text-sm font-semibold text-gray-700">Имя пользователя</label>
         <input
+          id="username"
           v-model="form.username"
           type="text"
           placeholder="Имя пользователя"
-          class="p-2 w-3-5 mt-2 border-gray-300 rounded-lg"
+          class="p-2 w-3-5 border-gray-300 rounded-lg"
           required
         />
+        <label for="login" class="p-2 mt-2 text-sm font-semibold text-gray-700">Логин</label>
         <input
+          id="login"
           v-model="form.email"
-          type="email"
+          type="text"
           placeholder="Email"
-          class="p-2 w-3-5 mt-2 borf border-gray-300 rounded-lg"
+          class="p-2 w-3-5 borf border-gray-300 rounded-lg"
           required
         />
+        <label for="password" class="p-2 mt-2 text-sm font-semibold text-gray-700">Пароль</label>
         <input
+          id="password"
           v-model="form.password"
           type="password"
           placeholder="Пароль"
-          class="p-2 w-3-5 mt-2 border-gray-300 rounded-lg"
+          class="p-2 w-3-5  border-gray-300 rounded-lg"
           required
         />
+        <label for="confirmPassword" class="p-2 mt-2 text-sm font-semibold text-gray-700">Повторите пароль</label>
         <input
+          id="confirmPassword"
           v-model="form.confirmPassword"
           type="password"
           placeholder="Повторите пароль"
-          class="p-2 w-3-5 mt-2 border-gray-300 rounded-lg"
+          class="p-2 w-3-5 border-gray-300 rounded-lg"
           required
         />
 
-        <label class="text-sm flex gap-2 p-2 mt-2">
+        <div class="flex items-center justify-center gap-4 mt-4">
+          <input
+            type="file"
+            id="file"
+            @change="handleAvatarUpload"
+            class="hidden"
+          />
+          <label
+            for="file"
+            class="cursor-pointer p-2 plr-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+          >
+            Загрузите аватар
+          </label>
+          <img
+            v-if="avatarFileName"
+            :src="avatarBase64"
+            alt="Avatar Preview"
+            class="cover-image ml-2"
+          />
+        </div>
+        
+        <label class="text-sm flex gap-2 p-2 mt-2 mb-4">
           <input type="checkbox" v-model="form.agree" required />
           <span class="ml-2 mt-1">Я принимаю <a href="#" class="text-purple-500 underline">условия использования</a></span>
         </label>  
@@ -71,7 +100,25 @@ const props = defineProps({
   isVisible: Boolean
 })
 
-const emit = defineEmits(['close', 'switchToLogin'])
+const avatarBase64 = ref(null)
+const avatarFileName = ref(null)
+
+function handleAvatarUpload(event) {
+  const file = event.target.files[0]
+  if (!file) return
+
+  avatarFileName.value = file.name
+
+  const reader = new FileReader()
+
+  reader.onload = () => {
+    avatarBase64.value = reader.result
+  }
+
+  reader.readAsDataURL(file)
+}
+
+const emit = defineEmits(['close', 'switchToLogin', 'register'])
 
 function close() {
   emit('close')
@@ -86,12 +133,25 @@ const form = ref({
   email: '',
   password: '',
   confirmPassword: '',
+  avatar: '',
   agree: false
 })
 
 function handleRegister() {
-  // Здесь можешь добавить валидацию или отправку данных
-  console.log('Registering:', form.value)
+  if (form.value.password !== form.value.confirmPassword) {
+    alert("Пароли не совпадают!")
+    return
+  }
+
+  const user = {
+    username: form.value.username,
+    login: form.value.email,
+    passwordHash: form.value.password,
+    avatar: avatarFileName.value || null,
+    registrationDate: null
+  }
+
+  emit('register', user)
   close()
 }
 
@@ -99,21 +159,28 @@ function handleRegister() {
 
 <style scoped>
 .modal-overlay {
-    position: fixed;
-    display: flex;
-    align-items: center;
-    inset: 0;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 9999;
+  position: fixed;
+  display: flex;
+  align-items: center;
+  inset: 0;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
 }
 .modal-content {
-    width: 400px;
-    height: 500px;
-    border-radius: 4%;
-    background-color: white;
-    padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    position: relative;
+  width: 400px;
+  height: 600px;
+  border-radius: 4%;
+  background-color: white;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.cover-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 8%;
+  object-fit: cover;
 }
 </style>

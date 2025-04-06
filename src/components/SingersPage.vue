@@ -12,35 +12,70 @@
         @click="goToSinger(singer)"
       />
     </div>
+
     <div class="flex-1 overflow-y-auto">
-    <router-view/>
+      <router-view />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SingerCard from '../components/SingerCard.vue'
 
 const router = useRouter()
-
-const searchQuery = ref('')
-
-const singers = ref([
-  { id: 1, name: 'BTS', listeners: '48M', tracks: 150, image: '/src/resources/singerCovers/bts.jpg' },
-  { id: 2, name: 'Jimin', listeners: '20M', tracks: 48, image: '/src/resources/singerCovers/jimin.jpg' },
-  { id: 3, name: 'J-Hope', listeners: '18M', tracks: 32, image: '/src/resources/singerCovers/jhope.jpg' },
-  { id: 4, name: 'Agust D', listeners: '12M', tracks: 24, image: '/src/resources/singerCovers/agustd.jpg' },
-  { id: 5, name: 'Jung Kook', listeners: '22M', tracks: 40, image: '/src/resources/singerCovers/jungkook.jpg' },
-  { id: 6, name: 'V', listeners: '25M', tracks: 36, image: '/src/resources/singerCovers/v.jpg' },
-])
+const singers = ref([])
 
 const filteredSingers = computed(() =>
-  singers.value.filter(singer =>
-    singer.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  singers.value.filter(
+    (s) => s.subscribersCount !== undefined && s.totalPlayCount !== undefined
   )
 )
+
+const fetchAllSingersWithStats = async () => {
+  try {
+    const baseUrl = 'http://localhost:5240/api/singer/singers'
+    const baseDetailUrl = 'http://localhost:5240/api/singer/singers/'
+
+    const response = await fetch(baseUrl)
+    const basicSingers = await response.json()
+
+    const detailedSingers = await Promise.all(
+      basicSingers.map(async (singer) => {
+        const detailRes = await fetch(`${baseDetailUrl}${singer.id}`)
+        const detailData = await detailRes.json()
+
+        const totalTracks = detailData.tracks.length
+        const totalPlayCount = detailData.tracks.reduce(
+          (sum, track) => sum + (track.playCount ?? 0),
+          0
+        )
+
+        return {
+          id: detailData.singer.id,
+          name: detailData.singer.name,
+          description: detailData.singer.description || 'Описание отсутствует',
+          image: detailData.singer.photoUrl
+            ? `/src/resources/singerCovers/${detailData.singer.photoUrl}`
+            : '/src/icons/NOVER_icon.ico',
+          subscribersCount: detailData.singer.subscribersCount ?? 0,
+          viewCount: detailData.singer.viewCount ?? 0,
+          totalTracks,
+          totalPlayCount
+        }
+      })
+    )
+
+    singers.value = detailedSingers
+  } catch (err) {
+    console.error('Ошибка при получении данных исполнителей:', err)
+  }
+}
+
+onMounted(() => {
+  fetchAllSingersWithStats()
+})
 
 function goToSinger(singer) {
   router.push(`/singers/${singer.id}`)

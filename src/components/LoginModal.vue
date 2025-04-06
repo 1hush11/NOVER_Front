@@ -13,11 +13,11 @@
 
         <form @submit.prevent="handleLogin" class="flex flex-col gap-4 text-md">
             <div class="flex flex-col">
-                <label for="email" class="p-2 mb-1 text-sm font-semibold text-gray-700">Email</label>
+                <label for="login" class="p-2 mb-1 text-sm font-semibold text-gray-700">Логин</label>
                 <input
-                    id="email"
-                    v-model="email"
-                    type="email"
+                    id="login"
+                    v-model="login"
+                    type="text"
                     class="p-2 w-3-5 mt-2 border-gray-300 rounded-lg"
                     required
                 />
@@ -66,7 +66,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'login', 'switchToRegister'])
 
-const email = ref('')
+const login = ref('')
 const password = ref('')
 
 function close() {
@@ -74,7 +74,7 @@ function close() {
 }
 
 function handleLogin() {
-    emit('login', { email: email.value, password: password.value })
+    emit('login', { login: login.value, password: password.value })
     close()
 }
 

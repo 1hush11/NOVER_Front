@@ -1,15 +1,15 @@
 <template>
   <div class="flex-1 overflow-y-auto p-8">
-    <div class="flex justify-end">
-        <button class="bg-transparent border-none mt-4 mr-4" @click="close">
-            <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
-            </svg>
-        </button>
-      </div>
-    <div class="flex gap-6 mt-6-">
-      <img :src="playlist.cover" alt="playlist cover" class="cover-image shadow" />
+    <div v-if="playlist" class="flex justify-end">
+      <button class="bg-transparent border-none mt-4 mr-4" @click="close">
+        <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
+        </svg>
+      </button>
+    </div>
 
+    <div v-if="playlist" class="flex gap-6 mt-6-">
+      <img :src="playlist.cover" alt="playlist cover" class="cover-image shadow" />
       <div class="flex flex-col justify-between">
         <div>
           <h1 class="text-3xl font-bold mb-4">{{ playlist.name }}</h1>
@@ -25,7 +25,8 @@
         </div>
       </div>
     </div>
-    <div class="flex gap-4 mt-4 mb-6">
+
+    <div v-if="playlist" class="flex gap-4 mt-4 mb-6">
       <button class="btn" @click="togglePlay" title="Воспроизвести / Пауза">
         <span v-if="!isPlaying">
           <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
@@ -39,7 +40,7 @@
         </span>
         Воспроизвести
       </button>
-      <button class="btn"  @click="toggleShuffle" title="Перемешать">
+      <button class="btn" @click="toggleShuffle" title="Перемешать">
         <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             fill-rule="evenodd"
@@ -51,14 +52,14 @@
         Перемешать
       </button>
       <button class="btn" title="В избранное">
-      <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
-        <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
-      </svg>
-      В избранное
+        <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
+          <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
+        </svg>
+        В избранное
       </button>
     </div>
 
-    <div class="mt-8">
+    <div v-if="playlist" class="mt-8">
       <h2 class="text-xl font-semibold mb-4">Треки</h2>
       <div class="flex flex-col gap-3">
         <TrackCard v-for="(track, index) in playlist.tracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
@@ -67,31 +68,68 @@
   </div>
 </template>
 
+
+
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router';
-import TrackCard from './TrackCard.vue';
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import TrackCard from './TrackCard.vue'
 
 const router = useRouter()
+const route = useRoute()
+
+const playlist = ref(null)
 
 function close() {
   router.back()
 }
-const playlist = ref({
-  name: 'Моя подборка для фона',
-  owner: 'novermusic',
-  createdAt: '12 марта 2024',
-  savedCount: 248,
-  cover: '/src/resources/playlistCovers/Untitled12.png',
-  tracks: [
-    { id: '1', title: 'Life Goes On', artist: 'BTS', duration: '3:24', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-    { id: '2', title: 'Like Crazy', artist: 'Jimin', duration: '3:32', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-    { id: '3', title: 'Arson', artist: 'J-Hope', duration: '2:58', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-    { id: '4', title: 'Euphoria', artist: 'Jungkook', duration: '3:45', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-    { id: '5', title: 'Still With You', artist: 'Jungkook', duration: '4:10', cover: '/src/resources/trackCovers/life_goes_on.jpg' },
-  ]
+
+onMounted(async () => {
+  try {
+    const response = await fetch(`http://localhost:5240/api/playlist/playlists/${route.params.id}`, {
+      credentials: 'include'
+    })
+
+    if (!response.ok) {
+      console.error('Ошибка загрузки плейлиста:', await response.text())
+      return
+    }
+
+    const data = await response.json()
+
+    playlist.value = {
+      name: data.title,
+      owner: data.creator || 'Неизвестно',
+      createdAt: new Date(data.createdAt).toLocaleDateString(),
+      savedCount: data.savedCount || 0,
+      cover: `/src/resources/playlistCovers/${data.coverUrl}`,
+      tracks: data.tracks.map(t => ({
+        id: t.id,
+        title: t.name,
+        singer: t.singers.join(', ') || 'Неизвестен',
+        duration: formatDuration(t.duration),
+        cover: `/src/resources/trackCovers/${t.coverUrl}`
+      }))
+    }
+
+  } catch (error) {
+    console.error('Ошибка при загрузке данных о плейлисте:', error)
+  }
 })
+
+// Форматирование продолжительности трека (например: 3:24)
+function formatDuration(seconds) {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
+// Навигация на трек
+function goToTrackPage(track) {
+  router.push(`/track/${track.id}`)
+}
 </script>
+
 
 <style scoped>
 .cover-image {
