@@ -12,7 +12,8 @@
       <img :src="playlist.cover" alt="playlist cover" class="cover-image shadow" />
       <div class="flex flex-col justify-between">
         <div>
-          <h1 class="text-3xl font-bold mb-4">{{ playlist.name }}</h1>
+          <h1 class="text-3xl font-bold mb-2">{{ playlist.name }}</h1>
+          <p class="mb-4">{{ playlist.description }}</p>
           <p class="text-sm text-gray-600 mt-1">
             Создатель: <span class="text-bold font-medium cursor-pointer hover:underline">{{ playlist.owner }}</span>
           </p>
@@ -52,12 +53,26 @@
         Перемешать
       </button>
       <button class="btn" title="В избранное">
-        <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
+        <svg fill="#1c1c1c" width="24" height="24" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
           <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
         </svg>
         В избранное
       </button>
+      <button v-if="playlist.isOwner" @click="showEditModal = true" class="btn mr-2">
+        <svg fill="#1c1c1" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+          width="20" height="20" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve">
+        <path d="M17,20H1c-0.6,0-1-0.4-1-1V3c0-0.6,0.4-1,1-1h9v2H2v14h14v-8h2v9C18,19.6,17.6,20,17,20z"/>
+        <path d="M9.3,10.7c-0.4-0.4-0.4-1,0-1.4l9-9c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4l-9,9C10.3,11.1,9.7,11.1,9.3,10.7z"/>
+        </svg>
+        Редактировать
+      </button>
     </div>
+    <EditPlaylistModal
+      v-if="showEditModal"
+      :playlist="playlist"
+      @close="showEditModal = false"
+      @updated="handlePlaylistUpdated"
+    />
 
     <div v-if="playlist" class="mt-8">
       <h2 class="text-xl font-semibold mb-4">Треки</h2>
@@ -74,9 +89,20 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import TrackCard from './TrackCard.vue'
+import EditPlaylistModal from '/src/components/EditPlaylistModal.vue'
 
 const router = useRouter()
 const route = useRoute()
+
+const showEditModal = ref(false)
+
+function handlePlaylistUpdated(updatedData) {
+  playlist.value.id = updatedData.id
+  playlist.value.name = updatedData.title
+  playlist.value.description = updatedData.description
+  playlist.value.type = updatedData.type
+  playlist.value.cover = `/src/resources/playlistCovers/${updatedData.coverUrl}`
+}
 
 const playlist = ref(null)
 
@@ -98,8 +124,11 @@ onMounted(async () => {
     const data = await response.json()
 
     playlist.value = {
+      id: data.id,
       name: data.title,
+      description: data.description,
       owner: data.creator || 'Неизвестно',
+      isOwner: data.isOwner,
       createdAt: new Date(data.createdAt).toLocaleDateString(),
       savedCount: data.savedCount || 0,
       cover: `/src/resources/playlistCovers/${data.coverUrl}`,
@@ -117,14 +146,12 @@ onMounted(async () => {
   }
 })
 
-// Форматирование продолжительности трека (например: 3:24)
 function formatDuration(seconds) {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 }
 
-// Навигация на трек
 function goToTrackPage(track) {
   router.push(`/track/${track.id}`)
 }

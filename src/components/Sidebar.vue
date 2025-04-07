@@ -69,7 +69,7 @@
     </div>
     <div class="player-wrapper">
       <div class="slider-container">
-        <span class="text-xs">1:30</span>
+        <span class="text-xs">00:00</span>
         <input type="range" min="0" max="100" v-model="sliderValue" class="track-slider" id="songSlider">
         <span class="text-xs">3:30</span>
       </div>

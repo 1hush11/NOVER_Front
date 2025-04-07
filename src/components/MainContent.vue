@@ -2,24 +2,31 @@
   <div class="flex flex-1 flex-col p-4 cursor-pointer overflow-y-auto">
     <div class="flex-col flex">
       <div>
-        <button class="text-xl font-bold mb-4 bg-transparent border-none" @click="goGenresPage">Жанры</button>
-        <div class="flex items-center gap-2 ">
-          <div class="flex overflow-hidden transition gap-2 rounded-lg shadow p-2">
-            <button @click="prev" :disabled="currentPage === 0" class="text-2xl text-bold p-4 bg-transparent border-none">‹</button>
-
-            <div
-              v-for="(genre, index) in pagedGenres"
-              :key="index"
-              class="flex-shrink-0 text-center cursor-pointer transition hover:shadow-lg rounded-lg p-4 w-24"
+        <section>
+          <h2 class="text-xl font-bold mb-4">Плейлисты популярных жанров</h2>
+          <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+            <button 
+              class="text-2xl text-bold p-4 bg-transparent border-none" 
+              @click="prev" 
+              :disabled="currentPage === 0"
             >
-              <img :src="genre.image" alt="genre" class="cover-image" />
-              <p class="text-md font-semibold text-gray-700">{{ genre.name }}</p>
-              <p class="text-sm text-gray-600">Top 50</p>
-            </div>
-            
-            <button @click="next" :disabled="currentPage + pagedGenres.length >= genres.length" class="text-2xl text-bold p-4 bg-transparent border-none">›</button>
+              ‹
+            </button>
+            <PlaylistCard
+              v-for="playlist in pagedGenres"
+              :key="playlist.id"
+              :playlist="playlist"
+              @click="goToPlaylist(playlist)"
+            />
+            <button
+              class="text-2xl text-bold p-4 bg-transparent border-none"
+              @click="next"
+              :disabled="currentPage + itemsPerPage >= genrePlaylists.length"
+            >
+              ›
+            </button>
           </div>
-        </div>
+        </section>
         </div>
       </div>
 
@@ -33,29 +40,68 @@
 </template>
 
 <script setup>
-import TrackCard from './TrackCard.vue'
-
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-const genres = [
-  { name: 'Pop', image: '/src/resources/genreCovers/pop.png' },
-  { name: 'K-Pop', image: '/src/resources/genreCovers/kpop.png' },
-  { name: 'Классика', image: '/src/resources/genreCovers/classical.png' },
-  { name: 'Фонк', image: '/src/resources/genreCovers/phonk.png' },
-  { name: 'Hip Hop', image: '/src/resources/genreCovers/hiphop.png' },
-  { name: 'Rock', image: '/src/resources/genreCovers/rock.png' },
-  { name: 'EDM', image: '/src/resources/genreCovers/edm.png' },
-  { name: 'Country', image: '/src/resources/genreCovers/country.png' },
-  { name: 'Jazz', image: '/src/resources/genreCovers/jazz.png' },
-]
+import TrackCard from './TrackCard.vue'
+import PlaylistCard from './PlaylistCard.vue'
 
-const itemsPerPage = 4
+const popularTracks = ref([])
+const genrePlaylists = ref([])
+
+onMounted(async () => {
+  try {
+    const topRes = await fetch('http://localhost:5240/api/track/top?count=10')
+    if (!topRes.ok) throw new Error(await topRes.text())
+    const topTracks = await topRes.json()
+
+    popularTracks.value = topTracks.map(track => ({
+      id: track.id,
+      title: track.name,
+      singer: track.singers.length ? track.singers.join(', ') : 'Неизвестный исполнитель',
+      cover: track.coverUrl
+        ? '/src/resources/trackCovers/' + track.coverUrl
+        : '/src/icons/NOVER_icon.ico'
+    }))
+
+    const genreRes = await fetch('http://localhost:5240/api/genre/genres', {
+      credentials: 'include'
+    })
+    if (!genreRes.ok) throw new Error('Не удалось загрузить жанры')
+
+    const genresData = await genreRes.json()
+
+    const genrePlaylistPromises = genresData.slice(0, 6).map(async genre => {
+      const trackRes = await fetch(`http://localhost:5240/api/genre/genres/${genre.id}/tracks?count=5`)
+      if (!trackRes.ok) return null
+
+      const tracks = await trackRes.json()
+
+      return {
+        id: `genre-${genre.id}`,
+        title: genre.name,
+        user: 'Жанровый плейлист',
+        cover: `/src/resources/genreCovers/${genre.coverUrl}`,
+        tracks: tracks
+      }
+    })
+
+    const genreResults = await Promise.all(genrePlaylistPromises)
+    genrePlaylists.value = genreResults.filter(Boolean)
+
+  } catch (err) {
+    console.error('Ошибка при загрузке данных:', err.message)
+  }
+})
+
+const itemsPerPage = 3
 const currentPage = ref(0)
-const pagedGenres = computed(() => genres.slice(currentPage.value, currentPage.value + itemsPerPage))
+const pagedGenres = computed(() =>
+  genrePlaylists.value.slice(currentPage.value, currentPage.value + itemsPerPage)
+)
 
 const next = () => {
-  if (currentPage.value + itemsPerPage < genres.length) {
+  if (currentPage.value + itemsPerPage < genrePlaylists.value.length) {
     currentPage.value += 1
   }
 }
@@ -66,35 +112,16 @@ const prev = () => {
   }
 }
 
-const popularTracks = ref([])
-
-onMounted(async () => {
-  try {
-    const res = await fetch('http://localhost:5240/api/track/top?count=10')
-    if (!res.ok) throw new Error(await res.text())
-    const data = await res.json()
-
-    popularTracks.value = data.map(track => ({
-      id: track.id,
-      title: track.name,
-      singer: track.singers.length ? track.singers.join(', ') : 'Неизвестный исполнитель',
-      cover: '/src/resources/trackCovers/' + track.coverUrl || '/src/icons/NOVER_icon.ico'
-    }))
-  } catch (err) {
-    console.error('Ошибка при загрузке популярных треков:', err.message)
-  }
-})
-
-
   const router = useRouter()
 function goGenresPage() {
   router.push('/genres')
 }
-function goToTrackPage(track) {
-  console.log('Navigating to track with ID:', track.id); // Логируем ID трека
+function goToTrackPage(track) { 
   router.push(`/track/${track.id}`);
 }
-
+function goToPlaylist(playlist) {
+  router.push(`/playlist/${playlist.id}`)
+}
 </script>
 
 

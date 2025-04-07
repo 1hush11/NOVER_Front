@@ -54,7 +54,7 @@ import PlaylistCard from '@/components/PlaylistCard.vue'
 const router = useRouter()
 
 function goToPlaylist(playlist) {
-  console.log('sss')
+  console.log(`${playlist.id}`)
   router.push(`/playlist/${playlist.id}`)
 }
 
@@ -84,14 +84,18 @@ onMounted(async () => {
     artistPlaylists.value = (data?.saved ?? []).map(p => ({
       id: p.id,
       title: p.title,
+      description: p.description,
       user: p.creator || 'Неизвестно',
+      isOwner: p.isOwner,
       cover: `/src/resources/playlistCovers/${p.coverUrl}`
     }))
 
     userPlaylists.value = (data?.created ?? []).map(p => ({
       id: p.id,
       title: p.title,
+      description: p.description,
       user: p.creator || 'Вы',
+      isOwner: p.isOwner,
       cover: `/src/resources/playlistCovers/${p.coverUrl}`
     }))
 

@@ -16,6 +16,10 @@ a {
     background-color: #1c1c1c;
 }
 
+.bg-purple {
+    background-color: #e0c8fb;
+}
+
 .text-white {
     color: white;
 }
@@ -287,6 +291,10 @@ button:hover {
     color: white;
 }
 
+.border-purple {
+    border: 2px solid #e0c8fb;
+}
+
 .border-b {
     border-bottom: 1px solid #ccc;
 }
@@ -433,10 +441,14 @@ button:hover {
     display: none;
 }
 
+select,
+textarea,
 input[type="text"],
 input[type="email"],
 input[type="password"],
-input[type="file"] {
+input[type="file"],
+input[type="date"] {
+    font-family: 'Inter', sans-serif;
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 0.5rem;

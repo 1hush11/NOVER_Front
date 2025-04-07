@@ -1,14 +1,16 @@
 <template>
   <div class="p-8">
+    <!-- Кнопка "закрыть/вернуться назад" -->
     <div class="flex justify-end">
-        <button class="bg-transparent border-none mt-4 mr-4" @click="close">
-            <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
-            </svg>
-        </button>
-      </div>
+      <button class="bg-transparent border-none mt-4 mr-4" @click="close">
+        <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Основной блок с обложкой, названием, исполнителем и датой -->
     <div class="flex gap-6 justify-center mt-6-">
-      
       <img :src="album.cover" alt="Album cover" class="cover-image" />
 
       <div class="flex flex-col justify-between">
@@ -17,7 +19,10 @@
 
           <div class="flex items-center gap-4 mt-2">
             <img :src="album.artistAvatar" alt="Artist avatar" class="cover-singer-image" />
-            <p class="text-purple-600 font-medium cursor-pointer hover:underline">{{ album.artist }}</p>
+            <!-- Можно сделать клик по имени артиста, чтобы перейти на страницу исполнителя -->
+            <p class="text-purple-600 font-medium cursor-pointer hover:underline">
+              {{ album.artist }}
+            </p>
           </div>
 
           <p class="text-sm text-gray-500 mt-2">Дата выпуска: {{ album.releaseDate }}</p>
@@ -25,6 +30,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Кнопки управления (воспроизведение, перемешать, избранное) -->
     <div class="flex justify-center gap-4 mt-4 mb-6">
       <button class="btn" @click="togglePlay" title="Воспроизвести / Пауза">
         <span v-if="!isPlaying">
@@ -39,8 +46,10 @@
         </span>
         Воспроизвести
       </button>
-      <button class="btn"  @click="toggleShuffle" title="Перемешать">
-        <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+      <button class="btn" @click="toggleShuffle" title="Перемешать">
+        <svg width="24" height="24" viewBox="0 0 15 15" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
           <path
             fill-rule="evenodd"
             clip-rule="evenodd"
@@ -50,48 +59,104 @@
         </svg>
         Перемешать
       </button>
+
       <button class="btn" title="В избранное">
-      <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
-        <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
-      </svg>
-      В избранное
+        <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="xMinYMin" class="jam jam-heart">
+          <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
+        </svg>
+        В избранное
       </button>
     </div>
+
     <div class="mt-8">
       <h2 class="text-xl font-semibold mb-4">Треки альбома</h2>
       <TrackCard
         v-for="(track, index) in album.tracks"
         :key="index"
+        :index="index"
         class="flex justify-between items-center p-3 bg-white rounded-lg shadow hover:shadow-md transition"
+        :track="track"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router';
-import TrackCard from './TrackCard.vue';
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import TrackCard from './TrackCard.vue'
 
+const route = useRoute()
 const router = useRouter()
 
-function close(){
+const album = ref({
+  id: '',
+  title: '',
+  cover: '',
+  releaseDate: '',
+  artist: '',
+  artistAvatar: '',
+  tracks: []
+})
+
+const isPlaying = ref(false)
+const isShuffle = ref(false)
+
+function togglePlay() {
+  isPlaying.value = !isPlaying.value
+}
+
+function toggleShuffle() {
+  isShuffle.value = !isShuffle.value
+}
+
+function close() {
   router.back()
 }
 
-const album = ref({
-  title: 'The Glow Pt. 2',
-  artist: 'The Microphones',
-  artistAvatar: '/src/resources/singerCovers/jhope.jpg',
-  cover: '/src/resources/trackCovers/arson.jpg',
-  releaseDate: '12 августа 2001',
-  tracks: [
-    { title: 'I Want Wind to Blow', duration: '5:32' },
-    { title: 'The Glow Pt. 2', duration: '4:10' },
-    { title: 'The Moon', duration: '3:45' },
-    { title: 'Headless Horseman', duration: '4:05' },
-    { title: 'My Roots Are Strong and Deep', duration: '2:44' }
-  ]
+async function loadAlbumData(albumId) {
+  try {
+    const response = await fetch(`http://localhost:5240/api/album/album/${albumId}`)
+    if (!response.ok) {
+      throw new Error(`Ошибка при загрузке: статус ${response.status}`)
+    }
+
+    const data = await response.json()
+    album.value = {
+      id: data.id,
+      title: data.name,
+      cover: `/src/resources/albumCovers/${data.coverUrl}`,
+      releaseDate: data.releaseDate,
+      artist: data.singer.name,
+      artistAvatar: `/src/resources/singerCovers/${data.singer.photoUrl}`,
+      tracks: data.tracks.map(t => ({
+        id: t.id,
+        title: t.name,
+        cover: `/src/resources/trackCovers/${t.coverUrl}`,
+        duration: formatDuration(t.duration)  // для красоты можно форматировать
+      }))
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке альбома:', error)
+  }
+}
+
+// Пример простой функции для форматирования длительности трека в mm:ss
+function formatDuration(seconds) {
+  const min = Math.floor(seconds / 60)
+  const sec = seconds % 60
+  return `${min}:${sec.toString().padStart(2, '0')}`
+}
+
+// При монтировании компонента грузим данные первого альбома (по ID из маршрута)
+onMounted(() => {
+  loadAlbumData(route.params.id)
+})
+
+// Если пользователь переключается с одного альбома на другой (меняется ID), подгружаем новые данные
+watch(() => route.params.id, (newId) => {
+  loadAlbumData(newId)
 })
 </script>
 
@@ -126,5 +191,10 @@ const album = ref({
 
 .btn:hover {
   background: #f5f5f5;
+}
+
+button:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 </style>

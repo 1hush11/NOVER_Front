@@ -31,7 +31,7 @@
 
             <div class="flex gap-4 mt-2">
               <button class="btn">Подписаться</button>
-              <button class="btn">Поделиться</button>
+              <!-- <button class="btn">Поделиться</button> -->
             </div>
           </div>
         </div>
