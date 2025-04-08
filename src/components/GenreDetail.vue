@@ -30,7 +30,12 @@
 
     <h2 class="text-xl font-semibold mb-2">Популярные треки</h2>
     <div class="flex flex-col gap-3">
-      <TrackCard v-for="(track, index) in genre.tracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
+      <TrackCard
+          v-for="(track, index) in genre.tracks"
+          :key="index"
+          :track="track"
+          :index="index"
+        />
     </div>
   </div>
 </template>
@@ -50,10 +55,6 @@ const genre = ref({
   singers: [],
   tracks: []
 })
-
-function goToTrackPage(track) {
-  router.push(`/track/${track.id}`)
-}
 
 function close() {
   router.back()
@@ -94,7 +95,8 @@ async function fetchGenreDetails(id) {
         id: t.id,
         title: t.name,
         singer: t.singers.join(', '),
-        cover:'/src/resources/trackCovers/' + t.coverUrl
+        cover:'/src/resources/trackCovers/' + t.coverUrl,
+      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
       }))
     }
   } catch (err) {

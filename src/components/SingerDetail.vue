@@ -30,7 +30,7 @@
             <p>{{ singer.description }}</p>
 
             <div class="flex gap-4 mt-2">
-              <button class="btn">Подписаться</button>
+              <!-- <button class="btn">Подписаться</button> -->
               <!-- <button class="btn">Поделиться</button> -->
             </div>
           </div>
@@ -44,7 +44,6 @@
               :key="track.id"
               :track="track"
               :index="index"
-              @click="goToTrackPage(track)"
             />
           </div>
         </div>
@@ -171,15 +170,20 @@ async function loadSingerData(id) {
     topTracks.value = tracksRes.map(t => ({
       id: t.id,
       title: t.name,
-      singer: singerRes.singer.name,
-      cover: `/src/resources/trackCovers/${t.coverUrl}`
+      singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      cover: t.coverUrl
+      ? `/src/resources/trackCovers/${t.coverUrl}`
+      : '/src/resources/trackCovers/empty.png',
+      audioUrl: t.audioUrl
     }))
 
     albums.value = albumsRes.map(a => ({
       id: a.id,
       title: a.name,
       year: new Date(a.releaseDate).getFullYear(),
-      cover: `/src/resources/albumCovers/${a.coverUrl}`
+      cover: a.coverUrl
+      ? `/src/resources/albumCovers/${a.coverUrl}`
+      : '/src/resources/trackCovers/empty.png'
     }))
 
     similarArtists.value = similarRes.map(s => {

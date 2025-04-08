@@ -69,10 +69,10 @@ onMounted(fetchGenres)
 
 <style scoped>
 .cover-image {
-    width: 140px;
-    height: 140px;
-    border-radius: 25%;
-    object-fit: cover;
+  width: 140px;
+  height: 140px;
+  border-radius: 25%;
+  object-fit: cover;
 }
 
 .genres-sidebar {

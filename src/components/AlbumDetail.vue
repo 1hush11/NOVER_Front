@@ -1,6 +1,5 @@
 <template>
   <div class="p-8">
-    <!-- Кнопка "закрыть/вернуться назад" -->
     <div class="flex justify-end">
       <button class="bg-transparent border-none mt-4 mr-4" @click="close">
         <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -9,7 +8,6 @@
       </button>
     </div>
 
-    <!-- Основной блок с обложкой, названием, исполнителем и датой -->
     <div class="flex gap-6 justify-center mt-6-">
       <img :src="album.cover" alt="Album cover" class="cover-image" />
 
@@ -18,10 +16,9 @@
           <h1 class="text-3xl font-bold">{{ album.title }}</h1>
 
           <div class="flex items-center gap-4 mt-2">
-            <img :src="album.artistAvatar" alt="Artist avatar" class="cover-singer-image" />
-            <!-- Можно сделать клик по имени артиста, чтобы перейти на страницу исполнителя -->
+            <img :src="album.singerCover" alt="Singer cover" class="cover-singer-image" />
             <p class="text-purple-600 font-medium cursor-pointer hover:underline">
-              {{ album.artist }}
+              {{ album.singer }}
             </p>
           </div>
 
@@ -31,7 +28,6 @@
       </div>
     </div>
 
-    <!-- Кнопки управления (воспроизведение, перемешать, избранное) -->
     <div class="flex justify-center gap-4 mt-4 mb-6">
       <button class="btn" @click="togglePlay" title="Воспроизвести / Пауза">
         <span v-if="!isPlaying">
@@ -60,7 +56,7 @@
         Перемешать
       </button>
 
-      <button class="btn" title="В избранное">
+      <button class="btn" title="В избранное" @click="addAlbumToLibrary">
         <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="xMinYMin" class="jam jam-heart">
           <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
@@ -87,6 +83,9 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
+
 const route = useRoute()
 const router = useRouter()
 
@@ -95,8 +94,8 @@ const album = ref({
   title: '',
   cover: '',
   releaseDate: '',
-  artist: '',
-  artistAvatar: '',
+  singer: '',
+  singerCover: '',
   tracks: []
 })
 
@@ -128,33 +127,55 @@ async function loadAlbumData(albumId) {
       title: data.name,
       cover: `/src/resources/albumCovers/${data.coverUrl}`,
       releaseDate: data.releaseDate,
-      artist: data.singer.name,
-      artistAvatar: `/src/resources/singerCovers/${data.singer.photoUrl}`,
+      singer: data.singer.name,
+      singerCover: `/src/resources/singerCovers/${data.singer.photoUrl}`,
       tracks: data.tracks.map(t => ({
         id: t.id,
         title: t.name,
+        singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
         cover: `/src/resources/trackCovers/${t.coverUrl}`,
-        duration: formatDuration(t.duration)  // для красоты можно форматировать
+        duration: formatDuration(t.duration),
+        audioUrl: t.audioUrl
       }))
     }
   } catch (error) {
     console.error('Ошибка при загрузке альбома:', error)
   }
 }
+async function addAlbumToLibrary() {
+  try {
+    const res = await fetch(`http://localhost:5240/api/user/library/add_album/${album.value.id}`, {
+      method: 'POST',
+      credentials: 'include'
+    })
 
-// Пример простой функции для форматирования длительности трека в mm:ss
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(text)
+    }
+
+    toast.success('Альбом добавлен в медиатеку', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  } catch (err) {
+    toast.error(err.message || 'Ошибка при добавлении альбома в медиатеку', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  }
+}
+
 function formatDuration(seconds) {
   const min = Math.floor(seconds / 60)
   const sec = seconds % 60
   return `${min}:${sec.toString().padStart(2, '0')}`
 }
 
-// При монтировании компонента грузим данные первого альбома (по ID из маршрута)
 onMounted(() => {
   loadAlbumData(route.params.id)
 })
 
-// Если пользователь переключается с одного альбома на другой (меняется ID), подгружаем новые данные
 watch(() => route.params.id, (newId) => {
   loadAlbumData(newId)
 })

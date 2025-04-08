@@ -4,13 +4,23 @@
       <h1 class="text-l uppercase cursor-pointer font-bold">Nover</h1>
     </div>
 
-
     <div class="flex items-center gap-4">
       <div>
         <button class="user-button flex items-center gap-2" @click="openLoginModal">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8zm2 10a3 3 0 0 0-3 3 1 1 0 1 1-2 0 5 5 0 0 1 5-5h8a5 5 0 0 1 5 5 1 1 0 1 1-2 0 3 3 0 0 0-3-3H8z" fill="#1c1c1c"/></svg>
+          <template v-if="user">
+            <button class="btn" v-if="user.username">
+              <span>{{ user.username }}</span>
+              <img :src="`/src/resources/userCovers/${user.avatar}` || '/src/resources/userCovers/empty.png'" alt="User Avatar" class="cover-image" />
+            </button>
+          </template>
+          <template v-else>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8zm2 10a3 3 0 0 0-3 3 1 1 0 1 1-2 0 5 5 0 0 1 5-5h8a5 5 0 0 1 5 5 1 1 0 1 1-2 0 3 3 0 0 0-3-3H8z" fill="#1c1c1c"/>
+            </svg>
+          </template>
         </button>
       </div>
+
       <LoginModal
         :isVisible="showLogin"
         @close="closeLoginModal"
@@ -25,10 +35,7 @@
         @register="registerUser"
       />
 
-      <div v-if="user" class="flex items-center gap-2 text-sm font-semibold text-gray-700">
-        Привет, {{ user.username }}
-      </div>
-      <button @click="showAddTrackModal = true" class="user-button" title="Добавить трек">
+      <button @click="showAddTrackModal = true" class="user-button ml-10-" title="Добавить трек">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 32" class="w-6 h-6 fill-white" width="35px" height="35px" fill="#9483a8" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
           <path d="M33.958,12.988C33.531,6.376,28.933,0,20.5,0C12.787,0,6.839,5.733,6.524,13.384
             C2.304,14.697,0,19.213,0,22.5C0,27.561,4.206,32,9,32h6.5c0.276,0,0.5-0.224,0.5-0.5S15.776,31,15.5,31H9
@@ -47,7 +54,7 @@
       />
 
       <div class="flex items-center border-2 border-purple-200 rounded-full px-4 py-2 text-purple-300 bg-white w-full max-w-md">
-        <input type="text" placeholder="Искать"/>
+        <SearchBar class="ml-4" />
       </div>
     </div>
   </header>
@@ -59,10 +66,30 @@ import { ref } from 'vue'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
+import SearchBar from './SearchBar.vue'
 import LoginModal from './LoginModal.vue'
 import SignUpModal from './SignUpModal.vue'
 import AddTrackModal from './AddTrackModal.vue'
 
+const searchQuery = ref('')
+const searchResult = ref({ tracks: [], artists: [], albums: [], genres: [], playlists: [] })
+
+async function handleSearch() {
+  const query = searchQuery.value.trim()
+  if (!query) {
+    searchResult.value = { tracks: [], artists: [], albums: [], genres: [], playlists: [] }
+    return
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5240/api/search?q=${encodeURIComponent(query)}`)
+    if (!res.ok) throw new Error(await res.text())
+
+    searchResult.value = await res.json()
+  } catch (err) {
+    console.error('Ошибка поиска:', err)
+  }
+}
 
 const showLogin = ref(false)
 const showRegister = ref(false)
@@ -158,23 +185,28 @@ async function registerUser(userData) {
 </script>
 
 <style scoped>
-.border-purple-200 {
-  border-color: #f3e8ff;
+.btn {
+  color: #1c1c1c;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: 0.2s;
 }
 
-.placeholder-purple-200::placeholder {
-  color: #f3e8ff;
+.btn:hover {
+  background: #f5f5f5;
 }
 
-.w-12 {
-  width: 3rem;
+.flex.items-center {
+  gap: 1rem; 
 }
 
-.h-12 {
-  height: 3rem;
-}
-
-.user-button{
+.user-button {
   background: transparent;
   border: transparent;
   height: 48px;
@@ -202,43 +234,4 @@ async function registerUser(userData) {
   object-fit: cover;
 }
 
-button:hover img {
-  box-shadow: 0 0 0 2px #e0c8fb;
-  transition: box-shadow 0.2s ease;
-}
-
-input::placeholder {
-  color: #a08eb6;
-}
-
-input[type=file] { display: none; }
-label[for=file] {
-  height: 48px;
-  width: 48px;
-  display: grid;
-  grid-auto-flow: column;
-  grid-gap: .5em;
-  justify-items: center;
-  align-content: center;
-  border: .1em solid #e0c8fb;
-  background: #e0c8fb;
-  color: #1c1c1c;
-  border-radius: 5em;
-  transition: 1s;
-  &:hover, &:focus, &:active {
-    background: #1c1c1c;
-    color: #e0c8fb;
-  }
-}
-
-input[type=text] {
-  height: 35px;
-	appearance: none;
-	outline: none;
-	border: .18em solid #e0c8fb;
-  border-radius: 2em;
-	background: rgba(#000000, .2);
-	padding: .4em;
-	color: #000000;
-}
 </style>

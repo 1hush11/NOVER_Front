@@ -68,23 +68,39 @@
       </nav>
     </div>
     <div class="player-wrapper">
+      <audio
+        ref="audio"
+        :src="currentTrack?.audioUrl"
+        @timeupdate="updateProgress"
+        @loadedmetadata="initDuration"
+        autoplay
+      />
+
       <div class="slider-container">
-        <span class="text-xs">00:00</span>
-        <input type="range" min="0" max="100" v-model="sliderValue" class="track-slider" id="songSlider">
-        <span class="text-xs">3:30</span>
+        <span class="text-xs">{{ currentTimeFormatted }}</span>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          v-model="sliderValue"
+          class="track-slider"
+          @change="seekAudio"
+        />
+        <span class="text-xs">{{ formattedDuration }}</span>
       </div>
-        
+
+
       <div class="player-container cursor-pointer" @click="goToTrack">
         <div class="play-button-wrapper">
-          <button class="play-button" @click.stop="togglePlay">
-            <span v-if="!isPlaying">
-              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
-                <path d="M8 5v14l11-7-11-7z"/>
+          <button class="play-button" @click.stop="togglePlay" title="Play/Pause">
+            <span v-if="!isThisTrackPlaying">
+              <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
+                <path d="M8 5v14l11-7-11-7z" />
               </svg>
             </span>
             <span v-else>
-              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
-                <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+              <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
+                <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
               </svg>
             </span>
           </button>
@@ -100,10 +116,10 @@
             </svg>
           </button>
           <div class="song-box">
-            <img src="/src/resources/trackCovers/life_goes_on.jpg" class="cover-image" />
+            <img :src="currentTrack?.cover || '/src/resources/trackCovers/empty.png'" class="cover-image" />
             <div class="song-info">
-              <div class="title">Life Goes On</div>
-              <div class="artist">BTS</div>
+              <div class="title">{{ currentTrack?.title || '' }}</div>
+              <div class="singer">{{ currentTrack?.singer || '' }}</div>
             </div>
           </div>
 
@@ -120,42 +136,116 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-  const isPlaying = ref(false);
-  const sliderValue = ref(0);
+import { useAudioStore } from '@/useAudioStore'
+const audioStore = useAudioStore()
 
-  function togglePlay() {
-    isPlaying.value = !isPlaying.value;
+const audio = ref(null)
+
+const { currentTrack, currentTime, duration, setCurrentTime, setDuration } = useAudioStore()
+
+const sliderValue = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0))
+
+const currentTimeFormatted = computed(() => {
+  const min = Math.floor(currentTime.value / 60)
+  const sec = Math.floor(currentTime.value % 60)
+  return `${min}:${sec.toString().padStart(2, '0')}`
+})
+
+const formattedDuration = computed(() => {
+  const min = Math.floor(duration.value / 60)
+  const sec = Math.floor(duration.value % 60)
+  return `${min}:${sec.toString().padStart(2, '0')}`
+})
+
+function updateProgress() {
+  if (audio.value && duration.value) {
+    setCurrentTime(audio.value.currentTime)
+  }
+}
+
+function seekAudio(event) {
+  if (audio.value && duration.value) {
+    const newTime = (event.target.value / 100) * duration.value
+    audio.value.currentTime = newTime
+    setCurrentTime(newTime)
+  }
+}
+
+function initDuration() {
+  if (audio.value?.duration) {
+    setDuration(Math.floor(audio.value.duration))
+  }
+}
+
+const isThisTrackPlaying = computed(() =>
+  audioStore.currentTrack.value?.id === currentTrack.value?.id && audioStore.isPlaying.value
+)
+
+async function togglePlay() {
+  if (audioStore.currentTrack.value?.id && audioStore.isPlaying.value) {
+    audio.value.pause()
+    audioStore.togglePlay()
+    return
   }
 
-  import { useRouter } from 'vue-router'
+  audio.value.play()
+  audioStore.togglePlay()
+}
 
-  const router = useRouter()
 
+const router = useRouter()
 
-  function goHome () {
-    router.push('/')
+function goToTrack() {
+  if (currentTrack.value?.id) {
+    router.push(`/track/${currentTrack.value.id}`)
   }
-  function goToTrack() {
-    const trackId = 1 
-    router.push(`/track/${trackId}`)
+}
+
+function goHome() {
+  router.push('/')
+}
+function goGenresPage() {
+  router.push('/genres')
+}
+function goSingersPage() {
+  router.push('/singers')
+}
+function goLibraryPage() {
+  router.push('/library')
+}
+function goPlaylistsPage() {
+  router.push('/playlists')
+}
+
+async function fetchCurrentTrack() {
+  try {
+    const res = await fetch('http://localhost:5240/api/track/current', {
+      credentials: 'include'
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      currentTrack.value = {
+        id: data.id,
+        title: data.name,
+        singer: data.singers?.join(', ') || 'Неизвестный',
+        cover: '/src/resources/trackCovers/' + data.coverUrl,
+        audioUrl: '/src/resources/trackAudio/' + data.audioUrl,
+        duration: data.duration
+      }
+    }
+  } catch (err) {
+    console.error('Ошибка загрузки текущего трека:', err)
   }
-  function goGenresPage() {
-    router.push('/genres')
-  }
-  function goSingersPage() {
-    router.push('/singers')
-  }
-  function goLibraryPage() {
-    router.push('/library')
-  }
-  function goPlaylistsPage() {
-    router.push('/playlists')
-  }
+}
+onMounted(() => {
+  audioStore.setAudioRef(audio.value)
+})
+
 </script>
-
-
 
 <style scoped>
 .logo-container {
@@ -302,8 +392,8 @@ li {
   transition: transform 0.5s ea, box-shadow 0.5s ease-in-out;
 }
 .player-container:hover {
-  transform: scale(1.03); /* немного увеличивает */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* тень для эффекта */
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
 }
 
 .nav-button {
@@ -317,7 +407,7 @@ li {
 .song-box {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 1.5rem;
 }
 
 .cover-image {
@@ -342,7 +432,7 @@ li {
   color: #1c1c1c;
 }
 
-.artist {
+.singer {
   font-size: 12px;
   color: #1c1c1c;
   opacity: 0.8;

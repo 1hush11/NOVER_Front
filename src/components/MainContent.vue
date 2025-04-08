@@ -33,7 +33,12 @@
     <div class="mt-6">
       <button class="text-xl font-bold mb-4 bg-transparent border-none">Популярно сейчас</button>
       <div class="flex flex-col gap-3">
-        <TrackCard v-for="(track, index) in popularTracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
+        <TrackCard
+          v-for="(track, index) in popularTracks"
+          :key="index"
+          :track="track"
+          :index="index"
+        />
       </div>
     </div>
   </div>
@@ -46,6 +51,10 @@ import { useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 import PlaylistCard from './PlaylistCard.vue'
 
+import { audioRef } from '@/audioRef'
+
+const audioElement = ref(null)
+
 const popularTracks = ref([])
 const genrePlaylists = ref([])
 
@@ -55,13 +64,14 @@ onMounted(async () => {
     if (!topRes.ok) throw new Error(await topRes.text())
     const topTracks = await topRes.json()
 
-    popularTracks.value = topTracks.map(track => ({
-      id: track.id,
-      title: track.name,
-      singer: track.singers.length ? track.singers.join(', ') : 'Неизвестный исполнитель',
-      cover: track.coverUrl
-        ? '/src/resources/trackCovers/' + track.coverUrl
-        : '/src/icons/NOVER_icon.ico'
+    popularTracks.value = topTracks.map(t => ({
+      id: t.id,
+      title: t.name,
+      singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      cover: t.coverUrl
+        ? '/src/resources/trackCovers/' + t.coverUrl
+        : '/src/resources/trackCovers/empty.png',
+      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
     }))
 
     const genreRes = await fetch('http://localhost:5240/api/genre/genres', {
@@ -88,6 +98,8 @@ onMounted(async () => {
 
     const genreResults = await Promise.all(genrePlaylistPromises)
     genrePlaylists.value = genreResults.filter(Boolean)
+
+    audioRef.value = audioElement.value
 
   } catch (err) {
     console.error('Ошибка при загрузке данных:', err.message)
@@ -116,9 +128,7 @@ const prev = () => {
 function goGenresPage() {
   router.push('/genres')
 }
-function goToTrackPage(track) { 
-  router.push(`/track/${track.id}`);
-}
+
 function goToPlaylist(playlist) {
   router.push(`/playlist/${playlist.id}`)
 }

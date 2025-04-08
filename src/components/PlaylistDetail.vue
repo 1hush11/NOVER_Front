@@ -52,7 +52,7 @@
         </svg>
         Перемешать
       </button>
-      <button class="btn" title="В избранное">
+      <button class="btn" title="В избранное" @click="addPlaylistToLibrary">
         <svg fill="#1c1c1c" width="24" height="24" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
           <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
         </svg>
@@ -90,6 +90,9 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 import EditPlaylistModal from '/src/components/EditPlaylistModal.vue'
+
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 
 const router = useRouter()
 const route = useRoute()
@@ -137,7 +140,8 @@ onMounted(async () => {
         title: t.name,
         singer: t.singers.join(', ') || 'Неизвестен',
         duration: formatDuration(t.duration),
-        cover: `/src/resources/trackCovers/${t.coverUrl}`
+        cover: `/src/resources/trackCovers/${t.coverUrl}`,
+        audioUrl: t.audioUrl
       }))
     }
 
@@ -145,6 +149,31 @@ onMounted(async () => {
     console.error('Ошибка при загрузке данных о плейлисте:', error)
   }
 })
+
+async function addPlaylistToLibrary() {
+  try {
+    const playlistId = route.params.id
+    const res = await fetch(`http://localhost:5240/api/user/library/add_playlist/${playlistId}`, {
+      method: 'POST',
+      credentials: 'include'
+    })
+
+    if (!res.ok) {
+      const errText = await res.text()
+      throw new Error(errText)
+    }
+
+    toast.success('Плейлист добавлен в медиатеку!', {
+      position: 'bottom-center',
+      autoClose: 3000
+    })
+  } catch (err) {
+    toast.error(err.message || 'Ошибка при добавлении плейлиста', {
+      position: 'bottom-center',
+      autoClose: 3000
+    })
+  }
+}
 
 function formatDuration(seconds) {
   const minutes = Math.floor(seconds / 60)

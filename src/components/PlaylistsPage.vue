@@ -5,28 +5,28 @@
     <section>
       <h2 class="text-xl font-semibold mb-2">Плейлисты других пользователей</h2>
       <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
-        <button @click="prevArtistPlaylist" :disabled="currentArtistPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
+        <button @click="prevOtherPlaylists" :disabled="currentOtherPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
         <PlaylistCard
-          v-for="(playlist, index) in pagedArtistPlaylists"
+          v-for="(playlist, index) in pagedOtherPlaylists"
           :key="'artist-' + index"
           :playlist="playlist" 
           @click="goToPlaylist(playlist)"
         />
-        <button @click="nextArtistPlaylist" :disabled="currentArtistPage + pagedArtistPlaylists.length >= artistPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
+        <button @click="nextOtherPlaylists" :disabled="currentOtherPage + pagedOtherPlaylists.length >= otherPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
       </div>
     </section>
 
     <section>
       <h2 class="text-xl font-semibold mb-2">Рекомендованные</h2>
       <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
-        <button @click="prevRecommendedPlaylist" :disabled="currentRecommendedPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
+        <button @click="prevRecPlaylist" :disabled="currentRecPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
         <PlaylistCard
-          v-for="(playlist, index) in pagedRecommendedPlaylists"
+          v-for="(playlist, index) in pagedRecPlaylists"
           :key="'recommended-' + index"
           :playlist="playlist"
           @click="goToPlaylist(playlist)"
         />
-        <button @click="nextRecommendedPlaylist" :disabled="currentRecommendedPage + pagedRecommendedPlaylists.length >= recommendedPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
+        <button @click="nextRecPlaylist" :disabled="currentRecPage + pagedRecPlaylists.length >= recPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
       </div>
     </section>
 
@@ -54,106 +54,103 @@ import PlaylistCard from '@/components/PlaylistCard.vue'
 const router = useRouter()
 
 function goToPlaylist(playlist) {
-  console.log(`${playlist.id}`)
   router.push(`/playlist/${playlist.id}`)
 }
 
 const itemsPerPage = 4
 
-const currentArtistPage = ref(0)
-const currentRecommendedPage = ref(0)
+const currentOtherPage = ref(0)
+const currentRecPage = ref(0)
 const currentUserPage = ref(0)
 
-const artistPlaylists = ref([])
-const recommendedPlaylists = ref([])
+const otherPlaylists = ref([])
 const userPlaylists = ref([])
+const recPlaylists = ref([])
+
 
 onMounted(async () => {
   try {
-    const res = await fetch('http://localhost:5240/api/user/library/playlists', {
-      credentials: 'include'
-    })
+    const [othersRes, savedRes, recRes] = await Promise.all([
+      fetch('http://localhost:5240/api/user/playlists/others', { credentials: 'include' }),
+      fetch('http://localhost:5240/api/user/library/saved_playlists', { credentials: 'include' }),
+      fetch('http://localhost:5240/api/playlist/playlists/recommended', { credentials: 'include' })
+    ]);
 
-    if (!res.ok) {
-      console.error('Ошибка загрузки плейлистов:', await res.text())
-      return
+    if (!othersRes.ok || !savedRes.ok || !recRes.ok) {
+      throw new Error('Ошибка загрузки плейлистов');
     }
 
-    const data = await res.json()
+    const othersData = await othersRes.json();
+    const savedData = await savedRes.json();
+    const recData = await recRes.json();
 
-    artistPlaylists.value = (data?.saved ?? []).map(p => ({
+    otherPlaylists.value = othersData.map(p => ({
       id: p.id,
       title: p.title,
       description: p.description,
       user: p.creator || 'Неизвестно',
-      isOwner: p.isOwner,
-      cover: `/src/resources/playlistCovers/${p.coverUrl}`
-    }))
+      isOwner: false,
+      cover: p.coverUrl
+        ? `/src/resources/playlistCovers/${p.coverUrl}`
+        : '/src/resources/trackCovers/empty.png'
+    }));
 
-    userPlaylists.value = (data?.created ?? []).map(p => ({
+    userPlaylists.value = savedData.map(p => ({
       id: p.id,
       title: p.title,
       description: p.description,
-      user: p.creator || 'Вы',
-      isOwner: p.isOwner,
-      cover: `/src/resources/playlistCovers/${p.coverUrl}`
-    }))
+      user: p.creator || 'Неизвестно',
+      isOwner: false,
+      cover: p.coverUrl
+        ? `/src/resources/playlistCovers/${p.coverUrl}`
+        : '/src/resources/trackCovers/empty.png'
+    }));
 
-    recommendedPlaylists.value = [
-      {
-        id: 100,
-        title: 'Релаксовое утро',
-        user: 'Platform',
-        cover: '/src/resources/playlistCovers/Untitled7.png'
-      },
-      {
-        id: 101,
-        title: 'Бас-буст🔥',
-        user: 'Platform',
-        cover: '/src/resources/playlistCovers/Untitled8.png'
-      },
-      {
-        id: 102,
-        title: 'Late Night Vibes',
-        user: 'Platform',
-        cover: '/src/resources/playlistCovers/Untitled9.png'
-      }
-    ]
+    recPlaylists.value = recData.map(p => ({
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      user: p.creator || 'Неизвестно',
+      isOwner: false,
+      cover: p.coverUrl
+        ? `/src/resources/playlistCovers/${p.coverUrl}`
+        : '/src/resources/trackCovers/empty.png'
+    }));
   } catch (e) {
-    console.error('Ошибка получения плейлистов:', e)
+    console.error('Ошибка получения плейлистов:', e);
   }
-})
+});
 
 
-const pagedArtistPlaylists = computed(() =>
-  artistPlaylists.value.slice(currentArtistPage.value, currentArtistPage.value + itemsPerPage)
+const pagedOtherPlaylists = computed(() =>
+  otherPlaylists.value.slice(currentOtherPage.value, currentOtherPage.value + itemsPerPage)
 )
-const pagedRecommendedPlaylists = computed(() =>
-  recommendedPlaylists.value.slice(currentRecommendedPage.value, currentRecommendedPage.value + itemsPerPage)
+const pagedRecPlaylists = computed(() =>
+  recPlaylists.value.slice(currentRecPage.value, currentRecPage.value + itemsPerPage)
 )
 const pagedUserPlaylists = computed(() =>
   userPlaylists.value.slice(currentUserPage.value, currentUserPage.value + itemsPerPage)
 )
 
-const nextArtistPlaylist = () => {
-  if (currentArtistPage.value + itemsPerPage < artistPlaylists.value.length) {
-    currentArtistPage.value++
+const nextOtherPlaylists = () => {
+  if (currentOtherPage.value + itemsPerPage < otherPlaylists.value.length) {
+    currentOtherPage.value++
   }
 }
-const prevArtistPlaylist = () => {
-  if (currentArtistPage.value > 0) {
-    currentArtistPage.value--
+const prevOtherPlaylists = () => {
+  if (currentOtherPage.value > 0) {
+    currentOtherPage.value--
   }
 }
 
-const nextRecommendedPlaylist = () => {
-  if (currentRecommendedPage.value + itemsPerPage < recommendedPlaylists.value.length) {
-    currentRecommendedPage.value++
+const nextRecPlaylist = () => {
+  if (currentRecPage.value + itemsPerPage < recPlaylists.value.length) {
+    currentRecPage.value++
   }
 }
-const prevRecommendedPlaylist = () => {
-  if (currentRecommendedPage.value > 0) {
-    currentRecommendedPage.value--
+const prevRecPlaylist = () => {
+  if (currentRecPage.value > 0) {
+    currentRecPage.value--
   }
 }
 

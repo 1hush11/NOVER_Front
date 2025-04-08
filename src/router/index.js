@@ -11,6 +11,7 @@ import PlaylistsPage from '@/components/PlaylistsPage.vue'
 import PlaylistDetail from '@/components/PlaylistDetail.vue'
 import AlbumCard from '@/components/AlbumCard.vue'
 import AlbumDetail from '@/components/AlbumDetail.vue'
+import SearchResult from '@/components/SearchResult.vue'
 
 
 const routes = [
@@ -33,6 +34,7 @@ const routes = [
             { path: 'playlists', name: 'PlaylistsPage', component: PlaylistsPage},
             { path: 'playlist/:id', name: 'PlaylistDetail', component: PlaylistDetail},
             { path: 'albums/:id', name: 'AlbumDetail', component: AlbumDetail},
+            { path: 'search', name: 'SearchResult', component: SearchResult }
         ]
     }
 ]
