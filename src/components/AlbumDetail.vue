@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8">
+  <div>
     <div class="flex justify-end">
       <button class="bg-transparent border-none mt-4 mr-4" @click="close">
         <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -8,14 +8,14 @@
       </button>
     </div>
 
-    <div class="flex gap-6 justify-center mt-6-">
+    <div class="flex gap-6 justify-center mt-6- p-8">
       <img :src="album.cover" alt="Album cover" class="cover-image" />
 
       <div class="flex flex-col justify-between">
         <div>
           <h1 class="text-3xl font-bold">{{ album.title }}</h1>
 
-          <div class="flex items-center gap-4 mt-2">
+          <div class="flex items-center mt-2">
             <img :src="album.singerCover" alt="Singer cover" class="cover-singer-image" />
             <p class="text-purple-600 font-medium cursor-pointer hover:underline">
               {{ album.singer }}
@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div class="flex justify-center gap-4 mt-4 mb-6">
+    <div class="flex justify-center gap-4 mt-4">
       <button class="btn" @click="togglePlay" title="Воспроизвести / Пауза">
         <span v-if="!isPlaying">
           <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
@@ -65,14 +65,14 @@
       </button>
     </div>
 
-    <div class="mt-8">
+    <div class="p-8">
       <h2 class="text-xl font-semibold mb-4">Треки альбома</h2>
       <TrackCard
         v-for="(track, index) in album.tracks"
         :key="index"
         :index="index"
-        class="flex justify-between items-center p-3 bg-white rounded-lg shadow hover:shadow-md transition"
         :track="track"
+        @play="() => handleTrackPlay({ track, index })"
       />
     </div>
   </div>
@@ -85,6 +85,25 @@ import TrackCard from './TrackCard.vue'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(album.value.tracks, index)
+    audioStore.playCurrent()
+  }
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -133,9 +152,10 @@ async function loadAlbumData(albumId) {
         id: t.id,
         title: t.name,
         singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
-        cover: `/src/resources/trackCovers/${t.coverUrl}`,
-        duration: formatDuration(t.duration),
-        audioUrl: t.audioUrl
+        cover: t.coverUrl
+          ? '/src/resources/trackCovers/' + t.coverUrl
+          : '/src/resources/trackCovers/empty.png',
+        audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
       }))
     }
   } catch (error) {
@@ -187,13 +207,15 @@ watch(() => route.params.id, (newId) => {
   height: 150px;
   border-radius: 8%;
   object-fit: cover;
+  border: 1px solid #1c1c1c;
 }
 
 .cover-singer-image {
   width: 40px;
   height: 40px;
   border-radius: 99%;
-  object-fit: cover;    
+  object-fit: cover; 
+  margin-right: 6px;
 }
 
 .btn {

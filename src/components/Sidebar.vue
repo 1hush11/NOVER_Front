@@ -8,7 +8,11 @@
         <p class="text-sm mb-2 uppercase text-bold">Меню</p>
         <ul class="no-list-style">
           <li class="mb-2">
-            <button class="menu-btn" @click="goHome">
+            <button
+              class="menu-btn"
+              :class="{ 'active-tab': route.path === ('/') }"
+              @click="goHome"
+            >
               <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
               viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve" width="30" height="30">
                 <polyline fill="none" stroke="#FFFFFF" opacity="0.25" stroke-width="2" stroke-miterlimit="10" points="3,17 16,4 29,17 "/>
@@ -19,7 +23,10 @@
             </button>
           </li>
           <li class="mb-2">
-            <button class="menu-btn" @click="goGenresPage">
+            <button 
+              class="menu-btn"
+              :class="{ 'active-tab': route.path.startsWith('/genres') }"
+              @click="goGenresPage">
               <svg width="30" height="30" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                 <g id="icomoon-ignore"/>
                 <path d="M16.003 22.377c3.231 0 5.851-2.619 5.851-5.851v-10.639c0-3.231-2.62-5.85-5.851-5.85s-5.851 2.619-5.851 5.85v10.639c0 3.231 2.62 5.851 5.851 5.851zM11.216 5.888c0-2.639 2.147-4.786 4.787-4.786s4.787 2.147 4.787 4.786v10.639c0 2.64-2.147 4.787-4.787 4.787s-4.787-2.147-4.787-4.787v-10.639z" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1"/>
@@ -29,7 +36,10 @@
             </button>
           </li>
           <li class="mb-2">
-            <button class="menu-btn" @click="goSingersPage">
+            <button
+              class="menu-btn"
+              :class="{ 'active-tab': route.path.startsWith('/singers') }"  
+              @click="goSingersPage">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clip-path="url(#clip0_429_11111)">
                   <circle cx="12" cy="7" r="3" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="1.5"/>
@@ -45,7 +55,10 @@
         <p class="text-sm mt-6 mb-2 uppercase text-bold">Медиатека</p>
         <ul class="no-list-style">
           <li class="mb-2">
-            <button class="menu-btn" @click="goLibraryPage">
+            <button 
+              class="menu-btn"
+              :class="{ 'active-tab': route.path.startsWith('/library') }"
+              @click="goLibraryPage">
               <svg fill="#FFFFFF" opacity="0.25" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
                 <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
               </svg>
@@ -53,7 +66,10 @@
             </button>
           </li>
           <li class="mb-2">
-            <button class="menu-btn" @click="goPlaylistsPage">
+            <button
+              class="menu-btn"
+              :class="{ 'active-tab': route.path.startsWith('/playlists') }"
+              @click="goPlaylistsPage">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2 11L16 11" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M2 17L13 17" fill="#FFFFFF" opacity="0.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -92,7 +108,7 @@
 
       <div class="player-container cursor-pointer" @click="goToTrack">
         <div class="play-button-wrapper">
-          <button class="play-button" @click.stop="togglePlay" title="Play/Pause">
+          <button class="play-button" @click.stop="togglePlay" title="Воспроизвести/Остановить">
             <span v-if="!isThisTrackPlaying">
               <svg width="24" height="24" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M8 5v14l11-7-11-7z" />
@@ -107,7 +123,7 @@
         </div>
 
         <div class="player-content">
-          <button class="nav-button">
+          <button class="nav-button"  @click.stop="prevTrack" title="Назад">
             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g transform="scale(-1,1) translate(-24,0)">
                 <path d="M3.76001 7.22005V16.7901C3.76001 18.7501 5.89 19.98 7.59 19L11.74 16.61L15.89 14.21C17.59 13.23 17.59 10.78 15.89 9.80004L11.74 7.40004L7.59 5.01006C5.89 4.03006 3.76001 5.25005 3.76001 7.22005Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -118,12 +134,12 @@
           <div class="song-box">
             <img :src="currentTrack?.cover || '/src/resources/trackCovers/empty.png'" class="cover-image" />
             <div class="song-info">
-              <div class="title">{{ currentTrack?.title || '' }}</div>
-              <div class="singer">{{ currentTrack?.singer || '' }}</div>
+              <div class="title">{{ currentTrack?.title || 'Неизвестно' }}</div>
+              <div class="singer">{{ currentTrack?.singer || 'Неизвестный' }}</div>
             </div>
           </div>
 
-          <button class="nav-button">
+          <button class="nav-button" @click.stop="nextTrack" title="Вперёд">
             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M3.76001 7.22005V16.7901C3.76001 18.7501 5.89 19.98 7.59 19L11.74 16.61L15.89 14.21C17.59 13.23 17.59 10.78 15.89 9.80004L11.74 7.40004L7.59 5.01006C5.89 4.03006 3.76001 5.25005 3.76001 7.22005Z" stroke="#292D32" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M20.24 18.1801V5.82007" stroke="#1c1c1c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -137,14 +153,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 import { useAudioStore } from '@/useAudioStore'
 const audioStore = useAudioStore()
 
 const audio = ref(null)
 
-const { currentTrack, currentTime, duration, setCurrentTime, setDuration } = useAudioStore()
+const { currentTrack, playNext, playPrev, currentTime, duration, setCurrentTime, setDuration } = useAudioStore()
 
 const sliderValue = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0))
 
@@ -195,8 +211,16 @@ async function togglePlay() {
   audioStore.togglePlay()
 }
 
+function prevTrack() {
+  playPrev()
+}
+
+function nextTrack() {
+  playNext()
+}
 
 const router = useRouter()
+const route = useRoute() 
 
 function goToTrack() {
   if (currentTrack.value?.id) {
@@ -230,7 +254,7 @@ async function fetchCurrentTrack() {
       const data = await res.json()
       currentTrack.value = {
         id: data.id,
-        title: data.name,
+        title: data.name || 'Неизвестно',
         singer: data.singers?.join(', ') || 'Неизвестный',
         cover: '/src/resources/trackCovers/' + data.coverUrl,
         audioUrl: '/src/resources/trackAudio/' + data.audioUrl,
@@ -286,7 +310,7 @@ onMounted(() => {
   background-color: rgba(255, 255, 255, 0.1); 
   border-left: 4px solid #e0c8fb;
   transition: background-color 0.3s, border-left 0.3s;
-    background-image: linear-gradient(to right, #e0c8fb, rgba(255, 255, 255, 0)); 
+  background-image: linear-gradient(to right, #e0c8fb, rgba(255, 255, 255, 0)); 
   background-color: transparent;
   border-left: 4px solid #e0c8fb;
 }
@@ -295,11 +319,14 @@ onMounted(() => {
   margin-right: 10px;
 }
 
-li {
-  margin-bottom: 0.5rem;
-  font-size: 16px;
+.active-tab {
+  background-color: rgba(255, 255, 255, 0.1); 
+  border-left: 4px solid #e0c8fb;
+  transition: background-color 0.3s, border-left 0.3s;
+  background-image: linear-gradient(to right, #e0c8fb, rgba(255, 255, 255, 0)); 
+  background-color: transparent;
+  border-left: 4px solid #e0c8fb;
 }
-
 
 .player-wrapper {
   display: flex;
@@ -407,7 +434,7 @@ li {
 .song-box {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 .cover-image {
@@ -418,6 +445,7 @@ li {
 }
 
 .song-info {
+  width: 110px;
   display: flex;
   flex-direction: column;
 }

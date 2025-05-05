@@ -35,9 +35,10 @@
       <div class="flex flex-col gap-3">
         <TrackCard
           v-for="(track, index) in popularTracks"
-          :key="index"
+          :key="track.id"
           :track="track"
           :index="index"
+          @play="() => handleTrackPlay({ track, index })"
         />
       </div>
     </div>
@@ -52,6 +53,25 @@ import TrackCard from './TrackCard.vue'
 import PlaylistCard from './PlaylistCard.vue'
 
 import { audioRef } from '@/audioRef'
+
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(popularTracks.value, index)
+    audioStore.playCurrent()
+  }
+}
 
 const audioElement = ref(null)
 

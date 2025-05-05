@@ -4,17 +4,17 @@
       <div class="flex items-start mb-6">
         <div>
             <img src="/src/resources/hearts/heart1.jpg" alt="Heart" class="cover-image mr-4" />
-            <button class="play-button" @click="togglePlay" title="Воспроизвести / Пауза">
-            <span v-if="!isPlaying">
+            <button class="play-button" title="Воспроизвести / Пауза">
+            <span >
               <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M8 5v14l11-7-11-7z" />
               </svg>
             </span>
-            <span v-else>
+            <!-- <span>
               <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
               </svg>
-            </span>
+            </span> -->
           </button>
         </div>
         <div class="flex flex-col ml-2">
@@ -25,7 +25,14 @@
       </div>
 
       <div class="flex flex-col gap-3 mb-10 cursor-pointer">
-        <TrackCard v-for="(track, index) in tracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
+        <TrackCard 
+          v-for="(track, index) in tracks" 
+          :key="track.id" 
+          :track="track" 
+          :index="index" 
+          @play="() => handleTrackPlay({ track, index })"
+          @remove="handleTrackRemove"
+        />
       </div>
     </div>
   </div>
@@ -36,19 +43,38 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(tracks.value, index)
+    audioStore.playCurrent()
+  }
+}
+
+function handleTrackRemove(trackId) {
+  tracks.value = tracks.value.filter(t => t.id !== trackId)
+}
+
 const router = useRouter()
 const user = ref(null)
 
 const tracks = ref([])
-const isPlaying = ref(false)
 
 function goToTrackPage(track) {
   router.push(`/track/${track.id}`)
 }
 
-function togglePlay() {
-  isPlaying.value = !isPlaying.value
-}
 
 onMounted(async () => {
   try {
@@ -76,7 +102,10 @@ onMounted(async () => {
       id: t.id,
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
-      cover: `/src/resources/trackCovers/${t.coverUrl}`
+      cover: t.coverUrl
+        ? '/src/resources/trackCovers/' + t.coverUrl
+        : '/src/resources/trackCovers/empty.png',
+      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
     }))
   } catch (error) {
     console.error('Ошибка при загрузке треков:', error)

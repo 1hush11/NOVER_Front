@@ -22,6 +22,7 @@
             :key="'track-' + track.id"
             :track="track"
             :index="index"
+            @play="() => handleTrackPlay({ track, index })"
           />
         </div>
       </div>
@@ -103,6 +104,25 @@ import SingerCard from './SingerCard.vue'
 import AlbumCard from './AlbumCard.vue'
 import PlaylistCard from './PlaylistCard.vue'
 
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(tracks.value, index)
+    audioStore.playCurrent()
+  }
+}
+
 const route = useRoute()
 const router = useRouter()
 
@@ -114,16 +134,17 @@ const results = ref({
   playlists: [],
   genres: []
 })
+
 const tracks = computed(() =>
   results.value.tracks?.map(t => ({
     id: t.id,
     title: t.title,
-    singer: t.singer || 'Неизвестный исполнитель',
-    cover: t. coverUrl
+    singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+    cover: t.coverUrl
       ? '/src/resources/trackCovers/' + t.coverUrl
       : '/src/resources/trackCovers/empty.png',
     audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
-  })) || []
+  }))
 )
 
 const singers = computed(() =>
@@ -134,7 +155,7 @@ const singers = computed(() =>
     subscribersCount: s.subscribersCount,
     totalTracks: s.totalTracks,
     totalPlayCount: s.totalPlayCount
-  })) || []
+  }))
 )
 
 const albums = computed(() =>
@@ -145,7 +166,7 @@ const albums = computed(() =>
     singer: a.singer.name,
     singerCover: `/src/resources/singerCovers/${a.singer.photoUrl}`,
     cover: a.coverUrl ? `/src/resources/albumCovers/${a.coverUrl}` : '/src/icons/NOVER_icon.ico'
-  })) || []
+  }))
 )
 
 const genres = computed(() =>
@@ -154,7 +175,7 @@ const genres = computed(() =>
     name: g.name,
     description: g.description || '',
     coverUrl: g.coverUrl ? `/src/resources/genreCovers/${g.coverUrl}` : '/src/icons/NOVER_icon.ico'
-  })) || []
+  }))
 )
 
 const playlists = computed(() =>
@@ -163,7 +184,7 @@ const playlists = computed(() =>
     title: p.title,
     user: p.user || 'Неизвестный',
     cover: p.coverUrl ? `/src/resources/playlistCovers/${p.coverUrl}` : '/src/icons/NOVER_icon.ico'
-  })) || []
+  }))
 )
 
 const isEmpty = computed(() =>

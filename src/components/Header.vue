@@ -1,25 +1,26 @@
 <template>
   <header class="flex justify-between items-center p-4 border-b">
     <div class="flex items-center gap-4">
-      <h1 class="text-l uppercase cursor-pointer font-bold">Nover</h1>
+      <router-link to="/">
+        <h1 class="text-black text-l uppercase cursor-pointer font-bold">Nover</h1>
+      </router-link>
     </div>
 
     <div class="flex items-center gap-4">
-      <div>
-        <button class="user-button flex items-center gap-2" @click="openLoginModal">
-          <template v-if="user">
-            <button class="btn" v-if="user.username">
-              <span>{{ user.username }}</span>
-              <img :src="`/src/resources/userCovers/${user.avatar}` || '/src/resources/userCovers/empty.png'" alt="User Avatar" class="cover-image" />
-            </button>
-          </template>
-          <template v-else>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8zm2 10a3 3 0 0 0-3 3 1 1 0 1 1-2 0 5 5 0 0 1 5-5h8a5 5 0 0 1 5 5 1 1 0 1 1-2 0 3 3 0 0 0-3-3H8z" fill="#1c1c1c"/>
-            </svg>
-          </template>
+      <template v-if="user?.username">
+        <button class="flex items-center btn">
+          <span>{{ user.username }}</span>
+          <img :src="`/src/resources/userCovers/${user.avatar || 'empty.png'}`" alt="User Avatar" class="cover-image" />
         </button>
-      </div>
+      </template>
+      <template v-if="!user">
+        <button class="user-button flex items-center gap-2" @click="openLoginModal">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM6 8a6 6 0 1 1 12 0A6 6 0 0 1 6 8zm2 10a3 3 0 0 0-3 3 1 1 0 1 1-2 0 5 5 0 0 1 5-5h8a5 5 0 0 1 5 5 1 1 0 1 1-2 0 3 3 0 0 0-3-3H8z" fill="#1c1c1c"/>
+          </svg>
+        </button>
+      </template>
+
 
       <LoginModal
         :isVisible="showLogin"
@@ -35,7 +36,7 @@
         @register="registerUser"
       />
 
-      <button @click="showAddTrackModal = true" class="user-button ml-10-" title="Добавить трек">
+      <button @click="showAddTrackModal = true" class="user-button" title="Добавить трек">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 32" class="w-6 h-6 fill-white" width="35px" height="35px" fill="#9483a8" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
           <path d="M33.958,12.988C33.531,6.376,28.933,0,20.5,0C12.787,0,6.839,5.733,6.524,13.384
             C2.304,14.697,0,19.213,0,22.5C0,27.561,4.206,32,9,32h6.5c0.276,0,0.5-0.224,0.5-0.5S15.776,31,15.5,31H9
@@ -53,8 +54,8 @@
         @trackAdded="handleTrackAdded"
       />
 
-      <div class="flex items-center border-2 border-purple-200 rounded-full px-4 py-2 text-purple-300 bg-white w-full max-w-md">
-        <SearchBar class="ml-4" />
+      <div class="flex items-center border-2 border-purple-200 rounded-full text-purple-300 bg-white w-full">
+        <SearchBar class="ml-2" />
       </div>
     </div>
   </header>
@@ -186,31 +187,28 @@ async function registerUser(userData) {
 
 <style scoped>
 .btn {
+  height: 48px;
   color: #1c1c1c;
   background: white;
-  border: 1px solid #ccc;
+  border: none;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: 5rem;
   font-size: 0.875rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: 0.2s;
-}
-
-.btn:hover {
-  background: #f5f5f5;
-}
-
-.flex.items-center {
-  gap: 1rem; 
+  transition: 1s;
+  &:hover {
+    background: #1c1c1c;
+    color: #e0c8fb;
+  }
 }
 
 .user-button {
   background: transparent;
   border: transparent;
   height: 48px;
-  width: 48px;
+  width: 70px;
   display: grid;
   grid-auto-flow: column;
   grid-gap: .5em;

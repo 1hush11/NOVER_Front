@@ -67,6 +67,7 @@
         Редактировать
       </button>
     </div>
+
     <EditPlaylistModal
       v-if="showEditModal"
       :playlist="playlist"
@@ -77,7 +78,13 @@
     <div v-if="playlist" class="mt-8">
       <h2 class="text-xl font-semibold mb-4">Треки</h2>
       <div class="flex flex-col gap-3">
-        <TrackCard v-for="(track, index) in playlist.tracks" :key="index" :track="track" :index="index" @click="goToTrackPage(track)"/>
+        <TrackCard 
+          v-for="(track, index) in playlist.tracks" 
+          :key="index" 
+          :track="track" 
+          :index="index"
+          @play="() => handleTrackPlay({ track, index })"
+        />
       </div>
     </div>
   </div>
@@ -93,6 +100,25 @@ import EditPlaylistModal from '/src/components/EditPlaylistModal.vue'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(playlist.value.tracks, index)
+    audioStore.playCurrent()
+  }
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -138,10 +164,11 @@ onMounted(async () => {
       tracks: data.tracks.map(t => ({
         id: t.id,
         title: t.name,
-        singer: t.singers.join(', ') || 'Неизвестен',
-        duration: formatDuration(t.duration),
-        cover: `/src/resources/trackCovers/${t.coverUrl}`,
-        audioUrl: t.audioUrl
+        singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+        cover: t.coverUrl
+          ? '/src/resources/trackCovers/' + t.coverUrl
+          : '/src/resources/trackCovers/empty.png',
+        audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
       }))
     }
 

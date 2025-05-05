@@ -35,6 +35,7 @@
           :key="index"
           :track="track"
           :index="index"
+          @play="() => handleTrackPlay({ track, index })"
         />
     </div>
   </div>
@@ -45,6 +46,25 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watchEffect } from 'vue'
 import TrackCard from './TrackCard.vue'
+
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(genre.value.tracks, index)
+    audioStore.playCurrent()
+  }
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -94,9 +114,11 @@ async function fetchGenreDetails(id) {
       tracks: tracks.map(t => ({
         id: t.id,
         title: t.name,
-        singer: t.singers.join(', '),
-        cover:'/src/resources/trackCovers/' + t.coverUrl,
-      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+        singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+        cover: t.coverUrl
+          ? '/src/resources/trackCovers/' + t.coverUrl
+          : '/src/resources/trackCovers/empty.png',
+        audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
       }))
     }
   } catch (err) {

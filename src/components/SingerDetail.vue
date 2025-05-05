@@ -10,7 +10,7 @@
         </button>
       </div>
       <div class="flex-1 overflow-y-auto p-8 bg-white text-gray-900">
-        <div id="profile" class="flex items-center gap-6 mb-10 mt-6-">
+        <div id="profile" class="flex items-center gap-4 mb-6 mt-6-">
           <img :src="singer.image" alt="Artist Image" class="cover-image" />
           <div>
             <h1 class="text-3xl font-bold mb-2">{{ singer.name }}</h1>
@@ -30,20 +30,21 @@
             <p>{{ singer.description }}</p>
 
             <div class="flex gap-4 mt-2">
-              <!-- <button class="btn">Подписаться</button> -->
-              <!-- <button class="btn">Поделиться</button> -->
+              <button class="btn">Подписаться</button>
+              <button class="btn">Поделиться</button>
             </div>
           </div>
         </div>
 
         <div class="mb-6 mt-4">
           <h2 class="text-xl font-semibold mb-2">Популярные треки</h2>
-          <div class="space-y-4">
+          <div>
             <TrackCard
               v-for="(track, index) in topTracks"
               :key="track.id"
               :track="track"
               :index="index"
+              @play="() => handleTrackPlay({ track, index })"
             />
           </div>
         </div>
@@ -98,6 +99,25 @@ import { useRoute, useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 import SingerCard from './SingerCard.vue'
 import AlbumCard from './AlbumCard.vue'
+
+import { useAudioStore } from '@/useAudioStore'
+
+const audioStore = useAudioStore()
+const { setQueue } = useAudioStore()
+
+function handleTrackPlay({ track, index }) {
+  const isSame = audioStore.currentTrack.value?.id === track.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(topTracks.value, index)
+    audioStore.playCurrent()
+  }
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -172,9 +192,9 @@ async function loadSingerData(id) {
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
       cover: t.coverUrl
-      ? `/src/resources/trackCovers/${t.coverUrl}`
-      : '/src/resources/trackCovers/empty.png',
-      audioUrl: t.audioUrl
+        ? '/src/resources/trackCovers/' + t.coverUrl
+        : '/src/resources/trackCovers/empty.png',
+      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
     }))
 
     albums.value = albumsRes.map(a => ({
