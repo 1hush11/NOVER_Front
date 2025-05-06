@@ -102,6 +102,7 @@ onMounted(async () => {
       id: t.id,
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      albumId: t.albumId,
       cover: t.coverUrl
         ? '/src/resources/trackCovers/' + t.coverUrl
         : '/src/resources/trackCovers/empty.png',

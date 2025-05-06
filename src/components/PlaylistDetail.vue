@@ -58,7 +58,7 @@
         </svg>
         В избранное
       </button>
-      <button v-if="playlist.isOwner" @click="showEditModal = true" class="btn mr-2">
+      <button v-if="playlist.isOwner" @click="goToEdit" class="btn mr-2">
         <svg fill="#1c1c1" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
           width="20" height="20" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve">
         <path d="M17,20H1c-0.6,0-1-0.4-1-1V3c0-0.6,0.4-1,1-1h9v2H2v14h14v-8h2v9C18,19.6,17.6,20,17,20z"/>
@@ -67,13 +67,6 @@
         Редактировать
       </button>
     </div>
-
-    <EditPlaylistModal
-      v-if="showEditModal"
-      :playlist="playlist"
-      @close="showEditModal = false"
-      @updated="handlePlaylistUpdated"
-    />
 
     <div v-if="playlist" class="mt-8">
       <h2 class="text-xl font-semibold mb-4">Треки</h2>
@@ -96,7 +89,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import TrackCard from './TrackCard.vue'
-import EditPlaylistModal from '/src/components/EditPlaylistModal.vue'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
@@ -123,7 +115,10 @@ function handleTrackPlay({ track, index }) {
 const router = useRouter()
 const route = useRoute()
 
-const showEditModal = ref(false)
+function goToEdit() {
+  router.push(`/playlist/${playlist.value.id}/edit`)
+}
+
 
 function handlePlaylistUpdated(updatedData) {
   playlist.value.id = updatedData.id

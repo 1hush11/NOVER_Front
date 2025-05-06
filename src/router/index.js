@@ -9,7 +9,7 @@ import SingerDetail from '@/components/SingerDetail.vue'
 import LibraryPage from '@/components/LibraryPage.vue'
 import PlaylistsPage from '@/components/PlaylistsPage.vue'
 import PlaylistDetail from '@/components/PlaylistDetail.vue'
-import AlbumCard from '@/components/AlbumCard.vue'
+import EditPlaylistPage from '@/components/EditPlaylistPage.vue'
 import AlbumDetail from '@/components/AlbumDetail.vue'
 import SearchResult from '@/components/SearchResult.vue'
 
@@ -33,6 +33,7 @@ const routes = [
             { path: 'library', name: 'LibraryPage', component: LibraryPage },
             { path: 'playlists', name: 'PlaylistsPage', component: PlaylistsPage},
             { path: 'playlist/:id', name: 'PlaylistDetail', component: PlaylistDetail},
+            { path: 'playlist/:id/edit', name: 'EditPlaylis', component: EditPlaylistPage},
             { path: 'albums/:id', name: 'AlbumDetail', component: AlbumDetail},
             { path: 'search', name: 'SearchResult', component: SearchResult }
         ]

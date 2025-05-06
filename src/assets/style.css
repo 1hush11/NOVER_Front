@@ -12,6 +12,10 @@ a {
     text-decoration: none;
 }
 
+.bg-white {
+    background-color: #FFFF;
+}
+
 .bg-black {
     background-color: #1c1c1c;
 }
@@ -22,10 +26,6 @@ a {
 
 .bg-gray {
     background-color: rgb(167, 167, 167);
-}
-
-.bg-red-500 {
-    background-color: #e0c8fb;
 }
 
 .text-white {
@@ -90,6 +90,14 @@ a {
 
 .w-full {
     width: 100%;
+}
+
+.w-2 {
+    width: 200px;
+}
+
+.w-2-7 {
+    width: 270px;
 }
 
 .w-3 {
@@ -305,6 +313,10 @@ button:hover {
 
 .text-white {
     color: white;
+}
+
+.border {
+    border: 1px solid #ccc;
 }
 
 .border-purple {

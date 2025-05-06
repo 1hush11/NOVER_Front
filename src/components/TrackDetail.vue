@@ -20,19 +20,6 @@
             {{ track.genre }}
           </button>
         </div>
-        <!-- <input
-          type="range"
-          min="0"
-          max="100"
-          v-model="progress"
-          @change="seekAudio"
-          class="track-slider"
-        />
-
-        <div class="w-full flex justify-between text-sm text-gray-700 mt-2 mb-1">
-          <span>{{ currentTimeFormatted }}</span>
-          <span>{{ formattedDuration }}</span>
-        </div> -->
 
         <div class="flex items-center gap-6 ml-4">
           <button class="bg-transparent border-none" @click="shuffleTracks" title="Перемешать">
@@ -94,14 +81,14 @@
     </div>
 
     <div class="flex gap-4 mt-4 mb-6">
-      <button class="btn" title="В избранное" @click="addToLibrary(track)">
-        <svg fill="#1c1c1c" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
+      <button class="btn" title="В избранное" @click="handleLibraryToggle">
+        <svg :fill="inLibrary ? '#a896bc' : '#1c1c1'" width="30" height="30" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
           <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
         </svg>
         В избранное
       </button>
 
-      <button class="btn" title="Добавить в плейлист">
+      <button class="btn" title="Добавить в плейлист" @click.stop="openPlaylistMenu($event)">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M18 18H20M22 18H20M20 18V16M20 18V20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M2 11L20 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -110,8 +97,38 @@
         </svg>
         В плейлист
       </button>
+      <div
+        v-if="showPlaylistMenu"
+        :style="{ position: 'absolute', top: menuPosition.top + 'px', left: menuPosition.left + 'px', zIndex: 1000 }"
+        class="border rounded-lg shadow bg-white w-3 p-4 mt-2 cursor-pointer"
+        @click.stop
+      >
+        <p class="font-semibold text-md mb-4">Выберите плейлист</p>
+        <ul class="max-h-60 overflow-y-auto">
+          <li
+            v-for="pl in playlists"
+            :key="pl.id"
+            class="border-b text-md"
+            style="height: 25px;"
+            @click="addTrackToPlaylist(pl.id)"
+          >
+            {{ pl.title }}
+          </li>
+        </ul>
+        <div class="border-t mt-2 pt-2">
+          <button @click="createNewPlaylist" class="bg-purple-600 w-2-7 text-md rounded-lg hover:bg-purple-700 transition border-none" style="height: 40px;">
+            + Создать новый плейлист
+          </button>
+        </div>
+      </div>
 
-      <button class="btn" title="Альбом">
+      <AddPlaylistModal
+        :isVisible="isCreateModalOpen"
+        @close="isCreateModalOpen = false"
+        @created="handleNewPlaylist"
+      />
+
+      <button class="btn" title="Альбом" @click="goToAlbum" :disabled="!track.albumId">
         <svg width="30" height="30" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
               <g stroke="none" fill="none" fill-rule="evenodd">
                   <g fill-rule="nonzero">
@@ -150,11 +167,23 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, h } from 'vue'
+
 import TrackCard from './TrackCard.vue'
+import AddPlaylistModal from './AddPlaylistModal.vue'
+import AlbumDetail from './AlbumDetail.vue'
 import { useAudioStore } from '@/useAudioStore'
+
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+
+const showPlaylistMenu = ref(false)
+const playlists = ref([])
+const menuPosition = ref({ top: 0, left: 0 })
+
+const isCreateModalOpen = ref(false)
+
+const inLibrary = ref(false)
 
 const audioStore = useAudioStore()
 const {
@@ -195,11 +224,13 @@ const track = ref({
   id: null,
   title: '',
   singer: '',
+  albumId: '',
   genre: '',
   cover: '',
   duration: 0,
   audioUrl: '',
 })
+
 const similarTracks = ref([])
 
 const isThisTrackPlaying = computed(() =>
@@ -229,7 +260,6 @@ function toggleTrackPlay() {
   }
 }
 
-
 function prevTrack() {
   playPrev()
 }
@@ -242,6 +272,15 @@ function shuffleTracks() {
   toggleShuffle()
 }
 
+function goToAlbum() {
+  console.warn(track.value.albumId)
+  if (track.value.albumId) {
+    router.push(`/albums/${track.value.albumId}`)
+  } else {
+    console.warn('albumId отсутствует')
+  }
+}
+
 function close() {
   router.back()
 }
@@ -249,6 +288,35 @@ function close() {
 function scrollToTop() {
   if (scrollContainer.value) {
     scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+onMounted(async () => {
+  await loadTrackAndSimilar(route.params.id)
+  await checkIfInLibrary()
+})
+
+async function checkIfInLibrary() {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/library/tracks', {
+      credentials: 'include'
+    })
+    if (!res.ok) throw new Error(await res.text())
+    const data = await res.json()
+
+    inLibrary.value = data.some(t => t.id === track.value.id)
+  } catch (err) {
+    console.error('Ошибка проверки медиатеки:', err)
+  }
+}
+
+
+async function handleLibraryToggle() {
+  if (inLibrary.value) {
+    showRemoveConfirm()
+  } else {
+    await addToLibrary()
+    inLibrary.value = true
   }
 }
 
@@ -260,10 +328,72 @@ async function addToLibrary() {
     })
     if (!res.ok) throw new Error(await res.text())
 
-    toast.success('Трек добавлен в медиатеку', { autoClose: 3000, position: 'bottom-center' })
+    inLibrary.value = true
+
+    toast.success('Трек добавлен в медиатеку', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
   } catch (err) {
-    toast.error(err.message || 'Ошибка добавления трека в медиатеку', { autoClose: 3000, position: 'bottom-center' })
+    toast.error(err.message || 'Ошибка добавления', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
   }
+}
+
+async function removeFromLibrary() {
+  try {
+    const res = await fetch(`http://localhost:5240/api/user/library/remove_track/${track.value.id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    if (!res.ok) throw new Error(await res.text())
+
+    inLibrary.value = false
+
+    toast.success('Трек удалён из медиатеки', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  } catch (err) {
+    toast.error(err.message || 'Ошибка удаления', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  }
+}
+
+function showRemoveConfirm() {
+  toast(
+    ({ closeToast }) => {
+      setTimeout(closeToast, 5000)
+
+      return h('div', { class: 'flex flex-col gap-2' }, [
+        h('div', { class: 'flex justify-center gap-4 items-center' }, [
+          h('span', 'Удалить трек из медиатеки?'),
+          h('button', {
+            class: 'bg-gray text-gray-700 rounded-lg border-none px-2 py-1',
+            style: 'width: 60px; height: 30px;',
+            onClick: closeToast
+          }, 'Нет'),
+          h('button', {
+            class: 'bg-purple text-gray-700 rounded-lg border-none px-2 py-1',
+            style: 'width: 60px; height: 30px;',
+            onClick: async () => {
+              await removeFromLibrary()
+              closeToast()
+            }
+          }, 'Да')
+        ])
+      ])
+    },
+    {
+      position: 'bottom-center',
+      autoClose: false,
+      closeOnClick: false
+    }
+  )
 }
 
 async function loadTrackAndSimilar(id) {
@@ -276,6 +406,7 @@ async function loadTrackAndSimilar(id) {
       id: data.id,
       title: data.name,
       singer: data.singers?.join(', ') || 'Неизвестный исполнитель',
+      albumId: data.albumId,
       genre: data.genreName,
       cover: '/src/resources/trackCovers/' + data.coverUrl,
       duration: data.duration,
@@ -290,6 +421,7 @@ async function loadTrackAndSimilar(id) {
       id: t.id,
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      albumId: t.albumId,
       cover: t.coverUrl
         ? '/src/resources/trackCovers/' + t.coverUrl
         : '/src/resources/trackCovers/empty.png',
@@ -300,14 +432,80 @@ async function loadTrackAndSimilar(id) {
   }
 }
 
-onMounted(() => {
-  loadTrackAndSimilar(route.params.id)
-})
-
 watch(() => route.params.id, async (newId) => {
   await loadTrackAndSimilar(newId)
   scrollToTop()
 })
+
+async function openPlaylistMenu(event) {
+  const rect = event.currentTarget.getBoundingClientRect()
+  menuPosition.value = {
+    top: rect.bottom + window.scrollY,
+    left: rect.left + window.scrollX
+  }
+
+  showPlaylistMenu.value = true
+
+  try {
+    const res = await fetch('http://localhost:5240/api/user/library/playlists', {
+      credentials: 'include'
+    })
+    if (!res.ok) throw new Error(await res.text())
+
+    const data = await res.json()
+    playlists.value = data.created 
+  } catch (err) {
+    toast.error('Не удалось загрузить плейлисты')
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', () => {
+    showPlaylistMenu.value = false
+  })
+})
+
+async function addTrackToPlaylist(playlistId) {
+  try {
+    const res = await fetch(`http://localhost:5240/api/playlist/playlists/${playlistId}/add`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(track.value.id)
+    })
+
+    if (!res.ok) throw new Error(await res.text())
+    toast.success('Трек добавлен в плейлист', {
+      autoClose: 2000,
+      position: 'bottom-center',
+  })
+    showPlaylistMenu.value = false
+  } catch (err) {
+    toast.error(err.message, {
+      autoClose: 2000,
+      position: 'bottom-center',
+    })
+  }
+}
+
+function createNewPlaylist() {
+  isCreateModalOpen.value = true
+}
+
+function handleNewPlaylist(newPlaylist) {
+  playlists.value.push({
+    id: newPlaylist.id,
+    title: form.value.title,
+    coverUrl: form.value.coverUrl,
+    description: form.value.description,
+    createdAt: new Date().toISOString(),
+    type: form.value.type,
+    creator: '',
+    isOwner: true
+  })
+  toast.success('Плейлист добавлен в список')
+}
+
 </script>
 
 

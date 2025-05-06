@@ -256,7 +256,10 @@ async function fetchCurrentTrack() {
         id: data.id,
         title: data.name || 'Неизвестно',
         singer: data.singers?.join(', ') || 'Неизвестный',
-        cover: '/src/resources/trackCovers/' + data.coverUrl,
+        albumId: t.albumId,
+        cover: t.coverUrl
+          ? '/src/resources/trackCovers/' + t.coverUrl
+          : '/src/resources/trackCovers/empty.png',
         audioUrl: '/src/resources/trackAudio/' + data.audioUrl,
         duration: data.duration
       }
@@ -307,6 +310,8 @@ onMounted(() => {
 }
 
 .menu-btn:hover {
+  color: #1c1c1c;
+
   background-color: rgba(255, 255, 255, 0.1); 
   border-left: 4px solid #e0c8fb;
   transition: background-color 0.3s, border-left 0.3s;
@@ -320,6 +325,7 @@ onMounted(() => {
 }
 
 .active-tab {
+  color: #1c1c1c;
   background-color: rgba(255, 255, 255, 0.1); 
   border-left: 4px solid #e0c8fb;
   transition: background-color 0.3s, border-left 0.3s;

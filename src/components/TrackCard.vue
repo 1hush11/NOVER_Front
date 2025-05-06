@@ -43,11 +43,10 @@
           preserveAspectRatio="xMinYMin"
         >
           <path
-            :fill="inLibrary ? '#9686a8' : '#1c1c1'"
+            :fill="inLibrary ? '#a896bc' : '#1c1c1'"
             d="M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z"
         />
         </svg>
-
       </button>
     </div>
   </div>
@@ -76,7 +75,6 @@ const props = defineProps({
 })
 
 const inLibrary = ref(false)
-const isChecking = ref(true)
 
 const router = useRouter()
 const audioStore = useAudioStore()
@@ -101,8 +99,6 @@ onMounted(async () => {
     inLibrary.value = data.some(t => t.id === props.track.id)
   } catch (err) {
     console.error('Ошибка проверки медиатеки:', err)
-  } finally {
-    isChecking.value = false
   }
 })
 
@@ -143,9 +139,8 @@ async function removeFromLibrary() {
     })
     if (!res.ok) throw new Error(await res.text())
 
-    await removeFromLibrary()
+    inLibrary.value = false
     emit('remove', props.track.id)
-
 
     toast.success('Трек удалён из медиатеки', {
       autoClose: 3000,
