@@ -27,7 +27,6 @@
               {{ formatNumber(singer.subscribersCount) }} подписчиков
             </span>
             
-
             <span>
               <svg width="16" height="16" viewBox="0 0 255 200" fill="#1c1c1c" xmlns="http://www.w3.org/2000/svg">
                 <path d="M249.9,189.1h-16V129c0-55.9-47.3-101.4-105.4-101.4C70.4,27.6,23.2,73,23.2,129l0,8c0,12,0,35.3,0,52.2h-16L7.2,129

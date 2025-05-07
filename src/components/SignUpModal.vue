@@ -48,7 +48,8 @@
           required
         />
 
-        <div class="flex items-center justify-center gap-4 mt-2">
+        <label class="p-2 mt-2 text-sm font-semibold text-gray-700">Аватар</label>
+        <div class="flex items-center justify-center gap-4">
           <input
             type="file"
             id="file"
@@ -57,7 +58,8 @@
           />
           <label
             for="file"
-            class="cursor-pointer p-2 mb-4 plr-2 rounded-lg hover:bg-purple-700 transition"
+            class="flex items-center cursor-pointer mb-6 plr-2 border rounded-lg transition"
+            style="width: 400px; height: 35px;"
           >
             Загрузите аватар
           </label>

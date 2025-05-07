@@ -52,12 +52,21 @@
         </svg>
         Перемешать
       </button>
-      <button class="btn" title="В избранное" @click="addPlaylistToLibrary">
-        <svg fill="#1c1c1c" width="24" height="24" viewBox="-2 -4 24 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin" class="jam jam-heart">
-          <path d='M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z'/>
+      <button class="btn" title="В избранное" @click="togglePlaylistLibrary">
+        <svg
+          :fill="playlist?.inLibrary ? '#a896bc' : '#1c1c1'"
+          width="24"
+          height="24"
+          viewBox="-2 -4 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="xMinYMin"
+          class="jam jam-heart"
+        >
+          <path d="M3.636 7.208L10 13.572l6.364-6.364a3 3 0 1 0-4.243-4.243L10 5.086l-2.121-2.12a3 3 0 0 0-4.243 4.242zM9.293 1.55l.707.707.707-.707a5 5 0 1 1 7.071 7.071l-7.07 7.071a1 1 0 0 1-1.415 0l-7.071-7.07a5 5 0 1 1 7.07-7.071z"/>
         </svg>
         В избранное
       </button>
+
       <button v-if="playlist.isOwner" @click="goToEdit" class="btn mr-2">
         <svg fill="#1c1c1" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
           width="20" height="20" viewBox="0 0 20 20" enable-background="new 0 0 20 20" xml:space="preserve">
@@ -96,7 +105,6 @@ import 'vue3-toastify/dist/index.css'
 import { useAudioStore } from '@/useAudioStore'
 
 const audioStore = useAudioStore()
-const { setQueue } = useAudioStore()
 
 function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
@@ -118,7 +126,6 @@ const route = useRoute()
 function goToEdit() {
   router.push(`/playlist/${playlist.value.id}/edit`)
 }
-
 
 function handlePlaylistUpdated(updatedData) {
   playlist.value.id = updatedData.id
@@ -147,6 +154,13 @@ onMounted(async () => {
 
     const data = await response.json()
 
+    const saved = await fetch('http://localhost:5240/api/user/library/saved_playlists', {
+      credentials: 'include'
+    })
+
+    const savedPlaylists = await saved.json()
+    const isInLibrary = savedPlaylists.some(p => p.id === data.id)
+
     playlist.value = {
       id: data.id,
       name: data.title,
@@ -156,6 +170,7 @@ onMounted(async () => {
       createdAt: new Date(data.createdAt).toLocaleDateString(),
       savedCount: data.savedCount || 0,
       cover: `/src/resources/playlistCovers/${data.coverUrl}`,
+      inLibrary: isInLibrary,
       tracks: data.tracks.map(t => ({
         id: t.id,
         title: t.name,
@@ -166,34 +181,36 @@ onMounted(async () => {
         audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
       }))
     }
-
   } catch (error) {
     console.error('Ошибка при загрузке данных о плейлисте:', error)
   }
 })
 
-async function addPlaylistToLibrary() {
-  try {
-    const playlistId = route.params.id
-    const res = await fetch(`http://localhost:5240/api/user/library/add_playlist/${playlistId}`, {
+async function togglePlaylistLibrary() {
+  const id = route.params.id
+
+  if (playlist.value.inLibrary) {
+    const res = await fetch(`http://localhost:5240/api/user/library/remove_playlist/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+    if (!res.ok) {
+      toast.error(await res.text(), { position: 'bottom-center' })
+      return
+    }
+    playlist.value.inLibrary = false
+    toast.success('Плейлист удалён из медиатеки', { position: 'bottom-center' })
+  } else {
+    const res = await fetch(`http://localhost:5240/api/user/library/add_playlist/${id}`, {
       method: 'POST',
       credentials: 'include'
     })
-
     if (!res.ok) {
-      const errText = await res.text()
-      throw new Error(errText)
+      toast.error(await res.text(), { position: 'bottom-center' })
+      return
     }
-
-    toast.success('Плейлист добавлен в медиатеку!', {
-      position: 'bottom-center',
-      autoClose: 3000
-    })
-  } catch (err) {
-    toast.error(err.message || 'Ошибка при добавлении плейлиста', {
-      position: 'bottom-center',
-      autoClose: 3000
-    })
+    playlist.value.inLibrary = true
+    toast.success('Плейлист добавлен в медиатеку', { position: 'bottom-center' })
   }
 }
 

@@ -12,7 +12,7 @@ import PlaylistDetail from '@/components/PlaylistDetail.vue'
 import EditPlaylistPage from '@/components/EditPlaylistPage.vue'
 import AlbumDetail from '@/components/AlbumDetail.vue'
 import SearchResult from '@/components/SearchResult.vue'
-
+import SubscriptionsPage from '@/components/SubscriptionsPage.vue'
 
 const routes = [
     {
@@ -35,7 +35,8 @@ const routes = [
             { path: 'playlist/:id', name: 'PlaylistDetail', component: PlaylistDetail},
             { path: 'playlist/:id/edit', name: 'EditPlaylis', component: EditPlaylistPage},
             { path: 'albums/:id', name: 'AlbumDetail', component: AlbumDetail},
-            { path: 'search', name: 'SearchResult', component: SearchResult }
+            { path: 'search', name: 'SearchResult', component: SearchResult },
+            { path: 'subscriptions', name: 'SubscriptionsPage', component: SubscriptionsPage }
         ]
     }
 ]

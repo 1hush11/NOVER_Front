@@ -171,11 +171,12 @@ import { ref, onMounted, computed, watch, h } from 'vue'
 
 import TrackCard from './TrackCard.vue'
 import AddPlaylistModal from './AddPlaylistModal.vue'
-import AlbumDetail from './AlbumDetail.vue'
 import { useAudioStore } from '@/useAudioStore'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+
+const isAuthorized = ref(false)
 
 const showPlaylistMenu = ref(false)
 const playlists = ref([])
@@ -190,7 +191,6 @@ const {
   currentTrack,
   isPlaying,
   play,
-  pause,
   togglePlay,
   playNext,
   playPrev,
@@ -213,6 +213,25 @@ function handleTrackPlay({ track, index }) {
   } else {
     audioStore.setQueue(similarTracks.value, index)
     audioStore.playCurrent()
+  }
+}
+
+async function fetchCurrentUser() {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/me', {
+      credentials: 'include'
+    })
+
+    if (!res.ok) {
+      isAuthorized.value = false
+      return
+    }
+
+    await res.json()
+    isAuthorized.value = true
+  } catch (err) {
+    isAuthorized.value = false
+    console.error('Ошибка получения текущего пользователя:', err)
   }
 }
 
@@ -292,8 +311,12 @@ function scrollToTop() {
 }
 
 onMounted(async () => {
+  await fetchCurrentUser()
   await loadTrackAndSimilar(route.params.id)
-  await checkIfInLibrary()
+
+  if (isAuthorized.value) {
+    await checkIfInLibrary()
+  }
 })
 
 async function checkIfInLibrary() {
@@ -301,17 +324,30 @@ async function checkIfInLibrary() {
     const res = await fetch('http://localhost:5240/api/user/library/tracks', {
       credentials: 'include'
     })
+
+    if (res.status === 401) {
+      isAuthorized.value = false
+      return
+    }
+
     if (!res.ok) throw new Error(await res.text())
     const data = await res.json()
-
     inLibrary.value = data.some(t => t.id === track.value.id)
   } catch (err) {
     console.error('Ошибка проверки медиатеки:', err)
+    isAuthorized.value = false
   }
 }
 
-
 async function handleLibraryToggle() {
+  if (!isAuthorized.value) {
+    toast.info('Войдите в аккаунт, чтобы добавлять в медиатеку', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+    return
+  }
+
   if (inLibrary.value) {
     showRemoveConfirm()
   } else {
@@ -492,19 +528,40 @@ function createNewPlaylist() {
   isCreateModalOpen.value = true
 }
 
-function handleNewPlaylist(newPlaylist) {
+async function handleNewPlaylist(newPlaylist) {
   playlists.value.push({
     id: newPlaylist.id,
-    title: form.value.title,
-    coverUrl: form.value.coverUrl,
-    description: form.value.description,
+    title: newPlaylist.title,
+    coverUrl: newPlaylist.coverUrl,
+    description: newPlaylist.description,
     createdAt: new Date().toISOString(),
-    type: form.value.type,
+    type: newPlaylist.type,
     creator: '',
     isOwner: true
   })
-  toast.success('Плейлист добавлен в список')
+
+  try {
+    const res = await fetch(`http://localhost:5240/api/playlist/playlists/${newPlaylist.id}/add`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(track.value.id)
+    })
+
+    if (!res.ok) throw new Error(await res.text())
+
+    toast.success('Плейлист создан и трек добавлен', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  } catch (err) {
+    toast.error('Ошибка при добавлении трека в плейлист: ' + err.message, {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  }
 }
+
 
 </script>
 

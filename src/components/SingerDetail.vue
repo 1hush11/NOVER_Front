@@ -13,25 +13,32 @@
         <div id="profile" class="flex items-center gap-4 mb-6 mt-6-">
           <img :src="singer.image" alt="Artist Image" class="cover-image" />
           <div>
-            <h1 class="text-3xl font-bold mb-2">{{ singer.name }}</h1>
-            <p class="text-sm text-gray-500 mb-4">
+            <h1 class="text-2xl font-bold mb-2">{{ singer.name }}</h1>
+            <div class="flex items-center">
+            <p class="flex items-center text-sm text-gray-500 mb-4">
               <span>
-              <svg width="20" height="20" viewBox="0 0 48 25" fill="#1c1c1c" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd"
-                  d="M16 19C18.7629 19 21 16.7629 21 14C21 11.2371 18.7629 9 16 9C13.2371 9 11 11.2371 11 14C11 16.7629 13.2371 19 16 19ZM16 21C19.8675 21 23 17.8675 23 14C23 10.1325 19.8675 7 16 7C12.1325 7 9 10.1325 9 14C9 17.8675 12.1325 21 16 21Z"
-                  fill="#1c1c1c"/>
-                <path fill-rule="evenodd" clip-rule="evenodd"
-                  d="M5.76618 28.0846C5.14556 28.6486 5 29.0826 5 29.4V33H27V29.4C27 29.0826 26.8544 28.6486 26.2338 28.0846C25.6009 27.5095 24.6268 26.9511 23.3932 26.4645C20.924 25.4906 17.9234 25 16 25C14.0766 25 11.076 25.4906 8.60682 26.4645C7.37322 26.9511 6.39908 27.5095 5.76618 28.0846ZM16 23C11.6612 23 3 25.144 3 29.4V35H29V29.4C29 25.144 20.3387 23 16 23Z"
-                  fill="#1c1c1c"/>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 7.16C17.94 7.15 17.87 7.15 17.81 7.16C16.43 7.11 15.33 5.98 15.33 4.58C15.33 3.15 16.48 2 17.91 2C19.34 2 20.49 3.16 20.49 4.58C20.48 5.98 19.38 7.11 18 7.16Z" stroke="#757575" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16.9699 14.44C18.3399 14.67 19.8499 14.43 20.9099 13.72C22.3199 12.78 22.3199 11.24 20.9099 10.3C19.8399 9.59004 18.3099 9.35003 16.9399 9.59003" stroke="#757575"stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5.96998 7.16C6.02998 7.15 6.09998 7.15 6.15998 7.16C7.53998 7.11 8.63998 5.98 8.63998 4.58C8.63998 3.15 7.48998 2 6.05998 2C4.62998 2 3.47998 3.16 3.47998 4.58C3.48998 5.98 4.58998 7.11 5.96998 7.16Z" stroke="#757575" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6.99994 14.44C5.62994 14.67 4.11994 14.43 3.05994 13.72C1.64994 12.78 1.64994 11.24 3.05994 10.3C4.12994 9.59004 5.65994 9.35003 7.02994 9.59003" stroke="#757575" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 14.63C11.94 14.62 11.87 14.62 11.81 14.63C10.43 14.58 9.32996 13.45 9.32996 12.05C9.32996 10.62 10.48 9.46997 11.91 9.46997C13.34 9.46997 14.49 10.63 14.49 12.05C14.48 13.45 13.38 14.59 12 14.63Z" stroke="#757575" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9.08997 17.78C7.67997 18.72 7.67997 20.26 9.08997 21.2C10.69 22.27 13.31 22.27 14.91 21.2C16.32 20.26 16.32 18.72 14.91 17.78C13.32 16.72 10.69 16.72 9.08997 17.78Z" stroke="#757575" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               </span>
             {{ formatNumber(singer.followers) }} подписчиков
             </p>
-            <p>{{ singer.description }}</p>
+            </div>
+            <p class="text-sm mb-4">{{ singer.description }}</p>
 
-            <div class="flex gap-4 mt-2">
-              <button class="btn">Подписаться</button>
-              <button class="btn">Поделиться</button>
+            <div class="flex mt-2">
+              <button class="btn"  @click="toggleSubscription">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 11.63C11.94 11.62 11.87 11.62 11.81 11.63C10.43 11.58 9.32996 10.45 9.32996 9.05C9.32996 7.62 10.48 6.46997 11.91 6.46997C13.34 6.46997 14.49 7.63 14.49 9.05C14.48 10.45 13.38 11.59 12 11.63Z" stroke="#1c1c1c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9.08997 14.78C7.67997 15.72 7.67997 17.26 9.08997 18.2C10.69 19.27 13.31 19.27 14.91 18.2C16.32 17.26 16.32 15.72 14.91 14.78C13.32 13.72 10.69 13.72 9.08997 14.78Z" stroke="#1c1c1c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {{ isSubscribed ? 'Отписаться' : 'Подписаться' }}
+              </button>
             </div>
           </div>
         </div>
@@ -102,8 +109,52 @@ import AlbumCard from './AlbumCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 
+const isSubscribed = ref(false)
+
+async function checkIfSubscribed() {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/me', {
+      credentials: 'include'
+    })
+    if (!res.ok) return
+
+    const subsRes = await fetch(`http://localhost:5240/api/user/subscriptions`, {
+      credentials: 'include'
+    })
+
+    if (!subsRes.ok) return
+    const subscriptions = await subsRes.json()
+
+    isSubscribed.value = subscriptions.some(s => s.id === Number(route.params.id))
+  } catch (e) {
+    console.error('Ошибка при проверке подписки:', e)
+  }
+}
+
+async function toggleSubscription() {
+  try {
+    const res = await fetch(
+      `http://localhost:5240/api/singer/${isSubscribed.value ? 'unsubscribe' : 'subscribe'}/${route.params.id}`,
+      {
+        method: 'POST',
+        credentials: 'include'
+      }
+    )
+
+    if (!res.ok) {
+      const message = await res.text()
+      throw new Error(message)
+    }
+
+    isSubscribed.value = !isSubscribed.value
+    singer.value.followers += isSubscribed.value ? 1 : -1
+  } catch (err) {
+    alert(err.message || 'Ошибка при подписке/отписке')
+  }
+}
+
+
 const audioStore = useAudioStore()
-const { setQueue } = useAudioStore()
 
 function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
@@ -199,7 +250,7 @@ async function loadSingerData(id) {
 
     albums.value = albumsRes.map(a => ({
       id: a.id,
-      title: a.name,
+      name: a.name,
       year: new Date(a.releaseDate).getFullYear(),
       cover: a.coverUrl
       ? `/src/resources/albumCovers/${a.coverUrl}`
@@ -227,30 +278,34 @@ async function loadSingerData(id) {
 
 onMounted(() => {
   loadSingerData(route.params.id)
+  checkIfSubscribed()
 })
 
 watch(() => route.params.id, async (newId) => {
   await loadSingerData(newId)
+  checkIfSubscribed()
   scrollToTop()
 })
+
 </script>
 
 
 <style scoped>
 .cover-image {
-    width: 180px;
-    height: 180px;
-    border-radius: 99%;
-    object-fit: cover;
+  width: 180px;
+  height: 180px;
+  border-radius: 99%;
+  object-fit: cover;
 }
 .cover-album-image {
-    width: 150px;
-    height: 150px;
-    border-radius: 8%;
-    object-fit: cover;
+  width: 150px;
+  height: 150px;
+  border-radius: 8%;
+  object-fit: cover;
 }
+
 .btn {
-  width: 120px;
+  width: 190px;
   color: #1c1c1c;
   background: white;
   border: 1px solid #ccc;
@@ -259,9 +314,8 @@ watch(() => route.params.id, async (newId) => {
   font-size: 0.875rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   transition: 0.2s;
-}
+} 
 
 .btn:hover {
   background: #f5f5f5;

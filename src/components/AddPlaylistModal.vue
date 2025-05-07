@@ -66,10 +66,7 @@ async function submit() {
     if (!res.ok) throw new Error(await res.text())
 
     const result = await res.json()
-    toast.success('Плейлист создан', {
-        autoClose: 2000,
-        position: 'bottom-center',
-    })
+    
     emit('created', result)
     close()
     } catch (err) {

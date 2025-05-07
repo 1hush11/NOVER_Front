@@ -393,7 +393,7 @@ button:hover {
 }
 
 .absolute {
-    position: relative;
+    position: absolute;
 }
 
 .flex {

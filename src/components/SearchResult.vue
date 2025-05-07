@@ -161,7 +161,7 @@ const singers = computed(() =>
 const albums = computed(() =>
   results.value.albums?.map(a => ({
     id: a.id,
-    title: a.title,
+    name: a.name,
     year: a.releaseDate?.split('-')[0] || 'Неизвестно',
     singer: a.singer.name,
     singerCover: `/src/resources/singerCovers/${a.singer.photoUrl}`,

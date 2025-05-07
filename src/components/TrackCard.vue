@@ -60,11 +60,9 @@ import 'vue3-toastify/dist/index.css'
 
 import { useAudioStore } from '@/useAudioStore'
 
-const emit = defineEmits(['play', 'remove'])
+const isAuthorized = ref(false)
 
-function emitPlay() {
-  emit('play', { track, index })
-}
+const emit = defineEmits(['play', 'remove'])
 
 const props = defineProps({
   index: Number,
@@ -88,21 +86,41 @@ function goToTrackPage() {
 }
 
 onMounted(async () => {
-  try {
-    const res = await fetch('http://localhost:5240/api/user/library/tracks', {
-      credentials: 'include'
-    })
+  await fetchCurrentUser()
 
-    if (!res.ok) throw new Error(await res.text())
-
-    const data = await res.json()
-    inLibrary.value = data.some(t => t.id === props.track.id)
-  } catch (err) {
-    console.error('Ошибка проверки медиатеки:', err)
+  if (isAuthorized.value) {
+    await checkIfInLibrary()
   }
 })
 
+async function fetchCurrentUser() {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/me', {
+      credentials: 'include'
+    })
+
+    if (!res.ok) {
+      isAuthorized.value = false
+      return
+    }
+
+    const data = await res.json()
+    isAuthorized.value = true
+  } catch (err) {
+    console.error('Ошибка при получении текущего пользователя:', err)
+    isAuthorized.value = false
+  }
+}
+
 async function handleLibraryToggle() {
+  if (!isAuthorized.value) {
+    toast.info('Войдите в аккаунт, чтобы добавлять в медиатеку', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+    return
+  }
+
   if (inLibrary.value) {
     showRemoveConfirm()
   } else {
@@ -128,6 +146,22 @@ async function addToLibrary() {
       autoClose: 3000,
       position: 'bottom-center'
     })
+  }
+}
+
+async function checkIfInLibrary() {
+  try {
+    const res = await fetch('http://localhost:5240/api/user/library/tracks', {
+      credentials: 'include'
+    })
+
+    if (!res.ok) throw new Error(await res.text())
+
+    const tracks = await res.json()
+    inLibrary.value = tracks.some(t => t.id === props.track.id)
+  } catch (err) {
+    console.error('Ошибка проверки медиатеки:', err)
+    inLibrary.value = false
   }
 }
 
@@ -195,7 +229,6 @@ function showRemoveConfirm() {
     }
   )
 }
-
 
 const formattedIndex = computed(() => {
   const idx = props.index + 1
