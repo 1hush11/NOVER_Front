@@ -149,7 +149,7 @@ async function toggleSubscription() {
     isSubscribed.value = !isSubscribed.value
     singer.value.followers += isSubscribed.value ? 1 : -1
   } catch (err) {
-    alert(err.message || 'Ошибка при подписке/отписке')
+    console.error(err.message || 'Ошибка при подписке/отписке')
   }
 }
 
@@ -182,6 +182,7 @@ const scrollContainer = ref(null)
 
 const itemsPerPage = 4
 const currentPage = ref(0)
+
 const pagedAlbums = computed(() =>
   albums.value.slice(currentPage.value, currentPage.value + itemsPerPage)
 )
@@ -209,12 +210,10 @@ function prev() {
 function close() {
   router.back()
 }
+
 function goToSinger(singer) {
   router.push(`/singers/${singer.id}`)
   scrollToTop()
-}
-function goToTrackPage(track) {
-  router.push(`/track/${track.id}`)
 }
 function goToAlbum(album) {
   router.push(`/albums/${album.id}`)
@@ -253,8 +252,9 @@ async function loadSingerData(id) {
       name: a.name,
       year: new Date(a.releaseDate).getFullYear(),
       cover: a.coverUrl
-      ? `/src/resources/albumCovers/${a.coverUrl}`
-      : '/src/resources/trackCovers/empty.png'
+        ? `/src/resources/albumCovers/${a.coverUrl}`
+        : '/src/resources/trackCovers/empty.png',
+      tracks: a.tracks,
     }))
 
     similarArtists.value = similarRes.map(s => {

@@ -2,7 +2,7 @@
   <div class="flex shadow rounded-lg items-center gap-4 cursor-pointer hover:bg-gray-100 p-4 transition">
     <img :src="singer.image" alt="singer" class="cover-image" />
     <div class="w-1-3">
-      <h2 class="text-lg font-semibold">{{ singer.name }}</h2>
+      <h2 class="text-lg font-semibold hover:underline">{{ singer.name }}</h2>
       <p class="text-sm text-gray-600">
         {{ formatNumber(singer.subscribersCount) }} подписчиков · {{ singer.totalTracks }} треков
       </p>

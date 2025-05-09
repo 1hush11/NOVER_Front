@@ -72,7 +72,6 @@ function playNext() {
     }
 }
 
-
 function playPrev() {
     if (queueIndex.value > 0) {
         queueIndex.value--

@@ -57,7 +57,6 @@ import { audioRef } from '@/audioRef'
 import { useAudioStore } from '@/useAudioStore'
 
 const audioStore = useAudioStore()
-const { setQueue } = useAudioStore()
 
 function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
@@ -146,11 +145,8 @@ const prev = () => {
 }
 
   const router = useRouter()
-function goGenresPage() {
-  router.push('/genres')
-}
 
-function goToPlaylist(playlist) {
+  function goToPlaylist(playlist) {
   router.push(`/playlist/${playlist.id}`)
 }
 </script>

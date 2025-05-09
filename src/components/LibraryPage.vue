@@ -4,17 +4,17 @@
       <div class="flex items-start mb-6">
         <div>
             <img src="/src/resources/hearts/heart1.jpg" alt="Heart" class="cover-image mr-4" />
-            <button class="play-button" title="Воспроизвести / Пауза">
-            <span >
+            <button class="play-button" @click="togglePlay"  title="Воспроизвести / Пауза">
+            <span v-if="!isThisTrackPlaying">
               <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M8 5v14l11-7-11-7z" />
               </svg>
             </span>
-            <!-- <span>
+            <span v-else>
               <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
                 <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
               </svg>
-            </span> -->
+            </span>
           </button>
         </div>
         <div class="flex flex-col ml-2">
@@ -39,14 +39,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 
 const audioStore = useAudioStore()
-const { setQueue } = useAudioStore()
+
+const isThisTrackPlaying = computed(() => {
+  const current = audioStore.currentTrack.value
+  return tracks.value.some(t => t.id === current?.id) && audioStore.isPlaying.value
+})
+
+function togglePlay() {
+  const queue = audioStore.trackQueue.value
+  const sameQueue = queue.length === tracks.value.length &&
+    queue.every((t, i) => t.id === tracks.value[i]?.id)
+
+  if (sameQueue && audioStore.currentTrack.value) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(tracks.value, 0)
+    audioStore.playCurrent()
+  }
+}
 
 function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
@@ -70,11 +87,6 @@ const router = useRouter()
 const user = ref(null)
 
 const tracks = ref([])
-
-function goToTrackPage(track) {
-  router.push(`/track/${track.id}`)
-}
-
 
 onMounted(async () => {
   try {

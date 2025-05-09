@@ -28,9 +28,11 @@ const router = useRouter()
 const singers = ref([])
 
 const filteredSingers = computed(() =>
-  singers.value.filter(
-    (s) => s.subscribersCount !== undefined && s.totalPlayCount !== undefined
-  )
+  singers.value
+    .filter(
+      (s) => s.subscribersCount !== null && s.totalPlayCount !== null
+    )
+    .sort((a, b) => b.totalPlayCount - a.totalPlayCount)
 )
 
 const fetchAllSingersWithStats = async () => {

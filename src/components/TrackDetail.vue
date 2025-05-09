@@ -292,7 +292,6 @@ function shuffleTracks() {
 }
 
 function goToAlbum() {
-  console.warn(track.value.albumId)
   if (track.value.albumId) {
     router.push(`/albums/${track.value.albumId}`)
   } else {
