@@ -9,24 +9,24 @@
         </button>
         </div>
 
-        <h2 class="text-xl font-bold mb-4 text-center">Создание плейлиста</h2>
+        <h2 class="text-2lg font-bold mb-4 text-center">Создание плейлиста</h2>
 
         <form @submit.prevent="submit" class="flex flex-col gap-3">
-        <input v-model="form.title" type="text" placeholder="Название плейлиста" class="input-underline" required />
-        <textarea v-model="form.description" rows="2" placeholder="Описание (необязательно)" class="input-underline" />
-        <select v-model="form.type" class="input-underline">
-            <option value="public">Публичный</option>
-            <option value="private">Приватный</option>
-        </select>
-        <input v-model="form.coverUrl" type="text" placeholder="Название файла обложки" class="input-underline" />
-        
-        <button
-            type="submit"
-            class="bg-purple-600 border-none text-md rounded-lg hover:bg-purple-700 transition"
-            style="height: 40px;"
-        >
-            Создать
-        </button>
+            <input v-model="form.title" type="text" placeholder="Название плейлиста"  required />
+            <textarea v-model="form.description" rows="2" placeholder="Описание (необязательно)"/>
+            <select v-model="form.type">
+                <option value="public">Публичный</option>
+                <option value="private">Приватный</option>
+            </select>
+            <input v-model="form.coverUrl" type="text" placeholder="Название файла обложки"/>
+            
+            <button
+                type="submit"
+                class="bg-purple-600 border-none text-md rounded-lg hover:bg-purple-700 transition"
+                style="height: 40px;"
+            >
+                Создать
+            </button>
         </form>
     </div>
     </div>
@@ -95,19 +95,5 @@ async function submit() {
     padding: 1.5rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     position: relative;
-}
-.input-underline {
-    position: relative;
-    border: none;
-    border-bottom: 2px solid #ccc;
-    background-color: transparent;
-    padding: 6px 0;
-    font-size: 1rem;
-    width: 100%;
-    transition: border-color 0.3s;
-}
-.input-underline:focus {
-    outline: none;
-    border-bottom: 2px solid #e0c8fb;
 }
 </style>

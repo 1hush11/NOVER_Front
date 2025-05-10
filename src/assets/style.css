@@ -44,10 +44,12 @@ a {
     color: #333;
 }
 
+.text-xs {
+    font-size: 0.75rem;
+}
 .text-sm {
     font-size: 0.875rem;
 }
-
 .text-md {
     font-size: 1rem;
 }
@@ -55,9 +57,14 @@ a {
 .text-lg {
     font-size: 1.125rem;
 }
-
 .text-xl {
     font-size: 1.25rem;
+}
+.text-2lg {
+    font-size: 1.75rem;
+}
+.text-2xl {
+    font-size: 2.5rem;
 }
 
 .font-bold {
@@ -231,26 +238,6 @@ a {
 
 .justify-end {
     justify-content: end;
-}
-
-.text-xs {
-    font-size: 0.75rem;
-}
-
-.text-sm {
-    font-size: 0.875rem;
-}
-
-.text-md {
-    font-size: 1rem;
-}
-
-.text-lg {
-    font-size: 1.125rem;
-}
-
-.text-2xl {
-    font-size: 2.5rem;
 }
 
 .text-center {

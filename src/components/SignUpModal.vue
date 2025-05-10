@@ -89,7 +89,6 @@
 </template>
 
 
-
 <script setup>
 import { ref } from 'vue'
 
@@ -149,8 +148,8 @@ function handleRegister() {
 
   emit('register', user)
 }
-
 </script>
+
 
 <style scoped>
 .modal-overlay {

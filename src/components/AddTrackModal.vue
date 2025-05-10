@@ -8,7 +8,7 @@
         </svg>
         </button>
     </div>  
-      <h2 class="text-xl font-bold mb-4 text-center">Добавление трека</h2>
+      <h2 class="text-2lg font-bold mb-4 text-center">Добавление трека</h2>
 
       <form @submit.prevent="submitTrack" class="flex flex-col">
         <div class="bg-purple rounded-lg p-2 mb-4">
@@ -16,16 +16,14 @@
         </div>
 
         <label class="p-2 text-sm font-semibold text-gray-700">Название</label>
-        <input v-model="form.name" class="input" type="text" required />
+        <input v-model="form.name" type="text" required />
 
-        <label class="p-2 text-sm font-semibold text-gray-700">Длительность (секунды)</label>
-        <input v-model.number="form.duration" class="input" type="number" />
+        <label class="p-2 text-sm font-semibold text-gray-700">Загрузить аудиофайл</label>
+        <input @change="handleFileChange" type="file" accept="audio/*"/>
 
-        <label class="p-2 text-sm font-semibold text-gray-700">Ссылка на аудио</label>
-        <input v-model="form.audioUrl" class="input" type="text" />
 
         <label class="p-2 text-sm font-semibold text-gray-700">Обложка (URL)</label>
-        <input v-model="form.coverUrl" class="input" type="text" />
+        <input v-model="form.coverUrl" type="text" />
 
         <label class="p-2 text-sm font-semibold text-gray-700">Жанр</label>
         <select v-model.number="form.genreId" class="input">
@@ -35,38 +33,40 @@
           </option>
         </select>
 
-        <label class="p-2 text-sm font-semibold text-gray-700">Альбом</label>
-        <select v-model.number="form.albumId" class="input">
-          <option disabled value="">Выберите альбом</option>
-          <option v-for="album in albums" :key="album.id" :value="album.id">
-            {{ album.name }} — {{ album.singer.name }}
-          </option>
-        </select>
-
         <button type="submit" class="mt-4 bg-purple-600 text-md rounded-lg hover:bg-purple-700 transition border-none" style="height: 40px;">
           Добавить
         </button>
+
+        
       </form>
+      <button
+          @click="openAlbumModal"
+          class="bg-gray mt-4 text-gray-700 rounded-lg border-none"
+          style="width: 330px; height: 25px;"
+        >
+          Загрузить альбом
+        </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+
+
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
-const emit = defineEmits(['close', 'trackAdded'])
+const emit = defineEmits(['close', 'trackAdded', 'openAlbum'])
+
 
 const form = ref({
     name: '',
     singer: '',
-    duration: 0,
     audioUrl: '',
     coverUrl: '',
     releaseDate: '',
     genreId: null,
-    albumId: null,
     status: ''
 })
 
@@ -83,48 +83,55 @@ async function fetchData() {
     if (albumsRes.ok) albums.value = await albumsRes.json()
 }
 
-async function submitTrack() {
-    const payload = {
-        name: form.value.name,
-        albumId: form.value.albumId,
-        duration: form.value.duration,
-        genreId: form.value.genreId,
-        releaseDate: form.value.releaseDate || null,
-        playCount: 0,
-        audioUrl: form.value.audioUrl,
-        coverUrl: form.value.coverUrl,
-        status: form.value.status,
-        singers: []
-    }
+const selectedFile = ref(null)
 
-    try {
-        const res = await fetch('http://localhost:5240/api/user/add_track', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
+function handleFileChange(event) {
+  selectedFile.value = event.target.files[0]
+}
+
+async function submitTrack() {
+  if (!selectedFile.value) {
+    toast.error('Выберите аудиофайл', { position: toast.POSITION.BOTTOM_CENTER })
+    return
+  }
+
+  const data = new FormData()
+  data.append('file', selectedFile.value)
+  data.append('name', form.value.name)
+  data.append('genreId', form.value.genreId ?? '')
+  data.append('coverUrl', form.value.coverUrl)
+  data.append('status', form.value.status)
+
+  try {
+    const res = await fetch('http://localhost:5240/api/user/publish_track', {
+      method: 'POST',
+      body: data,
+      credentials: 'include'
     })
 
     if (!res.ok) {
-        const err = await res.text()
-        throw new Error(err)
+      const err = await res.text()
+      throw new Error(err)
     }
 
     const addedTrack = await res.json()
     toast.success('Трек успешно добавлен!', {
-        position: toast.POSITION.BOTTOM_CENTER,
-        autoClose: 3000,
+      position: toast.POSITION.BOTTOM_CENTER,
+      autoClose: 3000,
     })
-
     emit('trackAdded', addedTrack)
     emit('close')
-    } catch (error) {
-        toast.error(error.message || 'Ошибка при добавлении трека', {
-            position: toast.POSITION.BOTTOM_CENTER,
-            autoClose: 3000,
+  } catch (error) {
+    toast.error(error.message || 'Ошибка при добавлении трека', {
+      position: toast.POSITION.BOTTOM_CENTER,
+      autoClose: 3000,
     })
-    }
+  }
 }
+function openAlbumModal() {
+  emit('openAlbum')
+}
+
 
 function close() {
   emit('close')
@@ -151,11 +158,6 @@ onMounted(fetchData)
   border-radius: 1rem;
   position: relative;
   box-shadow: 0 0 20px rgba(0,0,0,0.2);
-}
-.input {
-  border: 1px solid #ccc;
-  padding: 0.5rem;
-  border-radius: 8px;
 }
 .btn {
   padding: 0.5rem;

@@ -60,6 +60,13 @@
       v-if="showAddTrackModal"
       @close="showAddTrackModal = false"
       @trackAdded="handleTrackAdded"
+      @openAlbum="openAlbumModalFromTrack"
+    />
+
+
+    <AddAlbumModal 
+      v-if="showAddAlbumModal"
+      @close="showAddAlbumModal = false" 
     />
 
     <div class="flex items-center border-2 border-purple-200 rounded-full text-purple-300 bg-white w-full">
@@ -80,12 +87,14 @@ import ProfileModal from './ProfileModal.vue'
 import LoginModal from './LoginModal.vue'
 import SignUpModal from './SignUpModal.vue'
 import AddTrackModal from './AddTrackModal.vue'
+import AddAlbumModal from './AddAlbumModal.vue'
 
 import { getUserAvatarPath } from '/src/utils/PathHelper.js'
 
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showAddTrackModal = ref(false)
+const showAddAlbumModal = ref(false)
 
 const user = ref(null)
 const loginError = ref('')
@@ -183,6 +192,14 @@ function openRegisterModal() {
 
 function closeRegisterModal() {
   showRegister.value = false
+}
+function handleTrackAdded(addedTrack) {
+  console.log('Трек добавлен:', addedTrack)
+}
+
+function openAlbumModalFromTrack() {
+  showAddTrackModal.value = false
+  showAddAlbumModal.value = true
 }
 
 async function loginUser({ login, password }) {

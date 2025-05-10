@@ -12,18 +12,18 @@
       <img :src="playlist.cover" class="cover-image" />
       <div class="flex flex-col gap-4">
         <h1 class="text-xl font-bold">Редактирование плейлиста</h1>
-        <input v-model="editable.name" type="text" class="input-underline"/>
-        <textarea v-model="editable.description" class="input-underline" rows="2" />
+        <input v-model="editable.name" type="text"/>
+        <textarea v-model="editable.description" rows="2" />
         <div class="flex items-center gap-2">
           <label class="text-sm font-medium mr-4">Тип:</label>
-          <select v-model="editable.type" class="input-underline">
+          <select v-model="editable.type">
             <option value="public">Публичный</option>
             <option value="private">Приватный</option>
           </select>
         </div>
         <div class="flex items-center gap-2">
           <label class="text-sm font-medium mr-4">Обложка:</label>
-          <input v-model="editable.coverUrl" type="text" class="input-underline" />
+          <input v-model="editable.coverUrl" type="text"/>
         </div>
         <button 
           @click="saveChanges" 
@@ -59,7 +59,7 @@
 
           <button class="bg-transparent border-none p-2" @click="removeTrack(index)">
             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
+              <path fill="#ff3939" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
             </svg>
           </button>
         </div>
@@ -106,7 +106,7 @@ onMounted(async () => {
     id: playlistData.id,
     name: playlistData.title,
     description: playlistData.description,
-    cover: getPlyalistCoverPath(playlistData.coverUrl),
+    cover: getPlaylistCoverPath(playlistData.coverUrl),
     type: playlistData.type,
     tracks: playlistData.tracks.map(t => ({
       id: t.id,

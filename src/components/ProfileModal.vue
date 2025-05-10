@@ -69,7 +69,7 @@
         <button
             type="button"
             @click="logout"
-            class="bg-gray mt-4 text-gray-700 rounded-lg border-none px-2 py-1"
+            class="bg-gray mt-4 text-gray-700 rounded-lg border-none"
             style="height: 30px;"
         >
             Выйти из аккаунта
