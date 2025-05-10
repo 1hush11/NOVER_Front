@@ -49,7 +49,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
 import PlaylistCard from '@/components/PlaylistCard.vue'
+
+import { getPlaylistCoverPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 const router = useRouter()
 
@@ -90,9 +93,7 @@ onMounted(async () => {
       description: p.description,
       user: p.creator || 'Неизвестно',
       isOwner: false,
-      cover: p.coverUrl
-        ? `/src/resources/playlistCovers/${p.coverUrl}`
-        : '/src/resources/trackCovers/empty.png'
+      cover: getPlaylistCoverPath(p.coverUrl),
     }));
 
     userPlaylists.value = savedData.map(p => ({
@@ -101,9 +102,7 @@ onMounted(async () => {
       description: p.description,
       user: p.creator || 'Неизвестно',
       isOwner: false,
-      cover: p.coverUrl
-        ? `/src/resources/playlistCovers/${p.coverUrl}`
-        : '/src/resources/trackCovers/empty.png'
+      cover: getPlaylistCoverPath(p.coverUrl),
     }));
 
     recPlaylists.value = recData.map(p => ({
@@ -112,9 +111,7 @@ onMounted(async () => {
       description: p.description,
       user: p.creator || 'Неизвестно',
       isOwner: false,
-      cover: p.coverUrl
-        ? `/src/resources/playlistCovers/${p.coverUrl}`
-        : '/src/resources/trackCovers/empty.png'
+      cover: getPlaylistCoverPath(p.coverUrl),
     }));
   } catch (e) {
     console.error('Ошибка получения плейлистов:', e);

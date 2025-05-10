@@ -34,6 +34,7 @@
             v-for="singer in singers"
             :key="'singer-' + singer.id"
             :singer="singer"
+            @click="goToSinger(singer)"
           />
         </div>
       </div>
@@ -52,6 +53,7 @@
             v-for="album in pagedAlbums"
             :key="'album-' + album.id"
             :album="album"
+            @click="goToAlbum(album)"
           />
           <button
             class="text-2xl text-bold bg-transparent border-none"
@@ -70,6 +72,7 @@
             v-for="playlist in playlists"
             :key="'playlist-' + playlist.id"
             :playlist="playlist"
+            @click="goToPlaylist(playlist)"
           />
         </div>
       </div>
@@ -83,7 +86,7 @@
             class="flex gap-4 p-2 shadow rounded-lg cursor-pointer transition"
             @click="goToGenre(genre)"
           >
-            <img :src="genre.coverUrl" alt="genre cover" class="cover-image p-2" />
+            <img :src="genre.cover" alt="genre cover" class="cover-image p-2" />
             <div>
               <h2 class="text-lg font-semibold text-gray-800 mt-4">{{ genre.name }}</h2>
               <p class="text-sm text-gray-600 mt-4">{{ genre.description }}</p>
@@ -106,8 +109,10 @@ import PlaylistCard from './PlaylistCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 
+import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath, getPlaylistCoverPath, getGenreCoverPath } from '/src/utils/PathHelper.js'
+
+
 const audioStore = useAudioStore()
-const { setQueue } = useAudioStore()
 
 function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
@@ -140,10 +145,8 @@ const tracks = computed(() =>
     id: t.id,
     title: t.title,
     singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
-    cover: t.coverUrl
-      ? '/src/resources/trackCovers/' + t.coverUrl
-      : '/src/resources/trackCovers/empty.png',
-    audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+    cover: getTrackCoverPath(t.coverUrl),
+    audio: getTrackAudioPath(t.audioUrl)
   }))
 )
 
@@ -151,7 +154,7 @@ const singers = computed(() =>
   results.value.singers?.map(s => ({
     id: s.id,
     name: s.name,
-    image: s.coverUrl ? `/src/resources/singerCovers/${s.coverUrl}` : '/src/icons/NOVER_icon.ico',
+    photo: getSingerPhotoPath(s.photoUrl),
     subscribersCount: s.subscribersCount,
     totalTracks: s.totalTracks,
     totalPlayCount: s.totalPlayCount
@@ -164,8 +167,7 @@ const albums = computed(() =>
     name: a.name,
     year: a.releaseDate?.split('-')[0] || 'Неизвестно',
     singer: a.singer.name,
-    singerCover: `/src/resources/singerCovers/${a.singer.photoUrl}`,
-    cover: a.coverUrl ? `/src/resources/albumCovers/${a.coverUrl}` : '/src/icons/NOVER_icon.ico'
+    cover: getAlbumCoverPath(a.coverUrl),
   }))
 )
 
@@ -174,7 +176,7 @@ const genres = computed(() =>
     id: g.id,
     name: g.name,
     description: g.description || '',
-    coverUrl: g.coverUrl ? `/src/resources/genreCovers/${g.coverUrl}` : '/src/icons/NOVER_icon.ico'
+    cover: getGenreCoverPath(g.coverUrl),
   }))
 )
 
@@ -183,7 +185,7 @@ const playlists = computed(() =>
     id: p.id,
     title: p.title,
     user: p.user || 'Неизвестный',
-    cover: p.coverUrl ? `/src/resources/playlistCovers/${p.coverUrl}` : '/src/icons/NOVER_icon.ico'
+    cover: getPlaylistCoverPath(p.coverUrl)
   }))
 )
 
@@ -195,6 +197,15 @@ const isEmpty = computed(() =>
   !results.value.genres.length
 )
 
+function goToSinger(singer) {
+  router.push(`/singers/${singer.id}`)
+}
+function goToAlbum(album) {
+  router.push(`/albums/${album.id}`)
+}
+function goToPlaylist(playlist) {
+  router.push(`/playlist/${playlist.id}`)
+}
 function goToGenre(genre) {
   router.push(`/genres/${genre.id}`)
 }

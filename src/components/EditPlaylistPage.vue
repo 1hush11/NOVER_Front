@@ -84,6 +84,8 @@ import { ref, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 
+import { getPlaylistCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
+
 const router = useRouter()
 const route = useRoute()
 
@@ -99,27 +101,26 @@ onMounted(async () => {
   const res = await fetch(`http://localhost:5240/api/playlist/playlists/${route.params.id}`, {
     credentials: 'include',
   })
-  const data = await res.json()
+  const playlistData = await res.json()
   playlist.value = {
-    id: data.id,
-    name: data.title,
-    description: data.description,
-    cover: `/src/resources/playlistCovers/${data.coverUrl}`,
-    type: data.type,
-    tracks: data.tracks.map(t => ({
+    id: playlistData.id,
+    name: playlistData.title,
+    description: playlistData.description,
+    cover: getPlyalistCoverPath(playlistData.coverUrl),
+    type: playlistData.type,
+    tracks: playlistData.tracks.map(t => ({
       id: t.id,
       title: t.name,
       singer: t.singers?.join(', ') || 'Неизвестный исполнитель',
-      cover: t.coverUrl
-        ? '/src/resources/trackCovers/' + t.coverUrl
-        : '/src/resources/trackCovers/empty.png',
+      cover: getTrackCoverPath(t.coverUrl),
+      audio: getTrackAudioPath(t.audioUrl)
     })),
   }
   editable.value = {
-    name: data.title,
-    description: data.description,
-    coverUrl: data.coverUrl,
-    type: data.type,
+    name: playlistData.title,
+    description: playlistData.description,
+    cover: playlistData.cover,
+    type: playlistData.type,
   }
 })
 

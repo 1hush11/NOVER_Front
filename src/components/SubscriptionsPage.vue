@@ -14,12 +14,12 @@
         </button>
         <div class="flex gap-4 min-w-max pb-2">
             <div
-            v-for="singer in pagedSingers"
-            :key="singer.id"
-            class="flex flex-col items-center min-w-[96px] cursor-pointer transition hover:scale-105"
-            @click="goToSinger(singer)"
+                v-for="singer in pagedSingers"
+                :key="singer.id"
+                class="flex flex-col items-center min-w-[96px] cursor-pointer transition hover:scale-105"
+                @click="goToSinger(singer)"
             >
-            <img :src="singer.image" :alt="singer.name" class="singer-avatar" />
+            <img :src="singer.photo" :alt="singer.name" class="singer-avatar" />
             <p class="mt-2 text-center text-sm text-gray-700 font-medium">{{ singer.name }}</p>
             </div>
         </div>
@@ -52,7 +52,7 @@
         <button
             class="text-2xl text-bold p-4 bg-transparent border-none"
             @click="nextAlbum"
-            :disabled="currentPageAlbum + itemsPerPage >= newAlbums.length"
+            :disabled="currentPageAlbum + itemsPerPageAlbum >= newAlbums.length"
         >
         ›
         </button>
@@ -78,9 +78,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+
 import AlbumCard from '@/components/AlbumCard.vue'
 import TrackCard from '@/components/TrackCard.vue'
+
 import { useAudioStore } from '@/useAudioStore'
+
+import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 const subscribedSingers = ref([])
 const newAlbums = ref([])
@@ -117,25 +121,27 @@ onMounted(async () => {
         credentials: 'include'
         })
         if (singerRes.ok) {
-        const singers = await singerRes.json()
-        subscribedSingers.value = singers.map(s => ({
-            ...s,
-            image: `/src/resources/singerCovers/${s.photoUrl}`
-        }))
+        const singersData = await singerRes.json()
+        subscribedSingers.value = singersData.map(s => ({
+            id: s.id,
+            name: s.name,
+            photo: getSingerPhotoPath(s.photoUrl),
+            followers: Number(s.subscribersCount) || 0,
+            description: s.description
+            }))
         }
 
         const albumsRes = await fetch('http://localhost:5240/api/user/subscribed_albums', {
         credentials: 'include'
         })
         if (albumsRes.ok) {
-        const albums = await albumsRes.json()
-        newAlbums.value = albums.map(a => ({
+        const albumsData = await albumsRes.json()
+        newAlbums.value = albumsData.map(a => ({
             id: a.id,
             name: a.name,
             year: new Date(a.releaseDate).getFullYear(),
-            cover: a.coverUrl
-            ? `/src/resources/albumCovers/${a.coverUrl}`
-            : '/src/resources/trackCovers/empty.png'
+            cover: getAlbumCoverPath(a.coverUrl),
+            tracks: a.tracks,
         }))
         }
 
@@ -149,10 +155,8 @@ onMounted(async () => {
             title: t.name,
             singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
             albumId: t.albumId,
-            cover: t.coverUrl
-                ? '/src/resources/trackCovers/' + t.coverUrl
-                : '/src/resources/trackCovers/empty.png',
-            audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+            cover: getTrackCoverPath(t.coverUrl),
+            audio: getTrackAudioPath(t.audioUrl),
         }))
         }
     } catch (err) {

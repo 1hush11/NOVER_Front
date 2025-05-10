@@ -8,7 +8,7 @@
         class="flex items-center" @click="goToSinger(singer)"
       >
         <img
-          :src="singer.cover"
+          :src="singer.photo"
           alt="singer"
           class="cover-image ml-2"
         />
@@ -47,6 +47,8 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { getSingerPhotoPath } from '/src/utils/PathHelper.js'
+
 const topSingers = ref([]);
 
 onMounted(async () => {
@@ -54,13 +56,13 @@ onMounted(async () => {
     const response = await fetch('http://localhost:5240/api/singer/top?count=6');
     
     if (response.ok) {
-      const data = await response.json();
-      topSingers.value = data.map(singer => ({
-        id: singer.id,
-        name: singer.name,
-        cover: "/src/resources/singerCovers/" + singer.photoUrl,
-        subscribersCount: singer.subscribersCount ?? 0,
-        viewCount: singer.viewCount ?? 0,
+      const singerData = await response.json();
+      topSingers.value = singerData.map(s => ({
+        id: s.id,
+        name: s.name,
+        photo: getSingerPhotoPath(s.photoUrl),
+        subscribersCount: s.subscribersCount ?? 0,
+        viewCount: s.viewCount ?? 0,
       }));
     } else {
       console.error('Ошибка загрузки данных о топ-исполнителях');

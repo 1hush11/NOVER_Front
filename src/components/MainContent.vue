@@ -53,8 +53,9 @@ import TrackCard from './TrackCard.vue'
 import PlaylistCard from './PlaylistCard.vue'
 
 import { audioRef } from '@/audioRef'
-
 import { useAudioStore } from '@/useAudioStore'
+
+import { getTrackCoverPath, getTrackAudioPath, getGenreCoverPath } from '/src/utils/PathHelper.js'
 
 const audioStore = useAudioStore()
 
@@ -81,37 +82,36 @@ onMounted(async () => {
   try {
     const topRes = await fetch('http://localhost:5240/api/track/top?count=10')
     if (!topRes.ok) throw new Error(await topRes.text())
-    const topTracks = await topRes.json()
 
-    popularTracks.value = topTracks.map(t => ({
+    const topTracksData = await topRes.json()
+
+    popularTracks.value = topTracksData.map(t => ({
       id: t.id,
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
       albumId: t.albumId,
-      cover: t.coverUrl
-        ? '/src/resources/trackCovers/' + t.coverUrl
-        : '/src/resources/trackCovers/empty.png',
-      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+      cover: getTrackCoverPath(t.coverUrl),
+      audio: getTrackAudioPath(t.audioUrl)
     }))
 
-    const genreRes = await fetch('http://localhost:5240/api/genre/genres', {
+    const genresRes = await fetch('http://localhost:5240/api/genre/genres', {
       credentials: 'include'
     })
-    if (!genreRes.ok) throw new Error('Не удалось загрузить жанры')
+    if (!genresRes.ok) throw new Error('Не удалось загрузить жанры')
 
-    const genresData = await genreRes.json()
+    const genresData = await genresRes.json()
 
-    const genrePlaylistPromises = genresData.slice(0, 6).map(async genre => {
-      const trackRes = await fetch(`http://localhost:5240/api/genre/genres/${genre.id}/tracks?count=5`)
+    const genrePlaylistPromises = genresData.slice(0, 6).map(async g => {
+      const trackRes = await fetch(`http://localhost:5240/api/genre/genres/${g.id}/tracks?count=5`)
       if (!trackRes.ok) return null
 
       const tracks = await trackRes.json()
 
       return {
-        id: `genre-${genre.id}`,
-        title: genre.name,
+        id: `genre-${g.id}`,
+        title: g.name,
         user: 'Жанровый плейлист',
-        cover: `/src/resources/genreCovers/${genre.coverUrl}`,
+        cover: getGenreCoverPath(g.coverUrl),
         tracks: tracks
       }
     })

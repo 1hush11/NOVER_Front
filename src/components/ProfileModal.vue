@@ -145,13 +145,13 @@ async function saveChanges() {
 
         if (!res.ok) throw new Error(await res.text())
 
-        const data = await res.json()
+        const updateUserData = await res.json()
         toast.success('Профиль обновлён успешно', {
             position: toast.POSITION.BOTTOM_CENTER,
             autoClose: 3000
         })
 
-        emit('updated', data)
+        emit('updated', updateUserData)
         close()
     } catch (err) {
         toast.error(err.message || 'Ошибка при обновлении профиля', {

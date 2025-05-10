@@ -85,14 +85,6 @@ function goToTrackPage() {
   router.push(`/track/${props.track.id}`)
 }
 
-onMounted(async () => {
-  await fetchCurrentUser()
-
-  if (isAuthorized.value) {
-    await checkIfInLibrary()
-  }
-})
-
 async function fetchCurrentUser() {
   try {
     const res = await fetch('http://localhost:5240/api/user/me', {
@@ -233,6 +225,14 @@ function showRemoveConfirm() {
 const formattedIndex = computed(() => {
   const idx = props.index + 1
   return idx < 10 ? `0${idx}` : idx.toString()
+})
+
+onMounted(async () => {
+  await fetchCurrentUser()
+
+  if (isAuthorized.value) {
+    await checkIfInLibrary()
+  }
 })
 </script>
 

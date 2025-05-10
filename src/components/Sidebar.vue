@@ -13,8 +13,7 @@
               :class="{ 'active-tab': route.path === ('/') }"
               @click="goHome"
             >
-              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-              viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve" width="30" height="30">
+              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve" width="30" height="30">
                 <polyline fill="none" stroke="#FFFFFF" opacity="0.25" stroke-width="2" stroke-miterlimit="10" points="3,17 16,4 29,17 "/>
                 <polyline fill="none" stroke="#FFFFFF" opacity="0.25" stroke-width="2" stroke-miterlimit="10" points="6,14 6,27 13,27 13,17 19,17 19,27 26,27 
                   26,14 "/>
@@ -148,7 +147,8 @@
             </svg>
           </button>
           <div class="song-box">
-            <img :src="currentTrack?.cover || '/src/resources/trackCovers/empty.png'" class="cover-image" />
+            <img :src="validCover(currentTrack?.cover)" class="cover-image" />
+
             <div class="song-info">
               <div class="title">{{ currentTrack?.title || 'Неизвестно' }}</div>
               <div class="singer">{{ currentTrack?.singer || 'Неизвестный' }}</div>
@@ -171,12 +171,21 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
+import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
+
 import { useAudioStore } from '@/useAudioStore'
+
 const audioStore = useAudioStore()
 
 const audio = ref(null)
 
 const { currentTrack, playNext, playPrev, currentTime, duration, setCurrentTime, setDuration } = useAudioStore()
+
+function validCover(cover) {
+  return cover && cover.trim() !== ''
+    ? cover
+    : 'http://localhost:5240/Resources/TrackCovers/empty.png'
+}
 
 const sliderValue = computed(() => (duration.value ? (currentTime.value / duration.value) * 100 : 0))
 
@@ -263,30 +272,6 @@ function goSubscriptionsPage() {
   router.push('/subscriptions')
 }
 
-async function fetchCurrentTrack() {
-  try {
-    const res = await fetch('http://localhost:5240/api/track/current', {
-      credentials: 'include'
-    })
-
-    if (res.ok) {
-      const data = await res.json()
-      currentTrack.value = {
-        id: data.id,
-        title: data.name || 'Неизвестно',
-        singer: data.singers?.join(', ') || 'Неизвестный',
-        albumId: t.albumId,
-        cover: t.coverUrl
-          ? '/src/resources/trackCovers/' + t.coverUrl
-          : '/src/resources/trackCovers/empty.png',
-        audioUrl: '/src/resources/trackAudio/' + data.audioUrl,
-        duration: data.duration
-      }
-    }
-  } catch (err) {
-    console.error('Ошибка загрузки текущего трека:', err)
-  }
-}
 onMounted(() => {
   audioStore.setAudioRef(audio.value)
 })

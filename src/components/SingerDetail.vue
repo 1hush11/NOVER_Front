@@ -11,7 +11,7 @@
       </div>
       <div class="flex-1 overflow-y-auto p-8 bg-white text-gray-900">
         <div id="profile" class="flex items-center gap-4 mb-6 mt-6-">
-          <img :src="singer.image" alt="Artist Image" class="cover-image" />
+          <img :src="singer.photo" alt="Artist Image" class="cover-image" />
           <div>
             <h1 class="text-2xl font-bold mb-2">{{ singer.name }}</h1>
             <div class="flex items-center">
@@ -87,7 +87,7 @@
           <div class="flex gap-4 overflow-x-auto">
             <div class="flex flex-col gap-3 mb-10" style="width: 800px;" >
               <SingerCard
-                v-for="similarArtist in similarArtists"
+                v-for="similarArtist in similarSingers"
                 :key="similarArtist.id"
                 :singer="similarArtist"
                 @click="goToSinger(similarArtist)"
@@ -108,6 +108,8 @@ import SingerCard from './SingerCard.vue'
 import AlbumCard from './AlbumCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
+
+import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 const isSubscribed = ref(false)
 
@@ -176,7 +178,7 @@ const router = useRouter()
 const singer = ref({})
 const topTracks = ref([])
 const albums = ref([])
-const similarArtists = ref([])
+const similarSingers = ref([])
 
 const scrollContainer = ref(null)
 
@@ -223,7 +225,7 @@ const API = 'http://localhost:5240/api/singer'
 
 async function loadSingerData(id) {
   try {
-    const [singerRes, tracksRes, albumsRes, similarRes] = await Promise.all([
+    const [singerData, tracksData, albumsData, similardata] = await Promise.all([
       fetch(`${API}/singers/${id}`).then(r => r.json()),
       fetch(`${API}/singers/${id}/top_tracks`).then(r => r.json()),
       fetch(`${API}/singers/${id}/albums`).then(r => r.json()),
@@ -231,44 +233,40 @@ async function loadSingerData(id) {
     ])
 
     singer.value = {
-      name: singerRes.singer.name,
-      image: `/src/resources/singerCovers/${singerRes.singer.photoUrl}`,
-      followers: Number(singerRes.singer.subscribersCount) || 0,
-      description: singerRes.singer.description
+      name: singerData.singer.name,
+      photo: getSingerPhotoPath(singerData.singer.photoUrl),
+      followers: Number(singerData.singer.subscribersCount) || 0,
+      description: singerData.singer.description,
     }
 
-    topTracks.value = tracksRes.map(t => ({
+    topTracks.value = tracksData.map(t => ({
       id: t.id,
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
-      cover: t.coverUrl
-        ? '/src/resources/trackCovers/' + t.coverUrl
-        : '/src/resources/trackCovers/empty.png',
-      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+      cover: getTrackCoverPath(t.coverUrl),
+      audio: getTrackAudioPath(t.audioUrl),
     }))
 
-    albums.value = albumsRes.map(a => ({
+    albums.value = albumsData.map(a => ({
       id: a.id,
       name: a.name,
       year: new Date(a.releaseDate).getFullYear(),
-      cover: a.coverUrl
-        ? `/src/resources/albumCovers/${a.coverUrl}`
-        : '/src/resources/trackCovers/empty.png',
+      cover: getAlbumCoverPath(a.coverUrl),
       tracks: a.tracks,
     }))
 
-    similarArtists.value = similarRes.map(s => {
+    similarSingers.value = similardata.map(s => {
       const totalTracks = s.tracks?.length ?? 0
       const totalPlayCount = s.tracks?.reduce((sum, t) => sum + (t.playCount ?? 0), 0) ?? 0
 
       return {
         id: s.id,
         name: s.name,
-        image: `/src/resources/singerCovers/${s.photoUrl}`,
+        photo: getSingerPhotoPath(s.photoUrl),
         subscribersCount: s.subscribersCount ?? 0,
         totalPlayCount,
         totalTracks,
-        description: s.description
+        description: s.description,
       }
     })
   } catch (err) {

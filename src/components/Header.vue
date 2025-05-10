@@ -10,7 +10,7 @@
     <template v-if="user?.username">
       <button class="flex items-center btn" @click="showProfile = true">
         <span>{{ user.username }}</span>
-        <img :src="`/src/resources/userCovers/${user.avatar || 'empty.png'}`" alt="User Avatar" class="cover-image" />
+        <img :src="user.avatar" alt="User Avatar" class="cover-image" />
       </button>
     </template>
     <template v-else>
@@ -81,6 +81,8 @@ import LoginModal from './LoginModal.vue'
 import SignUpModal from './SignUpModal.vue'
 import AddTrackModal from './AddTrackModal.vue'
 
+import { getUserAvatarPath } from '/src/utils/PathHelper.js'
+
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showAddTrackModal = ref(false)
@@ -97,11 +99,15 @@ async function fetchCurrentUser() {
     })
     if (!res.ok) throw new Error('Не авторизован')
 
-    user.value = await res.json()
+    const userData = await res.json()
+    userData.avatar = getUserAvatarPath(userData.avatar)
+
+    user.value = userData
   } catch (err) {
     user.value = null
   }
 }
+
 
 function showLogoutConfirm() {
   toast(
@@ -193,10 +199,13 @@ async function loginUser({ login, password }) {
       throw new Error(errorText)
     }
 
-    const data = await res.json()
-    user.value = data
+    const userData = await res.json()
+    userData.avatar = getUserAvatarPath(userData.avatar)
+
+    user.value = userData
+
     loginError.value = ''
-    toast.success(`Добро пожаловать, \n${data.username || 'пользователь'}!`, {
+    toast.success(`Добро пожаловать, \n${userData.username || 'пользователь'}!`, {
       autoClose: 3000,
       position: toast.POSITION.BOTTOM_CENTER
     })
@@ -223,8 +232,6 @@ async function registerUser(userData) {
       throw new Error(errText)
     }
 
-    const registeredUser = await res.json()
-
     toast.success('Регистрация прошла успешно!', {
       position: toast.POSITION.BOTTOM_CENTER,
       autoClose: 3000,
@@ -233,7 +240,7 @@ async function registerUser(userData) {
     await loginUser({
       login: userData.login,
       password: userData.passwordHash,
-      avatar: userData.avatar
+      avatar: getUserAvatarPath(userData.avatar)
     })
 
     closeRegisterModal()

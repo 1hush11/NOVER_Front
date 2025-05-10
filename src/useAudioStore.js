@@ -23,7 +23,6 @@ function setAudioRef(ref) {
     }
 }
 
-
 function setTrack(track) {
     currentTrack.value = track
 }
@@ -41,7 +40,7 @@ function playCurrent() {
     isPlaying.value = true
 
     if (audioRef.value) {
-        audioRef.value.src = track.audioUrl
+        audioRef.value.src = track.audio
         audioRef.value.play()
     }
 }
@@ -80,9 +79,19 @@ function playPrev() {
 }
 
 function setQueue(tracks, index) {
-    trackQueue.value = tracks
-    queueIndex.value = index
+    if (isShuffle.value) {
+        const firstTrack = tracks[index]
+        const remaining = tracks.slice()
+        remaining.splice(index, 1)
+        const shuffled = [firstTrack, ...shuffleArray(remaining)]
+        trackQueue.value = shuffled
+        queueIndex.value = 0
+    } else {
+        trackQueue.value = tracks
+        queueIndex.value = index
+    }
 }
+
 
 async function play(track) {
     if (currentTrack.value?.id === track.id) {
@@ -99,7 +108,7 @@ async function play(track) {
     isPlaying.value = true
 
     if (audioRef.value) {
-        audioRef.value.src = track.audioUrl
+        audioRef.value.src = track.audio
         audioRef.value.load()
         audioRef.value.oncanplay = async () => {
             try {

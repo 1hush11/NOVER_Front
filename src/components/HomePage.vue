@@ -15,6 +15,4 @@
 import Sidebar from '@/components/Sidebar.vue'
 import Header from '@/components/Header.vue'
 import RightPanel from '@/components/RightPanel.vue'
-import LoginModal from '@/components/LoginModal.vue'
-
 </script>

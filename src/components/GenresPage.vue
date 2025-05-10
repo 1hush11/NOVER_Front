@@ -13,7 +13,7 @@
           @click="goToGenre(genre)"
         >
 
-          <img :src="genre.coverUrl" alt="genre cover" class="cover-image"/>
+          <img :src="genre.cover" alt="genre cover" class="cover-image"/>
           <div v-if="!route.params.id" class="mt-2">
             <h2 class="text-lg font-semibold text-gray-800 mt-4">{{ genre.name }}</h2>
             <p class="text-sm text-gray-600 mt-4">{{ genre.description }}</p>
@@ -31,27 +31,26 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+
+import { getGenreCoverPath } from '/src/utils/PathHelper.js'
 
 const activeGenre = ref(null)
 const genres = ref([])
 
 const router = useRouter()
 const route = useRoute()
-const isCollapsed = computed(() => !!route.params.id)
 
 async function fetchGenres() {
   try {
     const res = await fetch('http://localhost:5240/api/genre/genres')
     if (!res.ok) throw new Error('Ошибка запроса')
-    const data = await res.json()
-    genres.value = data.map(genre => ({
-      id: genre.id,
-      name: genre.name,
-      description: genre.description,
-      coverUrl: genre.coverUrl 
-        ? `/src/resources/genreCovers/${genre.coverUrl}` 
-        : '/src/icons/NOVER_icon.ico'
+    const genresData = await res.json()
+    genres.value = genresData.map(g => ({
+      id: g.id,
+      name: g.name,
+      description: g.description,
+      cover: getGenreCoverPath(g.coverUrl)
     }))
   } catch (err) {
     console.error('Ошибка при получении жанров:', err)

@@ -171,10 +171,13 @@ import { ref, onMounted, computed, watch, h } from 'vue'
 
 import TrackCard from './TrackCard.vue'
 import AddPlaylistModal from './AddPlaylistModal.vue'
+
 import { useAudioStore } from '@/useAudioStore'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+
+import { getAlbumCoverPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 const isAuthorized = ref(false)
 
@@ -282,15 +285,12 @@ function toggleTrackPlay() {
 function prevTrack() {
   playPrev()
 }
-
 function nextTrack() {
   playNext()
 }
-
 function shuffleTracks() {
   toggleShuffle()
 }
-
 function goToAlbum() {
   if (track.value.albumId) {
     router.push(`/albums/${track.value.albumId}`)
@@ -298,7 +298,6 @@ function goToAlbum() {
     console.warn('albumId отсутствует')
   }
 }
-
 function close() {
   router.back()
 }
@@ -435,17 +434,17 @@ async function loadTrackAndSimilar(id) {
   try {
     const res = await fetch(`http://localhost:5240/api/track/tracks/${id}`)
     if (!res.ok) throw new Error(await res.text())
-    const data = await res.json()
+    const trackData = await res.json()
 
     track.value = {
-      id: data.id,
-      title: data.name,
-      singer: data.singers?.join(', ') || 'Неизвестный исполнитель',
-      albumId: data.albumId,
-      genre: data.genreName,
-      cover: '/src/resources/trackCovers/' + data.coverUrl,
-      duration: data.duration,
-      audioUrl: `/src/resources/trackAudio/${data.audioUrl}`
+      id: trackData.id,
+      title: trackData.name,
+      singer: trackData.singers?.join(', ') || 'Неизвестный исполнитель',
+      albumId: trackData.albumId,
+      genre: trackData.genreName,
+      cover: getTrackCoverPath(trackData.coverUrl),
+      audio: getTrackAudioPath(trackData.audioUrl),
+      duration: trackData.duration,
     }
 
     const similarRes = await fetch(`http://localhost:5240/api/track/similar/${id}?count=5`)
@@ -457,10 +456,8 @@ async function loadTrackAndSimilar(id) {
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
       albumId: t.albumId,
-      cover: t.coverUrl
-        ? '/src/resources/trackCovers/' + t.coverUrl
-        : '/src/resources/trackCovers/empty.png',
-      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+      cover: getTrackCoverPath(t.coverUrl),
+      audio: getTrackAudioPath(t.audioUrl),
     }))
   } catch (err) {
     console.error('Ошибка загрузки трека и похожих треков:', err)
@@ -560,8 +557,6 @@ async function handleNewPlaylist(newPlaylist) {
     })
   }
 }
-
-
 </script>
 
 
@@ -634,5 +629,4 @@ async function handleNewPlaylist(newPlaylist) {
   border-radius: 50%;
   cursor: pointer;
 }
-
 </style>

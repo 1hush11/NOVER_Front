@@ -24,6 +24,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SingerCard from '../components/SingerCard.vue'
 
+import { getSingerPhotoPath } from '/src/utils/PathHelper.js'
+
 const router = useRouter()
 const singers = ref([])
 
@@ -38,31 +40,28 @@ const filteredSingers = computed(() =>
 const fetchAllSingersWithStats = async () => {
   try {
     const baseUrl = 'http://localhost:5240/api/singer/singers'
-    const baseDetailUrl = 'http://localhost:5240/api/singer/singers/'
 
     const response = await fetch(baseUrl)
     const basicSingers = await response.json()
 
     const detailedSingers = await Promise.all(
       basicSingers.map(async (singer) => {
-        const detailRes = await fetch(`${baseDetailUrl}${singer.id}`)
-        const detailData = await detailRes.json()
+        const res = await fetch(`${baseUrl}/${singer.id}`)
+        const singerData = await res.json()
 
-        const totalTracks = detailData.tracks.length
-        const totalPlayCount = detailData.tracks.reduce(
+        const totalTracks = singerData.tracks.length
+        const totalPlayCount = singerData.tracks.reduce(
           (sum, track) => sum + (track.playCount ?? 0),
           0
         )
 
         return {
-          id: detailData.singer.id,
-          name: detailData.singer.name,
-          description: detailData.singer.description || 'Описание отсутствует',
-          image: detailData.singer.photoUrl
-            ? `/src/resources/singerCovers/${detailData.singer.photoUrl}`
-            : '/src/icons/NOVER_icon.ico',
-          subscribersCount: detailData.singer.subscribersCount ?? 0,
-          viewCount: detailData.singer.viewCount ?? 0,
+          id: singerData.singer.id,
+          name: singerData.singer.name,
+          description: singerData.singer.description || 'Описание отсутствует',
+          photo: getSingerPhotoPath(singerData.singer.photoUrl),
+          subscribersCount: singerData.singer.subscribersCount ?? 0,
+          viewCount: singerData.singer.viewCount ?? 0,
           totalTracks,
           totalPlayCount
         }

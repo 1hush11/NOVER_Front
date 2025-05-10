@@ -20,7 +20,7 @@
         @click="goToSinger(singer)"
       >
         <img
-          :src="singer.image"
+          :src="singer.photo"
           :alt="singer"
           class="cover-image"
         />
@@ -49,8 +49,9 @@ import TrackCard from './TrackCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 
+import { getGenreCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
+
 const audioStore = useAudioStore()
-const { setQueue } = useAudioStore()
 
 function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
@@ -101,24 +102,22 @@ async function fetchGenreDetails(id) {
 
     const genreRes = await fetch(`http://localhost:5240/api/genre/genres/${id}`)
     if (!genreRes.ok) throw new Error('Жанр не найден')
+    
     const genreData = await genreRes.json()
-
     genre.value = {
       name: genreData.name,
       description: genreData.description,
       singers: singers.map(s => ({
         id: s.id,
         name: s.name,
-        image: '/src/resources/singerCovers/' + s.photoUrl
+        photo: getSingerPhotoPath(s.photoUrl)
       })),
       tracks: tracks.map(t => ({
         id: t.id,
         title: t.name,
         singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
-        cover: t.coverUrl
-          ? '/src/resources/trackCovers/' + t.coverUrl
-          : '/src/resources/trackCovers/empty.png',
-        audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+        cover: getTrackCoverPath(t.coverUrl),
+        audio: getTrackAudioPath(t.audioUrl)
       }))
     }
   } catch (err) {

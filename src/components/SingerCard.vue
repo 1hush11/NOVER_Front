@@ -1,10 +1,10 @@
 <template>
   <div class="flex shadow rounded-lg items-center gap-4 cursor-pointer hover:bg-gray-100 p-4 transition">
-    <img :src="singer.image" alt="singer" class="cover-image" />
+    <img :src="singer.photo" alt="singer" class="cover-image" />
     <div class="w-1-3">
       <h2 class="text-lg font-semibold hover:underline">{{ singer.name }}</h2>
       <p class="text-sm text-gray-600">
-        {{ formatNumber(singer.subscribersCount) }} подписчиков · {{ singer.totalTracks }} треков
+        {{ formatNumber(singer.subscribersCount) }} подписчиков · {{ singer.totalTracks }} {{ pluralizeTrack(singer.totalTracks) }}
       </p>
       <p class="text-sm text-gray-600">
         Прослушиваний: {{ formatNumber(singer.totalPlayCount) }}
@@ -21,13 +21,6 @@ defineProps({
   }
 })
 
-import { useRouter } from 'vue-router'
-const router = useRouter()
-
-function goToSinger(singer) {
-  router.push(`/singers/${singer.id}`)
-}
-
 function formatNumber(value) {
   const num = Number(value)
   if (isNaN(num) || value === undefined || value === null) return '0'
@@ -37,6 +30,15 @@ function formatNumber(value) {
   return num.toString()
 }
 
+function pluralizeTrack(n) {
+  const num = Math.abs(n) % 100
+  const lastDigit = num % 10
+
+  if (num > 10 && num < 20) return 'треков'
+  if (lastDigit > 1 && lastDigit < 5) return 'трека'
+  if (lastDigit === 1) return 'трек'
+  return 'треков'
+}
 </script>
 
 <style scoped>

@@ -3,18 +3,18 @@
     <div class="flex-1 overflow-y-auto">
       <div class="flex items-start mb-6">
         <div>
-            <img src="/src/resources/hearts/heart1.jpg" alt="Heart" class="cover-image mr-4" />
+          <img :src="`http://localhost:5240/Resources/Hearts/${userHeart}`" alt="Heart" class="cover-image mr-4" />
             <button class="play-button" @click="togglePlay"  title="Воспроизвести / Пауза">
-            <span v-if="!isThisTrackPlaying">
-              <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
-                <path d="M8 5v14l11-7-11-7z" />
-              </svg>
-            </span>
-            <span v-else>
-              <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
-                <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
-              </svg>
-            </span>
+              <span v-if="!isThisTrackPlaying">
+                <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
+                  <path d="M8 5v14l11-7-11-7z" />
+                </svg>
+              </span>
+              <span v-else>
+                <svg width="40" height="40" viewBox="0 0 24 20" fill="currentColor">
+                  <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+                </svg>
+              </span>
           </button>
         </div>
         <div class="flex flex-col ml-2">
@@ -40,10 +40,11 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import TrackCard from './TrackCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
+
+import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 const audioStore = useAudioStore()
 
@@ -83,7 +84,6 @@ function handleTrackRemove(trackId) {
   tracks.value = tracks.value.filter(t => t.id !== trackId)
 }
 
-const router = useRouter()
 const user = ref(null)
 
 const tracks = ref([])
@@ -109,16 +109,14 @@ onMounted(async () => {
       return
     }
 
-    const data = await trackRes.json()
-    tracks.value = data.map(t => ({
+    const tracksData = await trackRes.json()
+    tracks.value = tracksData.map(t => ({
       id: t.id,
       title: t.name,
       singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
       albumId: t.albumId,
-      cover: t.coverUrl
-        ? '/src/resources/trackCovers/' + t.coverUrl
-        : '/src/resources/trackCovers/empty.png',
-      audioUrl: `/src/resources/trackAudio/${t.audioUrl}`
+      cover: getTrackCoverPath(t.coverUrl),
+      audio: getTrackAudioPath(t.audioUrl)
     }))
   } catch (error) {
     console.error('Ошибка при загрузке треков:', error)
@@ -134,6 +132,11 @@ function formatTrackCount(n) {
   if (lastDigit >= 2 && lastDigit <= 4) return `${n} трека`
   return `${n} треков`
 }
+const userHeart = computed(() => {
+  if (!user.value?.id) return 'heart1.jpg'
+  const number = (user.value.id - 1) % 5 + 1
+  return `heart${number}.jpg`
+})
 
 </script>
 
