@@ -12,8 +12,10 @@
       <img :src="playlist.cover" class="cover-image" />
       <div class="flex flex-col gap-4">
         <h1 class="text-xl font-bold">Редактирование плейлиста</h1>
+
         <input v-model="editable.name" type="text"/>
         <textarea v-model="editable.description" rows="2" />
+        
         <div class="flex items-center gap-2">
           <label class="text-sm font-medium mr-4">Тип:</label>
           <select v-model="editable.type">
@@ -21,10 +23,12 @@
             <option value="private">Приватный</option>
           </select>
         </div>
+        
         <div class="flex items-center gap-2">
           <label class="text-sm font-medium mr-4">Обложка:</label>
-          <input v-model="editable.coverUrl" type="text"/>
+          <input class="custom-file-input" type="file" @change="handleCoverChange" accept="image/*" />
         </div>
+        
         <button 
           @click="saveChanges" 
           class="bg-purple-600 text-md rounded-lg hover:bg-purple-700 transition border-none"
@@ -93,7 +97,6 @@ const playlist = ref(null)
 const editable = ref({
   name: '',
   description: '',
-  coverUrl: '',
   type: '',
 })
 
@@ -151,22 +154,31 @@ async function removeTrack(index) {
   }
 }
 
+const coverFile = ref(null)
+
+function handleCoverChange(event) {
+  const file = event.target.files[0]
+  if (file) coverFile.value = file
+}
 
 async function saveChanges() {
+  const playlistUpdateData = new FormData()
+  playlistUpdateData.append('title', editable.value.name)
+  playlistUpdateData.append('description', editable.value.description)
+  playlistUpdateData.append('type', editable.value.type)
+
+  if (coverFile.value) {
+    playlistUpdateData.append('coverUrl', coverFile.value)
+  }
+
   const res = await fetch(`http://localhost:5240/api/playlist/playlists/${route.params.id}/edit`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    method: 'POST', 
     credentials: 'include',
-    body: JSON.stringify({
-      title: editable.value.name,
-      description: editable.value.description,
-      coverUrl: editable.value.coverUrl,
-      type: editable.value.type,
-    }),
+    body: playlistUpdateData,
   })
 
   if (res.ok) {
-    toast.success('Плейлист обновлён!', { 
+    toast.success('Плейлист обновлён!', {
       autoClose: 2000,
       position: 'bottom-center',
     })

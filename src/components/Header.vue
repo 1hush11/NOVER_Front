@@ -59,7 +59,6 @@
     <AddTrackModal
       v-if="showAddTrackModal"
       @close="showAddTrackModal = false"
-      @trackAdded="handleTrackAdded"
       @openAlbum="openAlbumModalFromTrack"
     />
 
@@ -116,7 +115,6 @@ async function fetchCurrentUser() {
     user.value = null
   }
 }
-
 
 function showLogoutConfirm() {
   toast(
@@ -180,23 +178,16 @@ function openLoginModal() {
   showRegister.value = false
   showLogin.value = true
 }
-
 function closeLoginModal() {
   showLogin.value = false
 }
-
 function openRegisterModal() {
   showLogin.value = false
   showRegister.value = true
 }
-
 function closeRegisterModal() {
   showRegister.value = false
 }
-function handleTrackAdded(addedTrack) {
-  console.log('Трек добавлен:', addedTrack)
-}
-
 function openAlbumModalFromTrack() {
   showAddTrackModal.value = false
   showAddAlbumModal.value = true
@@ -240,8 +231,8 @@ async function registerUser(userData) {
   try {
     const res = await fetch('http://localhost:5240/api/user/signup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData)
+      body: userData,
+      credentials: 'include',
     })
 
     if (!res.ok) {
@@ -271,10 +262,10 @@ async function registerUser(userData) {
 }
 
 function handleProfileUpdate(updatedUser) {
+  updatedUser.avatar = getUserAvatarPath(updatedUser.avatar)
   user.value = updatedUser
   showProfile.value = false
 }
-
 </script>
 
 <style scoped>

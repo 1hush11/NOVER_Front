@@ -37,26 +37,13 @@
         />
 
         <label class="p-2 mt-2 text-sm font-semibold text-gray-700">Аватар</label>
-        <div class="flex items-center">
-            <input
-                type="file"
-                id="file"
-                @change="handleAvatarUpload"
-                class="hidden"
-            />
-            <label
-                for="file"
-                class="flex items-center cursor-pointer plr-2 border rounded-lg transition"
-                style="width: 400px; height: 35px;"
-            >  Загрузите аватар
-            </label>
-            <img
-                v-if="avatarBase64"
-                :src="avatarBase64"
-                alt="Аватар"
-                class="cover-image"
-            />
-        </div>
+        <input
+            class="custom-file-input mb-2"
+            type="file"
+            id="file"
+            @change="handleAvatarChange"
+            accept="image/*"
+        />
 
         <button
             type="submit"
@@ -88,36 +75,15 @@ const props = defineProps({
     isVisible: Boolean,
     user: Object
 })
-const emit = defineEmits(['close', 'logout', 'updated'])
 
-const avatarBase64 = ref(null)
+const emit = defineEmits(['close', 'logout', 'updated'])
 
 const form = ref({
     username: '',
     login: '',
     password: '',
-    avatar: ''
+    avatarFile: ''
 })
-
-watch(() => props.user, (user) => {
-    if (user) {
-        form.value.username = user.username
-        form.value.login = user.login
-        form.value.avatar = user.avatar
-    }
-}, { immediate: true })
-
-function handleAvatarUpload(event) {
-    const file = event.target.files[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = () => {
-        avatarBase64.value = reader.result
-        form.value.avatar = file.name
-    }
-    reader.readAsDataURL(file)
-}
 
 function close() {
     emit('close')
@@ -127,40 +93,56 @@ function logout() {
     emit('logout')
 }
 
+const avatarFile = ref(null)
+
+function handleAvatarChange(event) {
+    avatarFile.value = event.target.files[0]
+}
+
+
 async function saveChanges() {
     try {
-        const updatedUser = {
-            username: form.value.username,
-            login: form.value.login,
-            passwordHash: form.value.password,
-            avatar: form.value.avatar
+        const userUpdateData = new FormData()
+        userUpdateData.append('username', form.value.username)
+        userUpdateData.append('login', form.value.login)
+        if (form.value.password?.trim()) {
+            userUpdateData.append('passwordHash', form.value.password)
+        }
+        if (avatarFile.value) {
+            userUpdateData.append('avatarFile', avatarFile.value)
         }
 
         const res = await fetch('http://localhost:5240/api/user/update', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(updatedUser)
+            method: 'POST',
+            body: userUpdateData,
+            credentials: 'include'
         })
 
         if (!res.ok) throw new Error(await res.text())
 
-        const updateUserData = await res.json()
+        const updatedUser = await res.json()
         toast.success('Профиль обновлён успешно', {
             position: toast.POSITION.BOTTOM_CENTER,
             autoClose: 3000
         })
 
-        emit('updated', updateUserData)
+        emit('updated', updatedUser)
         close()
     } catch (err) {
         toast.error(err.message || 'Ошибка при обновлении профиля', {
-            position: toast.POSITION.BOTTOM_CENTER,
-            autoClose: 3000
+        position: toast.POSITION.BOTTOM_CENTER,
+        autoClose: 3000
         })
     }
 }
 
+watch(() => props.user, (user) => {
+    if (user) {
+        form.value.username = user.username
+        form.value.login = user.login
+        form.value.avatar = user.avatar
+    }
+}, { immediate: true })
 </script>
 
 <style scoped>

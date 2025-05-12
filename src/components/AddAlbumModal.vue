@@ -14,8 +14,9 @@
         <label class="p-2 text-sm font-semibold text-gray-700">Название альбома</label>
         <input v-model="form.albumName" type="text" required />
 
-        <label class="p-2 text-sm font-semibold text-gray-700">Обложка (URL)</label>
-        <input v-model="form.coverUrl" type="text" />
+        <label class="p-2 text-sm font-semibold text-gray-700">Обложка (файл)</label>
+        <input class="custom-file-input" type="file" @change="handleCoverUpload" accept="image/*" />
+
 
         <label class="p-2 text-sm font-semibold text-gray-700">Жанр</label>
         <select v-model.number="form.genreId">
@@ -29,7 +30,7 @@
             <input v-model="track.name" class="input" type="text" placeholder="Название трека" />
             <input
                 type="file"
-                class="custom-file-input"
+                class="custom-file-input ml-2"
                 @change="e => {
                     track.file = e.target.files[0]
                     track.fileName = e.target.files[0]?.name || ''
@@ -77,13 +78,20 @@ const genres = ref([])
 function addTrack() {
     form.value.tracks.push({ name: '', file: null, fileName: '' })
 }
-
 function removeTrack(index) {
     form.value.tracks.splice(index, 1)
 }
-
 function close() {
     emit('close')
+}
+
+const coverFile = ref(null)
+
+function handleCoverUpload(event) {
+    const file = event.target.files[0]
+    if (file) {
+        coverFile.value = file
+    }
 }
 
 async function fetchGenres() {
@@ -100,8 +108,10 @@ async function submitAlbum() {
     try {
         const albumData = new FormData()
         albumData.append('albumName', form.value.albumName)
-        albumData.append('coverUrl', form.value.coverUrl)
         albumData.append('genreId', form.value.genreId ?? '')
+        if (coverFile.value) {
+            albumData.append('coverFile', coverFile.value)
+        }
 
         const res = await fetch('http://localhost:5240/api/user/publish_album', {
         method: 'POST',

@@ -49,27 +49,14 @@
         />
 
         <label class="p-2 mt-2 text-sm font-semibold text-gray-700">Аватар</label>
-        <div class="flex items-center justify-center gap-4">
-          <input
-            type="file"
-            id="file"
-            @change="handleAvatarUpload"
-            class="hidden"
-          />
-          <label
-            for="file"
-            class="flex items-center cursor-pointer mb-6 plr-2 border rounded-lg transition"
-            style="width: 400px; height: 35px;"
-          >
-            Загрузите аватар
-          </label>
-          <img
-            v-if="avatarFileName"
-            :src="avatarBase64"
-            alt="Avatar Preview"
-            class="cover-image ml-2"
-          />
-        </div>
+        <input
+          class="custom-file-input mb-6"
+          type="file"
+          id="file"
+          @change="handleAvatarChange"
+          accept="image/*"
+        />
+
 
         <button
           type="submit"
@@ -96,22 +83,9 @@ const props = defineProps({
   isVisible: Boolean
 })
 
-const avatarBase64 = ref(null)
-const avatarFileName = ref(null)
-
-function handleAvatarUpload(event) {
-  const file = event.target.files[0]
-  if (!file) return
-
-  avatarFileName.value = file.name
-
-  const reader = new FileReader()
-
-  reader.onload = () => {
-    avatarBase64.value = reader.result
-  }
-
-  reader.readAsDataURL(file)
+const avatarFile = ref(null)
+function handleAvatarChange(event) {
+  avatarFile.value = event.target.files[0]
 }
 
 const emit = defineEmits(['close', 'switchToLogin', 'register'])
@@ -129,7 +103,7 @@ const form = ref({
   email: '',
   password: '',
   confirmPassword: '',
-  avatar: ''
+  avatarFile: ''
 })
 
 function handleRegister() {
@@ -138,16 +112,28 @@ function handleRegister() {
     return
   }
 
-  const user = {
-    username: form.value.username,
-    login: form.value.email,
-    passwordHash: form.value.password,
-    avatar: avatarFileName.value || null,
-    registrationDate: null
+  const userData = new FormData()
+  userData.append('username', form.value.username)
+  userData.append('login', form.value.email)
+  userData.append('passwordHash', form.value.password)
+
+  if (avatarFile.value) {
+    userData.append('avatarFile', avatarFile.value)
   }
 
-  emit('register', user)
+
+  fetch('http://localhost:5240/api/user/signup', {
+    method: 'POST',
+    body: userData,
+    credentials: 'include'
+  })
+  .then(res => res.ok ? res.json() : res.text().then(text => { throw new Error(text) }))
+  .then(
+    emit('register', userData)
+  )
+  .catch(err => console.error(err.message))
 }
+
 </script>
 
 

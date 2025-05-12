@@ -21,8 +21,8 @@
         <label class="p-2 text-sm font-semibold text-gray-700">Загрузить аудиофайл</label>
         <input class="custom-file-input" @change="handleFileChange" type="file" accept="audio/*"/>
 
-        <label class="p-2 text-sm font-semibold text-gray-700">Обложка (URL)</label>
-        <input v-model="form.coverUrl" type="text" />
+        <label class="p-2 text-sm font-semibold text-gray-700">Загрузить обложку</label>
+        <input class="custom-file-input" type="file" @change="handleCoverChange" accept="image/*" />
 
         <label class="p-2 text-sm font-semibold text-gray-700">Жанр</label>
         <select v-model.number="form.genreId" class="input">
@@ -70,7 +70,12 @@ const form = ref({
 })
 
 const genres = ref([])
-const albums = ref([])
+const albums = ref([])  
+const coverFile = ref(null)
+
+function handleCoverChange(event) {
+  coverFile.value = event.target.files[0]
+}
 
 async function fetchData() {
     const [genresRes, albumsRes] = await Promise.all([
@@ -94,17 +99,21 @@ async function submitTrack() {
     return
   }
 
-  const data = new FormData()
-  data.append('file', selectedFile.value)
-  data.append('name', form.value.name)
-  data.append('genreId', form.value.genreId ?? '')
-  data.append('coverUrl', form.value.coverUrl)
-  data.append('status', form.value.status)
+  const trackData = new FormData()
+  trackData.append('file', selectedFile.value)
+  trackData.append('name', form.value.name)
+  trackData.append('genreId', form.value.genreId ?? '')
+  trackData.append('status', form.value.status)
+  
+  if (coverFile.value) {
+    trackData.append('coverFile', coverFile.value)
+  }
+
 
   try {
     const res = await fetch('http://localhost:5240/api/user/publish_track', {
       method: 'POST',
-      body: data,
+      body: trackData,
       credentials: 'include'
     })
 

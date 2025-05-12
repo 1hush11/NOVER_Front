@@ -11,15 +11,22 @@
 
         <h2 class="text-2lg font-bold mb-4 text-center">Создание плейлиста</h2>
 
-        <form @submit.prevent="submit" class="flex flex-col gap-3">
-            <input v-model="form.title" type="text" placeholder="Название плейлиста"  required />
-            <textarea v-model="form.description" rows="2" placeholder="Описание (необязательно)"/>
-            <select v-model="form.type">
+        <form @submit.prevent="submit" class="flex flex-col">
+            <label for="name" class="p-2 mt-2 text-sm font-semibold text-gray-700">Название</label>
+            <input id="name" class="p-2 w-3-5 border-gray-300 rounded-lg" v-model="form.title" type="text" placeholder="Название плейлиста" required />
+            
+            <label for="description" class="p-2 mt-2 text-sm font-semibold text-gray-700">Описание</label>
+            <textarea id="description" class="p-2 w-3-5 border-gray-300 rounded-lg" v-model="form.description" rows="2" placeholder="Описание (необязательно)"/>
+            
+            <label for="type" class="p-2 mt-2 text-sm font-semibold text-gray-700">Тип плейлиста</label>
+            <select id="type"class="p-2 w-3-5 border-gray-300" v-model="form.type">
                 <option value="public">Публичный</option>
                 <option value="private">Приватный</option>
             </select>
-            <input v-model="form.coverUrl" type="text" placeholder="Название файла обложки"/>
-            
+
+            <label for="cover" class="p-2 mt-2 text-sm font-semibold text-gray-700">Обложка</label>
+            <input id="cover" class="custom-file-input mb-6" type="file" @change="handleFileChange" accept="image/*" />
+
             <button
                 type="submit"
                 class="bg-purple-600 border-none text-md rounded-lg hover:bg-purple-700 transition"
@@ -45,8 +52,12 @@ const form = ref({
     title: '',
     description: '',
     type: 'public',
-    coverUrl: 'empty.png'
 })
+const coverFile = ref(null)
+
+function handleFileChange(e) {
+    coverFile.value = e.target.files[0]
+}
 
 function close() {
     emit('close')
@@ -54,26 +65,30 @@ function close() {
 
 async function submit() {
     try {
-    const res = await fetch('http://localhost:5240/api/playlist/add_playlist', {
+        const playlistData = new FormData()
+        playlistData.append('title', form.value.title)
+        playlistData.append('description', form.value.description)
+        playlistData.append('type', form.value.type)
+        if (coverFile.value) {
+            playlistData.append('coverUrl', coverFile.value)
+        }
+
+        const res = await fetch('http://localhost:5240/api/playlist/add_playlist', {
         method: 'POST',
-        credentials: 'include',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(form.value)
-    })
+        body: playlistData,
+        credentials: 'include'
+        })
 
-    if (!res.ok) throw new Error(await res.text())
+        if (!res.ok) throw new Error(await res.text())
 
-    const result = await res.json()
-    
-    emit('created', result)
-    close()
+        const result = await res.json()
+        emit('created', result)
+        close()
     } catch (err) {
-    toast.error(err.message, {
+        toast.error(err.message, {
         autoClose: 2000,
         position: 'bottom-center',
-    })
+        })
     }
 }
 </script>
