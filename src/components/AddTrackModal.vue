@@ -19,8 +19,7 @@
         <input v-model="form.name" type="text" required />
 
         <label class="p-2 text-sm font-semibold text-gray-700">Загрузить аудиофайл</label>
-        <input @change="handleFileChange" type="file" accept="audio/*"/>
-
+        <input class="custom-file-input" @change="handleFileChange" type="file" accept="audio/*"/>
 
         <label class="p-2 text-sm font-semibold text-gray-700">Обложка (URL)</label>
         <input v-model="form.coverUrl" type="text" />

@@ -379,6 +379,12 @@ button:hover {
     color: #333;
 }
 
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .absolute {
     position: relative;
 }
@@ -498,6 +504,32 @@ input[type="checkbox"]:checked::after {
     font-size: 12px;
     top: 0;
     left: 3px;
+}
+
+.custom-file-input {
+    height: 35px;
+}
+.custom-file-input::-webkit-file-upload-button {
+    visibility: hidden;
+}
+.custom-file-input::before {
+    content: 'Выберите файл';
+    display: inline-block;
+    background: linear-gradient(top, #f9f9f9, #e3e3e3);
+    border-radius: 4px;
+    padding: 1px;
+    outline: none;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    cursor: pointer;
+    text-shadow: 1px 1px #fff;
+    font-size: 10pt;
+}
+.custom-file-input:hover::before {
+    border-color: black;
+}
+.custom-file-input:active::before {
+    background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9); 
 }
 
 li {

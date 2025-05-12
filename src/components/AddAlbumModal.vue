@@ -26,11 +26,23 @@
         <div class="mt-4">
             <h3 class="font-semibold mb-2">Треки альбома</h3>
             <div v-for="(track, index) in form.tracks" :key="index" class="flex gap-2 mb-2 items-center">
-            <input v-model="track.name" class="input w-1/2" type="text" placeholder="Название трека" />
-            <input type="file" @change="e => track.file = e.target.files[0]" accept="audio/*" />
-            <button type="button" class="bg-transparent border-none p-2" @click="removeTrack(index)"><svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <input v-model="track.name" class="input" type="text" placeholder="Название трека" />
+            <input
+                type="file"
+                class="custom-file-input"
+                @change="e => {
+                    track.file = e.target.files[0]
+                    track.fileName = e.target.files[0]?.name || ''
+                }"
+                accept="audio/*"
+            />
+            <span v-if="track.fileName" class="text-sm text-gray-600 truncate w-2">{{ track.fileName }}</span>
+
+            <button type="button" class="bg-transparent border-none p-2" @click="removeTrack(index)">
+                <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
-            </svg></button>
+                </svg>
+            </button>
             </div>
             <button type="button" class="bg-gray mt-4 text-gray-700 rounded-lg border-none" style="width: 430px; height: 25px;" @click="addTrack">
             + Добавить трек
@@ -63,7 +75,7 @@ const form = ref({
 const genres = ref([])
 
 function addTrack() {
-    form.value.tracks.push({ name: '', file: null })
+    form.value.tracks.push({ name: '', file: null, fileName: '' })
 }
 
 function removeTrack(index) {
@@ -81,41 +93,52 @@ async function fetchGenres() {
 
 async function submitAlbum() {
     if (form.value.tracks.length === 0) {
-    toast.error('Добавьте хотя бы один трек', { position: toast.POSITION.BOTTOM_CENTER })
-    return
+        toast.error('Добавьте хотя бы один трек', { position: toast.POSITION.BOTTOM_CENTER })
+        return
     }
-
-    const data = new FormData()
-    data.append('albumName', form.value.albumName)
-    data.append('releaseDate', form.value.releaseDate)
-    data.append('coverUrl', form.value.coverUrl)
-    data.append('genreId', form.value.genreId ?? '')
-
-    const trackMeta = []
-
-    form.value.tracks.forEach((track, index) => {
-    if (!track.file) return
-    data.append(`file_${index}`, track.file)
-    trackMeta.push({ name: track.name, fileKey: `file_${index}` })
-    })
-
-    data.append('tracksMeta', JSON.stringify(trackMeta))
 
     try {
-    const res = await fetch('http://localhost:5240/api/user/publish_album', {
+        const albumData = new FormData()
+        albumData.append('albumName', form.value.albumName)
+        albumData.append('coverUrl', form.value.coverUrl)
+        albumData.append('genreId', form.value.genreId ?? '')
+
+        const res = await fetch('http://localhost:5240/api/user/publish_album', {
         method: 'POST',
-        body: data,
+        body: albumData,
         credentials: 'include'
-    })
+        })
 
-    if (!res.ok) throw new Error(await res.text())
+        if (!res.ok) throw new Error(await res.text())
+        const { id: albumId } = await res.json()
 
-    toast.success('Альбом успешно добавлен!', { position: toast.POSITION.BOTTOM_CENTER })
-    emit('close')
+        for (const track of form.value.tracks) {
+        const trackForm = new FormData()
+        trackForm.append('name', track.name)
+        trackForm.append('albumId', albumId)
+        trackForm.append('genreId', form.value.genreId ?? '')
+        trackForm.append('coverUrl', form.value.coverUrl)
+        trackForm.append('file', track.file)
+
+        const trackRes = await fetch('http://localhost:5240/api/user/publish_track', {
+            method: 'POST',
+            body: trackForm,
+            credentials: 'include'
+        })
+
+        if (!trackRes.ok) {
+            const msg = await trackRes.text()
+            throw new Error(`Ошибка при загрузке трека "${track.name}": ${msg}`)
+        }
+        }
+
+        toast.success('Альбом и треки успешно опубликованы!', { position: toast.POSITION.BOTTOM_CENTER })
+        emit('close')
     } catch (error) {
-    toast.error(error.message || 'Ошибка при добавлении альбома', { position: toast.POSITION.BOTTOM_CENTER })
+        toast.error(error.message || 'Ошибка при добавлении альбома', { position: toast.POSITION.BOTTOM_CENTER })
     }
 }
+
 
 onMounted(fetchGenres)
 </script>
