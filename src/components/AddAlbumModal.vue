@@ -17,7 +17,6 @@
         <label class="p-2 text-sm font-semibold text-gray-700">Обложка (файл)</label>
         <input class="custom-file-input" type="file" @change="handleCoverUpload" accept="image/*" />
 
-
         <label class="p-2 text-sm font-semibold text-gray-700">Жанр</label>
         <select v-model.number="form.genreId">
             <option disabled value="">Выберите жанр</option>

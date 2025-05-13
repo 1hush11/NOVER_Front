@@ -171,8 +171,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
-
 import { useAudioStore } from '@/useAudioStore'
 
 const audioStore = useAudioStore()

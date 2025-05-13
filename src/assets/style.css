@@ -87,6 +87,10 @@ a {
     height: 100vh;
 } 
 
+.h-20 {
+    height: 50px;
+}
+
 .t-0 {
     top: 0;
 }
@@ -97,6 +101,10 @@ a {
 
 .w-full {
     width: 100%;
+}
+
+.w-20 {
+    width: 50px;
 }
 
 .w-2 {
