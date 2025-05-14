@@ -105,9 +105,11 @@ async function saveChanges() {
         const userUpdateData = new FormData()
         userUpdateData.append('username', form.value.username)
         userUpdateData.append('login', form.value.login)
+        
         if (form.value.password?.trim()) {
             userUpdateData.append('passwordHash', form.value.password)
         }
+        
         if (avatarFile.value) {
             userUpdateData.append('avatarFile', avatarFile.value)
         }

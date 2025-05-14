@@ -23,7 +23,7 @@
           </div>
 
           <p class="text-sm text-gray-500 mt-2">Дата выпуска: {{ album.releaseDate }}</p>
-          <p class="text-sm text-gray-500">Треков: {{ album.tracks.length }}</p>
+          <p class="text-sm text-gray-500" v-if="album.tracks.length">Треков: {{ album.tracks.length }}</p>
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@
       </button>
     </div>
 
-    <div class="p-8">
+    <div class="p-8" v-if="album.tracks.length">
       <h2 class="text-xl font-semibold mb-4">Треки альбома</h2>
       <TrackCard
         v-for="(track, index) in album.tracks"
@@ -73,9 +73,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, h, computed  } from 'vue'
+import { ref, onMounted, h, computed  } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import TrackCard from './TrackCard.vue'
+import TrackCard from '/src/components/Cards/TrackCard.vue'
 
 import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

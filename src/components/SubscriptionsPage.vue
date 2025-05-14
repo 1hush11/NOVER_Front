@@ -4,7 +4,7 @@
 
     <section class="mb-6">
     <h2 class="text-xl font-semibold mb-4">Исполнители</h2>
-    <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+    <div v-if="subscribedSingers.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
         <button
             @click="prevSinger" 
             :disabled="currentPageSinger === 0"
@@ -31,11 +31,12 @@
         ›
         </button>
     </div>
+    <p v-else class="text-gray-500">Вы ни на кого не подписаны.</p>
     </section>
 
     <section class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Новые альбомы</h2>
-    <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+    <h2 class="text-xl font-semibold mb-4">Новые альбомы</h2>
+    <div v-if="newAlbums.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
         <button
             @click="prevAlbum" 
             :disabled="currentPageAlbum === 0"
@@ -57,12 +58,13 @@
         ›
         </button>
     </div>
+    <p v-else class="text-gray-500">Новых альбомов пока нет.</p>
     </section>
 
 
     <section class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Новые популярные треки</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <h2 class="text-xl font-semibold mb-4">Новые популярные треки</h2>
+    <div v-if="popularTracks.length" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <TrackCard
             v-for="(track, index) in popularTracks"
             :key="track.id"
@@ -70,7 +72,8 @@
             :index="index"
             @play="() => handleTrackPlay({ track, index })"
         />
-        </div>
+    </div>
+    <p v-else class="text-gray-500">Новых треков тоже нет :( .</p>
     </section>
     </div>
 </template>
@@ -79,8 +82,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
-import AlbumCard from '@/components/AlbumCard.vue'
-import TrackCard from '@/components/TrackCard.vue'
+import AlbumCard from '@/components/Cards/AlbumCard.vue'
+import TrackCard from '@/components/Cards/TrackCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 

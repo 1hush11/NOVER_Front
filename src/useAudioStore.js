@@ -92,7 +92,6 @@ function setQueue(tracks, index) {
     }
 }
 
-
 async function play(track) {
     if (currentTrack.value?.id === track.id) {
         try {

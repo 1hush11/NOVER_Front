@@ -1,10 +1,8 @@
 <template>
   <div class="p-8">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Исполнители</h1>
-    </div>
+    <h1 class="text-2xl font-bold mb-6">Исполнители</h1>
 
-    <div class="flex flex-col gap-4">
+    <div v-if="filteredSingers.length" class="flex flex-col gap-4">
       <SingerCard
         v-for="singer in filteredSingers"
         :key="singer.id"
@@ -12,6 +10,7 @@
         @click="goToSinger(singer)"
       />
     </div>
+    <p v-else class="text-gray-500">Исполнители не найдены.</p>
 
     <div class="flex-1 overflow-y-auto">
       <router-view />
@@ -22,7 +21,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import SingerCard from '../components/SingerCard.vue'
+import SingerCard from './Cards/SingerCard.vue'
 
 import { getSingerPhotoPath } from '/src/utils/PathHelper.js'
 
@@ -41,34 +40,21 @@ const fetchAllSingersWithStats = async () => {
   try {
     const baseUrl = 'http://localhost:5240/api/singer/singers'
 
-    const response = await fetch(baseUrl)
-    const basicSingers = await response.json()
+    const res = await fetch(baseUrl)
 
-    const detailedSingers = await Promise.all(
-      basicSingers.map(async (singer) => {
-        const res = await fetch(`${baseUrl}/${singer.id}`)
-        const singerData = await res.json()
+    if (!res.ok) throw new Error('Ошибка запроса')
 
-        const totalTracks = singerData.tracks.length
-        const totalPlayCount = singerData.tracks.reduce(
-          (sum, track) => sum + (track.playCount ?? 0),
-          0
-        )
-
-        return {
-          id: singerData.singer.id,
-          name: singerData.singer.name,
-          description: singerData.singer.description || 'Описание отсутствует',
-          photo: getSingerPhotoPath(singerData.singer.photoUrl),
-          subscribersCount: singerData.singer.subscribersCount ?? 0,
-          viewCount: singerData.singer.viewCount ?? 0,
-          totalTracks,
-          totalPlayCount
-        }
-      })
-    )
-
-    singers.value = detailedSingers
+    const singersData = await res.json()
+    singers.value = singersData.map(s=> ({
+      id: s.id,
+      name: s.name,
+      photo: getSingerPhotoPath(s.photoUrl),
+      description: s.description,
+      viewCount: s.viewCount,
+      subscribersCount: s.subscribersCount,
+      totalPlayCount: s.totalPlayCount,
+      totalTracks: s.totalTracks,
+    }))
   } catch (err) {
     console.error('Ошибка при получении данных исполнителей:', err)
   }

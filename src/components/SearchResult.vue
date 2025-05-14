@@ -41,7 +41,7 @@
 
       <div v-if="albums.length">
         <h3 class="text-lg font-semibold mb-4">Альбомы</h3>
-        <div class="flex justify-center overflow-hidden transition rounded-lg p-2 mb-4">
+        <div class="flex justify-center overflow-hidden transition rounded-lg mb-4">
           <button
             class="text-2xl text-bold bg-transparent border-none"
             @click="prev"
@@ -58,7 +58,7 @@
           <button
             class="text-2xl text-bold bg-transparent border-none"
             @click="next"
-            :disabled="currentPage + itemsPerPage >= pagedAlbums.length"
+            :disabled="(currentPage + 1) * itemsPerPage >= albums.length"
           >
             ›
           </button>
@@ -102,10 +102,10 @@
 import { onMounted, ref, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import TrackCard from './TrackCard.vue'
-import SingerCard from './SingerCard.vue'
-import AlbumCard from './AlbumCard.vue'
-import PlaylistCard from './PlaylistCard.vue'
+import TrackCard from './Cards/TrackCard.vue'
+import SingerCard from './Cards/SingerCard.vue'
+import AlbumCard from './Cards/AlbumCard.vue'
+import PlaylistCard from './Cards/PlaylistCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 

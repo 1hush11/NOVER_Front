@@ -1,7 +1,7 @@
 <template>
   <div class="p-4 cursor-pointer">
     <h2 class="text-xl font-bold mb-2">ТОП исполнители</h2>
-    <div class="flex flex-col gap-4 transition rounded-lg shadow">
+    <div v-if="topSingers.length" class="flex flex-col gap-4 transition rounded-lg shadow">
       <div
         v-for="(singer, index) in topSingers"
         :key="index"
@@ -40,6 +40,7 @@
         </div>
       </div>
     </div>
+    <p v-else class="text-gray-500 italic">Нет данных об исполнителях</p>
   </div>
 </template>
 

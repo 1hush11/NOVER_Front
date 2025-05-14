@@ -45,7 +45,7 @@
 
         <div class="mb-6 mt-4">
           <h2 class="text-xl font-semibold mb-2">Популярные треки</h2>
-          <div>
+          <div v-if="topTracks.length">
             <TrackCard
               v-for="(track, index) in topTracks"
               :key="track.id"
@@ -54,11 +54,12 @@
               @play="() => handleTrackPlay({ track, index })"
             />
           </div>
+          <p v-else class="text-gray-500">Нет треков</p>
         </div>
 
         <div class="mb-6">
           <h2 class="text-xl font-semibold mb-2">Альбомы</h2>
-          <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+          <div v-if="albums.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
           <button 
             class="text-2xl text-bold p-4 bg-transparent border-none" 
             @click="prev" 
@@ -80,11 +81,12 @@
               ›
             </button>
           </div>
+          <p v-else class="text-gray-500">Нет альбомов</p>
         </div>
 
         <div class="mb-6">
-          <h2 class="text-xl font-semibold mb-4">Похожие исполнители</h2>
-          <div class="flex gap-4 overflow-x-auto">
+          <h2 class="text-xl font-semibold mb-2">Похожие исполнители</h2>
+          <div v-if="similarSingers.length" class="flex gap-4 overflow-x-auto">
             <div class="flex flex-col gap-3 mb-10" style="width: 800px;" >
               <SingerCard
                 v-for="similarArtist in similarSingers"
@@ -94,6 +96,7 @@
               />
             </div>
           </div>
+          <p v-else class="text-gray-500">Нет похожих исполнителей</p>
         </div>
       </div>
     </div>
@@ -103,9 +106,9 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import TrackCard from './TrackCard.vue'
-import SingerCard from './SingerCard.vue'
-import AlbumCard from './AlbumCard.vue'
+import TrackCard from '/src/components/Cards/TrackCard.vue'
+import SingerCard from '/src/components/Cards/SingerCard.vue'
+import AlbumCard from '/src/components/Cards/AlbumCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 
@@ -290,8 +293,8 @@ watch(() => route.params.id, async (newId) => {
 
 <style scoped>
 .cover-image {
-  width: 180px;
-  height: 180px;
+  width: 220px;
+  height: 220px;
   border-radius: 99%;
   object-fit: cover;
 }
@@ -304,6 +307,7 @@ watch(() => route.params.id, async (newId) => {
 
 .btn {
   width: 190px;
+  height: 40px;
   color: #1c1c1c;
   background: white;
   border: 1px solid #ccc;

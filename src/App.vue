@@ -20,7 +20,7 @@ import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import MainContent from './components/MainContent.vue'
 import RightPanel from './components/RightPanel.vue'
-import TrackDetail from './components/TrackDetail.vue'
+import TrackDetail from './components/Details/TrackDetail.vue'
 </script>
 
 <link rel="stylesheet" href="./assets/style.css">

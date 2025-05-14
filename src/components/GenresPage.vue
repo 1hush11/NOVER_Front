@@ -45,6 +45,7 @@ async function fetchGenres() {
   try {
     const res = await fetch('http://localhost:5240/api/genre/genres')
     if (!res.ok) throw new Error('Ошибка запроса')
+    
     const genresData = await res.json()
     genres.value = genresData.map(g => ({
       id: g.id,

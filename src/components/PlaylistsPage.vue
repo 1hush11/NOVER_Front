@@ -4,7 +4,7 @@
     <h1 class="text-2xl font-bold mb-6">Плейлисты</h1>
     <section>
       <h2 class="text-xl font-semibold mb-2">Плейлисты других пользователей</h2>
-      <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+      <div v-if="otherPlaylists.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
         <button @click="prevOtherPlaylists" :disabled="currentOtherPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
         <PlaylistCard
           v-for="(playlist, index) in pagedOtherPlaylists"
@@ -14,11 +14,12 @@
         />
         <button @click="nextOtherPlaylists" :disabled="currentOtherPage + pagedOtherPlaylists.length >= otherPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
       </div>
+      <p v-else class="text-gray-500 italic">Нет плейлистов от других пользователей.</p>
     </section>
 
     <section>
       <h2 class="text-xl font-semibold mb-2">Рекомендованные</h2>
-      <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+      <div v-if="recPlaylists.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
         <button @click="prevRecPlaylist" :disabled="currentRecPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
         <PlaylistCard
           v-for="(playlist, index) in pagedRecPlaylists"
@@ -28,11 +29,12 @@
         />
         <button @click="nextRecPlaylist" :disabled="currentRecPage + pagedRecPlaylists.length >= recPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
       </div>
+      <p v-else class="text-gray-500 italic">Нет рекомендаций на данный момент.</p>
     </section>
 
     <section>
       <h2 class="text-xl font-semibold mb-2">Мои плейлисты</h2>
-      <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+      <div v-if="userPlaylists.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
         <button @click="prevUserPlaylist" :disabled="currentUserPage === 0" class="text-2xl text-bold bg-transparent border-none">‹</button>
         <PlaylistCard
           v-for="(playlist, index) in pagedUserPlaylists"
@@ -42,6 +44,7 @@
         />
         <button @click="nextUserPlaylist" :disabled="currentUserPage + pagedUserPlaylists.length >= userPlaylists.length" class="text-2xl text-bold bg-transparent border-none">›</button>
       </div>
+      <p v-else class="text-gray-500 italic">Вы ещё не добавили ни одного плейлиста.</p>
     </section>
   </div>
 </template>
@@ -50,7 +53,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-import PlaylistCard from '@/components/PlaylistCard.vue'
+import PlaylistCard from '@/components/Cards/PlaylistCard.vue'
 
 import { getPlaylistCoverPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

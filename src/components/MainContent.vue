@@ -4,7 +4,7 @@
       <div>
         <section>
           <h2 class="text-xl font-bold mb-4">Плейлисты популярных жанров</h2>
-          <div class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
+          <div v-if="pagedGenres.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
             <button 
               class="text-2xl text-bold p-4 bg-transparent border-none" 
               @click="prev" 
@@ -26,13 +26,14 @@
               ›
             </button>
           </div>
+          <p v-else class="text-gray-500 italic">Нет доступных плейлистов по жанрам.</p>
         </section>
         </div>
       </div>
 
     <div class="mt-6">
       <button class="text-xl font-bold mb-4 bg-transparent border-none">Популярно сейчас</button>
-      <div class="flex flex-col gap-3">
+      <div v-if="popularTracks.length" class="flex flex-col gap-3">
         <TrackCard
           v-for="(track, index) in popularTracks"
           :key="track.id"
@@ -41,6 +42,7 @@
           @play="() => handleTrackPlay({ track, index })"
         />
       </div>
+      <p v-else class="text-gray-500 italic">Популярные треки не найдены.</p>
     </div>
   </div>
 </template>
@@ -49,13 +51,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import TrackCard from './TrackCard.vue'
-import PlaylistCard from './PlaylistCard.vue'
+import TrackCard from './Cards/TrackCard.vue'
+import PlaylistCard from './Cards/PlaylistCard.vue'
 
 import { audioRef } from '@/audioRef'
 import { useAudioStore } from '@/useAudioStore'
 
-import { getTrackCoverPath, getTrackAudioPath, getGenreCoverPath } from '/src/utils/PathHelper.js'
+import { getTrackCoverPath, getTrackAudioPath, getPlaylistCoverPath } from '/src/utils/PathHelper.js'
 
 const audioStore = useAudioStore()
 
@@ -84,47 +86,42 @@ onMounted(async () => {
     if (!topRes.ok) throw new Error(await topRes.text())
 
     const topTracksData = await topRes.json()
-
     popularTracks.value = topTracksData.map(t => ({
       id: t.id,
       title: t.name,
-      singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      singer: t.singers?.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
       albumId: t.albumId,
       cover: getTrackCoverPath(t.coverUrl),
       audio: getTrackAudioPath(t.audioUrl)
     }))
 
-    const genresRes = await fetch('http://localhost:5240/api/genre/genres', {
-      credentials: 'include'
-    })
-    if (!genresRes.ok) throw new Error('Не удалось загрузить жанры')
+    const playlistsRes = await fetch('http://localhost:5240/api/review/playlists_by_genre')
+    if (!playlistsRes.ok) throw new Error(await playlistsRes.text())
 
-    const genresData = await genresRes.json()
+    const playlistsData = await playlistsRes.json()
 
-    const genrePlaylistPromises = genresData.slice(0, 6).map(async g => {
-      const trackRes = await fetch(`http://localhost:5240/api/genre/genres/${g.id}/tracks?count=5`)
-      if (!trackRes.ok) return null
-
-      const tracks = await trackRes.json()
-
-      return {
-        id: `genre-${g.id}`,
-        title: g.name,
-        user: 'Жанровый плейлист',
-        cover: getGenreCoverPath(g.coverUrl),
-        tracks: tracks
-      }
-    })
-
-    const genreResults = await Promise.all(genrePlaylistPromises)
-    genrePlaylists.value = genreResults.filter(Boolean)
+    genrePlaylists.value = playlistsData
+      .filter(p => Array.isArray(p.tracks) && p.tracks.length > 0)
+      .map((p, index) => ({
+        id: p.id,
+        title: p.title,
+        user: p.user,
+        cover: getPlaylistCoverPath(p.coverUrl),
+        tracks: p.tracks.map(t => ({
+          id: t.id,
+          title: t.name,
+          singer: t.singers?.join(', ') || 'Неизвестный исполнитель',
+          cover: getTrackCoverPath(t.coverUrl),
+          audio: getTrackAudioPath(t.audioUrl)
+        }))
+      }))
 
     audioRef.value = audioElement.value
-
   } catch (err) {
     console.error('Ошибка при загрузке данных:', err.message)
   }
 })
+
 
 const itemsPerPage = 3
 const currentPage = ref(0)

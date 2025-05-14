@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-3 mb-10 cursor-pointer">
+      <div v-if="tracks.length" class="flex flex-col gap-3 mb-10 cursor-pointer">
         <TrackCard 
           v-for="(track, index) in tracks" 
           :key="track.id" 
@@ -34,13 +34,14 @@
           @remove="handleTrackRemove"
         />
       </div>
+      <p v-else class="text-gray-500 italic mt-4">Нет треков в медиатеке.</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import TrackCard from './TrackCard.vue'
+import TrackCard from './Cards/TrackCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 

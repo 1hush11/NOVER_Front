@@ -82,11 +82,11 @@ import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
 import SearchBar from './SearchBar.vue'
-import ProfileModal from './ProfileModal.vue'
-import LoginModal from './LoginModal.vue'
-import SignUpModal from './SignUpModal.vue'
-import AddTrackModal from './AddTrackModal.vue'
-import AddAlbumModal from './AddAlbumModal.vue'
+import ProfileModal from './Modals/ProfileModal.vue'
+import LoginModal from './Modals/LoginModal.vue'
+import SignUpModal from './Modals/SignUpModal.vue'
+import AddTrackModal from './Modals/AddTrackModal.vue'
+import AddAlbumModal from './Modals/AddAlbumModal.vue'
 
 import { getUserAvatarPath } from '/src/utils/PathHelper.js'
 

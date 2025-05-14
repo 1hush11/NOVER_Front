@@ -163,7 +163,7 @@
 
     <div class="mt-6">
       <h2 class="text-xl font-bold mb-4">Похожие треки</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div v-if="similarTracks.length" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <TrackCard 
           v-for="(track, index) in similarTracks" 
           :key="index" 
@@ -172,19 +172,20 @@
           @play="() => handleTrackPlay({ track, index })"
         />
       </div>
+      <p v-else class="text-gray-500 italic">Похожие треки не найдены.</p>
     </div>
     <div class="mt-6 cursor-pointer">
       <h2 class="text-xl font-bold mb-4">Отзывы</h2>
-      <div v-if="reviews.length === 0" class="text-gray-500 italic">Пока нет отзывов.</div>
-      <ul v-else class="no-list-style ml-2">
+      <ul v-if="reviews.length" class="no-list-style ml-2">
         <li v-for="(review, index) in reviews" :key="index" class="flex flex-col gap-3">
           <div class="flex justify-between items-center">
             <span class="font-semibold">{{ review.user }}</span>
             <span class="text-sm text-gray-600">{{ new Date(review.createdAt).toLocaleString() }}</span>
           </div>
-          <div class="border-b">{{ review.comment }}</div>
+          <div class="border-b mb-4">{{ review.comment }}</div>
         </li>
       </ul>
+      <p v-else class="text-gray-500 italic">Отзывов пока нет.</p>
     </div>
   </div>
 </template>
@@ -193,9 +194,9 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, onMounted, computed, watch, h } from 'vue'
 
-import TrackCard from './TrackCard.vue'
-import AddPlaylistModal from './AddPlaylistModal.vue'
-import AddReviewModal from './AddReviewModal.vue'
+import TrackCard from '/src/components/Cards/TrackCard.vue'
+import AddPlaylistModal from '/src/components/Modals/AddPlaylistModal.vue'
+import AddReviewModal from '/src/components/Modals/AddReviewModal.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 

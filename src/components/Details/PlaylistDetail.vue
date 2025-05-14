@@ -1,6 +1,6 @@
 <template>
-  <div class="flex-1 overflow-y-auto p-8">
-    <div v-if="playlist" class="flex justify-end">
+  <div  v-if="playlist" class="flex-1 overflow-y-auto p-8">
+    <div class="flex justify-end">
       <button class="bg-transparent border-none mt-4 mr-4" @click="close">
         <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
@@ -51,7 +51,7 @@
       </button>
       <button class="btn" title="В избранное" @click="togglePlaylistLibrary">
         <svg
-          :fill="playlist?.inLibrary ? '#a896bc' : '#1c1c1'"
+          :fill="playlist.inLibrary ? '#a896bc' : '#1c1c1'"
           width="24"
           height="24"
           viewBox="-2 -4 24 24"
@@ -74,7 +74,7 @@
       </button>
     </div>
 
-    <div v-if="playlist" class="mt-8">
+    <div v-if="playlist.tracks.length" class="mt-8">
       <h2 class="text-xl font-semibold mb-4">Треки</h2>
       <div class="flex flex-col gap-3">
         <TrackCard 
@@ -86,14 +86,15 @@
         />
       </div>
     </div>
+    <p v-else class="text-gray-500">Нет треков в плейлисте</p>
   </div>
 </template>
 
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import TrackCard from './TrackCard.vue'
+import TrackCard from '/src/components/Cards/TrackCard.vue'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
@@ -165,6 +166,71 @@ function close() {
   router.back()
 }
 
+async function removeFromLibrary() {
+  const id = route.params.id
+  const res = await fetch(`http://localhost:5240/api/user/library/remove_playlist/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  })
+  if (!res.ok) {
+    toast.error(await res.text(), { position: 'bottom-center' })
+    return
+  }
+  playlist.value.inLibrary = false
+  toast.success('Плейлист удалён из медиатеки', { position: 'bottom-center' })
+}
+
+async function togglePlaylistLibrary() {
+  if (playlist.value.inLibrary) {
+    showRemoveConfirm()
+  } else {
+    const id = route.params.id
+    const res = await fetch(`http://localhost:5240/api/user/library/add_playlist/${id}`, {
+      method: 'POST',
+      credentials: 'include'
+    })
+    if (!res.ok) {
+      toast.error(await res.text(), { position: 'bottom-center' })
+      return
+    }
+    playlist.value.inLibrary = true
+    toast.success('Плейлист добавлен в медиатеку', { position: 'bottom-center' })
+  }
+}
+
+
+function showRemoveConfirm() {
+  toast(
+    ({ closeToast }) => {
+      setTimeout(closeToast, 5000)
+
+      return h('div', { class: 'flex flex-col gap-2' }, [
+        h('div', { class: 'flex justify-center gap-4 items-center' }, [
+          h('span', 'Удалить плейлист из медиатеки?'),
+          h('button', {
+            class: 'bg-gray text-gray-700 rounded-lg border-none px-2 py-1',
+            style: 'width: 60px; height: 30px;',
+            onClick: closeToast
+          }, 'Нет'),
+          h('button', {
+            class: 'bg-purple text-gray-700 rounded-lg border-none px-2 py-1',
+            style: 'width: 60px; height: 30px;',
+            onClick: async () => {
+              await removeFromLibrary()
+              closeToast()
+            }
+          }, 'Да')
+        ])
+      ])
+    },
+    {
+      position: 'bottom-center',
+      autoClose: false,
+      closeOnClick: false
+    }
+  )
+}
+
 onMounted(async () => {
   try {
     const response = await fetch(`http://localhost:5240/api/playlist/playlists/${route.params.id}`, {
@@ -184,6 +250,7 @@ onMounted(async () => {
       description: playlistData.description,
       owner: playlistData.creator || 'Неизвестно',
       isOwner: playlistData.isOwner,
+      inLibrary: playlistData.inLibrary || false,
       createdAt: new Date(playlistData.createdAt).toLocaleDateString(),
       savedCount: playlistData.savedCount || 0,
       cover: getPlaylistCoverPath(playlistData.coverUrl),
@@ -200,33 +267,6 @@ onMounted(async () => {
   }
 })
 
-async function togglePlaylistLibrary() {
-  const id = route.params.id
-
-  if (playlist.value.inLibrary) {
-    const res = await fetch(`http://localhost:5240/api/user/library/remove_playlist/${id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-    if (!res.ok) {
-      toast.error(await res.text(), { position: 'bottom-center' })
-      return
-    }
-    playlist.value.inLibrary = false
-    toast.success('Плейлист удалён из медиатеки', { position: 'bottom-center' })
-  } else {
-    const res = await fetch(`http://localhost:5240/api/user/library/add_playlist/${id}`, {
-      method: 'POST',
-      credentials: 'include'
-    })
-    if (!res.ok) {
-      toast.error(await res.text(), { position: 'bottom-center' })
-      return
-    }
-    playlist.value.inLibrary = true
-    toast.success('Плейлист добавлен в медиатеку', { position: 'bottom-center' })
-  }
-}
 </script>
 
 

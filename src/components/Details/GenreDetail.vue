@@ -12,7 +12,7 @@
     <p class="text-gray-700 mb-6">{{ genre.description }}</p>
 
     <h2 class="text-xl font-semibold mb-4">Лучшие исполнители</h2>
-    <div class="flex gap-4 mb-6">
+    <div class="flex gap-4 mb-6" v-if="genre.singers.length">
       <div
         v-for="singer in genre.singers"
         :key="singer"
@@ -27,9 +27,10 @@
         <p class="mt-2 text-center text-sm text-gray-700 font-medium mt-2">{{ singer.name }}</p>
       </div>
     </div>
+    <p v-else class="text-gray-500 mb-6">Нет исполнителей</p>
 
-    <h2 class="text-xl font-semibold mb-2">Популярные треки</h2>
-    <div class="flex flex-col gap-3">
+    <h2 class="text-xl font-semibold mb-4">Популярные треки</h2>
+    <div class="flex flex-col gap-3 mb-6" v-if="genre.tracks.length">
       <TrackCard
           v-for="(track, index) in genre.tracks"
           :key="index"
@@ -38,6 +39,7 @@
           @play="() => handleTrackPlay({ track, index })"
         />
     </div>
+    <p v-else class="text-gray-500">Нет треков</p>
   </div>
 </template>
 
@@ -45,7 +47,7 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
 import { ref, watchEffect } from 'vue'
-import TrackCard from './TrackCard.vue'
+import TrackCard from '/src/components/Cards/TrackCard.vue'
 
 import { useAudioStore } from '@/useAudioStore'
 
