@@ -95,6 +95,7 @@ onMounted(async () => {
       title: p.title,
       description: p.description,
       user: p.creator || 'Неизвестно',
+      userRole: p.creatorRole,
       isOwner: false,
       cover: getPlaylistCoverPath(p.coverUrl),
     }));
@@ -104,6 +105,7 @@ onMounted(async () => {
       title: p.title,
       description: p.description,
       user: p.creator || 'Неизвестно',
+      userRole: p.creatorRole,
       isOwner: false,
       cover: getPlaylistCoverPath(p.coverUrl),
     }));
@@ -113,6 +115,7 @@ onMounted(async () => {
       title: p.title,
       description: p.description,
       user: p.creator || 'Неизвестно',
+      userRole: p.creatorRole,
       isOwner: false,
       cover: getPlaylistCoverPath(p.coverUrl),
     }));

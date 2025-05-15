@@ -1,0 +1,161 @@
+<template>
+    <div>
+    <h2 class="text-xl font-semibold mb-4">Ожидающие одобрения треки</h2>
+
+    <div v-if="tracks.length" class="space-y-4">
+        <div v-for="track in tracks" :key="track.id">
+        <div class="flex items-center justify-between rounded-lg shadow p-4 w-full">
+        <div class="flex items-center gap-4">
+        <p class="text-sm text-gray-600 text-center">{{ formattedIndex }}</p>
+
+        <img :src="track.cover" :alt="track.title + ' cover'" class="cover-image" />
+
+        <div>
+            <p
+            class="text-md font-semibold hover:underline cursor-pointer"
+            @click.stop="goToTrackPage"
+            >
+            {{ track.title }}
+            </p>
+            <p class="text-sm text-gray-600 cursor-default">{{ track.singer }}</p>
+        </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+
+        <div class="flex gap-4">
+            <button @click="approveTrack(track.id)" class="btn bg-green text-green">
+            Одобрить
+            </button>
+            <button @click="rejectTrack(track.id)" class="btn bg-red text-red">
+            Отклонить
+            </button>
+        </div>
+        </div>
+    </div>
+            <!-- <div>
+            <p class="font-bold">{{ track.name }}</p>
+            <p class="text-sm text-gray-600">Исполнитель: {{ track.singers?.join(', ') || '—' }}</p>
+            <audio :src="getTrackAudio(track.audioUrl)" controls class="mt-2 w-full"></audio>
+        </div>
+        <div class="flex gap-2">
+            <button @click="approveTrack(track.id)" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded">
+            Одобрить
+            </button>
+            <button @click="rejectTrack(track.id)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded">
+            Отклонить
+            </button>
+        </div> -->
+        </div>
+    </div>
+
+    <p v-else class="text-gray-500 italic">Нет треков, ожидающих модерации.</p>
+    </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { toast } from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
+
+import { getTrackCoverPath, getTrackAudioPath, getPlaylistCoverPath } from '/src/utils/PathHelper.js'
+
+const tracks = ref([])
+
+function getTrackAudio(url) {
+    return getTrackAudioPath(url)
+}
+
+async function fetchPendingTracks() {
+    try {
+    const res = await fetch('http://localhost:5240/api/admin/tracks/pending', {
+        credentials: 'include'
+    })
+    if (!res.ok) throw new Error('Не удалось загрузить треки')
+
+    const trackData = await res.json()
+    tracks.value = trackData.map(t => ({
+        id: t.id,
+        title: t.name,
+        singer: t.singers?.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+        albumId: t.albumId,
+        cover: getTrackCoverPath(t.coverUrl),
+        audio: getTrackAudioPath(t.audioUrl)
+    }))
+    } catch (err) {
+    toast.error(err.message || 'Ошибка при загрузке треков')
+    }
+}
+
+async function approveTrack(id) {
+    try {
+    const res = await fetch(`http://localhost:5240/api/admin/track/approve/${id}`, {
+        method: 'POST',
+        credentials: 'include'
+    })
+    if (!res.ok) throw new Error(await res.text())
+
+    toast.success('Трек одобрен', {
+        position: 'bottom-center',
+    })
+    tracks.value = tracks.value.filter(t => t.id !== id)
+    } catch (err) {
+    toast.error(err.message || 'Ошибка при одобрении')
+    }
+}
+
+async function rejectTrack(id) {
+    try {
+    const res = await fetch(`http://localhost:5240/api/admin/track/reject/${id}`, {
+        method: 'POST',
+        credentials: 'include'
+    })
+    if (!res.ok) throw new Error(await res.text())
+
+    toast.success('Трек отклонён', {
+        position: 'bottom-center',
+    })
+    tracks.value = tracks.value.filter(t => t.id !== id)
+    } catch (err) {
+    toast.error(err.message || 'Ошибка при отклонении')
+    }
+}
+
+onMounted(fetchPendingTracks)
+</script>
+
+
+<style scoped>
+.btn {
+    width: 100px;
+    border: 1px solid #ccc;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: 0.2s;
+}
+
+.cover-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 25%;
+    object-fit: cover;
+}
+
+.play-button {
+    width: 45px;
+    height: 45px;
+    background: #e0c8fb;
+    color: #1c1c1c;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+</style>

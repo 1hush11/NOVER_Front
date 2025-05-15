@@ -293,6 +293,12 @@ button:hover {
 .text-red-500 {
     color: #e0c8fb;
 }
+.text-red {
+    color: #842029;
+}
+.text-green {
+    color: #0f5132;
+}
 
 .bg-transparent {
     background: transparent;
@@ -354,7 +360,12 @@ button:hover {
 .bg-purple-200 {
     background-color: #e0c8fb;
 }
-
+.bg-red {
+    background-color: #f8d7da;
+}
+.bg-green {
+    background-color: #d1e7dd;
+}
 .p-4 {
     padding: 1rem;
 }

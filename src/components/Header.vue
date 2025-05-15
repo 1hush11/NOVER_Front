@@ -7,7 +7,7 @@
     </div>
 
     <div class="flex items-center gap-4">
-    <template v-if="user?.username">
+    <template v-if="user">
       <button class="flex items-center btn" @click="showProfile = true">
         <span>{{ user.username }}</span>
         <img :src="user.avatar" alt="User Avatar" class="cover-image" />
@@ -44,7 +44,7 @@
       @register="registerUser"
     />
 
-    <button @click="showAddTrackModal = true" class="user-button" title="Добавить трек">
+    <button v-if="user && user.role === 'Пользователь'" @click="showAddTrackModal = true" class="user-button" title="Добавить трек">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 32" class="w-6 h-6 fill-white" width="35px" height="35px" fill="#9483a8" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
         <path d="M33.958,12.988C33.531,6.376,28.933,0,20.5,0C12.787,0,6.839,5.733,6.524,13.384
           C2.304,14.697,0,19.213,0,22.5C0,27.561,4.206,32,9,32h6.5c0.276,0,0.5-0.224,0.5-0.5S15.776,31,15.5,31H9
@@ -62,13 +62,13 @@
       @openAlbum="openAlbumModalFromTrack"
     />
 
-
     <AddAlbumModal 
       v-if="showAddAlbumModal"
       @close="showAddAlbumModal = false" 
     />
 
-    <div class="flex items-center border-2 border-purple-200 rounded-full text-purple-300 bg-white w-full">
+
+    <div v-if="user && user.role === 'Пользователь'" class="flex items-center border-2 border-purple-200 rounded-full text-purple-300 bg-white w-full">
       <SearchBar class="ml-2" />
     </div>
     </div>
@@ -77,9 +77,10 @@
 
 
 <script setup>
-import { ref, onMounted, h } from 'vue'
+import { ref, onMounted, h, computed } from 'vue'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+import { useRouter } from 'vue-router'
 
 import SearchBar from './SearchBar.vue'
 import ProfileModal from './Modals/ProfileModal.vue'
@@ -90,31 +91,22 @@ import AddAlbumModal from './Modals/AddAlbumModal.vue'
 
 import { getUserAvatarPath } from '/src/utils/PathHelper.js'
 
+
+import { useUserStore } from '@/userStore'
+
+const userStore = useUserStore()
+const user = computed(() => userStore.user)
+
+const router = useRouter()
+
 const showLogin = ref(false)
 const showRegister = ref(false)
 const showAddTrackModal = ref(false)
 const showAddAlbumModal = ref(false)
 
-const user = ref(null)
 const loginError = ref('')
 
 const showProfile = ref(false)
-
-async function fetchCurrentUser() {
-  try {
-    const res = await fetch('http://localhost:5240/api/user/me', {
-      credentials: 'include'
-    })
-    if (!res.ok) throw new Error('Не авторизован')
-
-    const userData = await res.json()
-    userData.avatar = getUserAvatarPath(userData.avatar)
-
-    user.value = userData
-  } catch (err) {
-    user.value = null
-  }
-}
 
 function showLogoutConfirm() {
   toast(
@@ -148,30 +140,8 @@ function showLogoutConfirm() {
   )
 }
 
-async function logoutUser() {
-  try {
-    await fetch('http://localhost:5240/api/user/logout', {
-      method: 'POST',
-      credentials: 'include'
-    })
-
-    user.value = null
-    showProfile.value = false
-
-    toast.success('Вы вышли из аккаунта', {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 3000,
-    })
-  } catch (err) {
-    toast.error('Ошибка при выходе', {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 3000,
-    })
-  }
-}
-
 onMounted(() => {
-  fetchCurrentUser()
+  userStore.fetchCurrentUser()
 })
 
 function openLoginModal() {
@@ -195,70 +165,41 @@ function openAlbumModalFromTrack() {
 
 async function loginUser({ login, password }) {
   try {
-    const res = await fetch('http://localhost:5240/api/user/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ login, password })
+    await userStore.login(login, password)
+    toast.success(`Добро пожаловать, ${user.value.username}!`, {
+      position: 'bottom-center',
     })
 
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(errorText)
+    if (userStore.user.role === 'Администратор') {
+      router.push('/admin')
     }
 
-    const userData = await res.json()
-    userData.avatar = getUserAvatarPath(userData.avatar)
-
-    user.value = userData
-
-    loginError.value = ''
-    toast.success(`Добро пожаловать, \n${userData.username || 'пользователь'}!`, {
-      autoClose: 3000,
-      position: toast.POSITION.BOTTOM_CENTER
-    })
     closeLoginModal()
   } catch (err) {
-    loginError.value = err.message || 'Ошибка входа'
-    toast.error(loginError.value, {
-      autoClose: 3000,
-      position: toast.POSITION.BOTTOM_CENTER,
+    toast.error(err.message || 'Ошибка входа', {
+      position: 'bottom-center',
     })
   }
 }
 
-async function registerUser(userData) {
+
+async function registerUser(formData) {
   try {
-    const res = await fetch('http://localhost:5240/api/user/signup', {
-      method: 'POST',
-      body: userData,
-      credentials: 'include',
+    await userStore.register(formData)
+    toast.success('Успешная регистрация', {
+      position: 'bottom-center',
     })
-
-    if (!res.ok) {
-      const errText = await res.text()
-      throw new Error(errText)
-    }
-
-    toast.success('Регистрация прошла успешно!', {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 3000,
-    })
-
-    await loginUser({
-      login: userData.login,
-      password: userData.passwordHash,
-      avatar: getUserAvatarPath(userData.avatar)
-    })
-
     closeRegisterModal()
-
   } catch (err) {
-    toast.error(err.message || 'Ошибка регистрации', {
-      position: toast.POSITION.BOTTOM_CENTER,
-      autoClose: 3000,
-    })
+    toast.error(err.message || 'Ошибка регистрации')
   }
+}
+
+async function logoutUser() {
+  await userStore.logout()
+  toast.success('Вы вышли из аккаунта', {
+    position: 'bottom-center',
+  })
 }
 
 function handleProfileUpdate(updatedUser) {

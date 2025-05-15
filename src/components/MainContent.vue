@@ -106,6 +106,7 @@ onMounted(async () => {
         id: p.id,
         title: p.title,
         user: p.user,
+        userRole: p.creatorRole,
         cover: getPlaylistCoverPath(p.coverUrl),
         tracks: p.tracks.map(t => ({
           id: t.id,

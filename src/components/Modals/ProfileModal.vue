@@ -91,7 +91,9 @@ function close() {
 
 function logout() {
     emit('logout')
+    close() 
 }
+
 
 const avatarFile = ref(null)
 

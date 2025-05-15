@@ -14,7 +14,7 @@
         <div>
           <h1 class="text-3xl font-bold mb-2">{{ playlist.title }}</h1>
           <p class="mb-4">{{ playlist.description }}</p>
-          <p class="text-sm text-gray-600 mt-1">
+          <p v-if="playlist.ownerRole !== 'Администратор'" class="text-sm text-gray-600 mt-1">
             Создатель: <span class="text-bold font-medium cursor-pointer hover:underline">{{ playlist.owner }}</span>
           </p>
           <p class="text-sm text-gray-500">
@@ -249,6 +249,7 @@ onMounted(async () => {
       title: playlistData.title,
       description: playlistData.description,
       owner: playlistData.creator || 'Неизвестно',
+      ownerRole: playlistData.creatorRole,
       isOwner: playlistData.isOwner,
       inLibrary: playlistData.inLibrary || false,
       createdAt: new Date(playlistData.createdAt).toLocaleDateString(),

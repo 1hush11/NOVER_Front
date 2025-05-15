@@ -2,7 +2,7 @@
   <div class="text-center cursor-pointer transition hover:shadow-lg rounded-lg p-2 w-1-3">
     <img :src="playlist.cover" alt="playlist cover" class="cover-image" />
     <p class="text-md font-semibold truncate">{{ playlist.title }}</p>
-    <p v-if="playlist.user" class="text-sm text-gray-500 truncate">от {{ playlist.user }}</p>
+    <p v-if="playlist.user && playlist.userRole !== 'Администратор'" class="text-sm text-gray-500 truncate">от {{ playlist.user }}</p>
   </div>
 </template>
 

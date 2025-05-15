@@ -75,7 +75,6 @@ function close() {
 
 function handleLogin() {
     emit('login', { login: login.value, password: password.value })
-
 }
 
 function switchToRegister() {

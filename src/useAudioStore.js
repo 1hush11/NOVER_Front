@@ -27,23 +27,38 @@ function setTrack(track) {
     currentTrack.value = track
 }
 
-function playCurrent() {
+async function playCurrent() {
     const track = trackQueue.value[queueIndex.value]
 
-    if (currentTrack.value?.id === track.id && audioRef.value?.src === audioRef.value?.src) {
-        audioRef.value?.play()
-        isPlaying.value = true
-        return
-    }
+    if (!track) return
+
+    const isSameTrack = currentTrack.value?.id === track.id
 
     currentTrack.value = track
     isPlaying.value = true
 
+    // ✅ Увеличиваем playCount
+    try {
+        await fetch(`http://localhost:5240/api/track/${track.id}/play`, {
+            method: 'POST'
+        })
+    } catch (e) {
+        console.error('Не удалось увеличить playCount:', e)
+    }
+
     if (audioRef.value) {
         audioRef.value.src = track.audio
-        audioRef.value.play()
+        audioRef.value.load()
+        audioRef.value.oncanplay = async () => {
+            try {
+                await audioRef.value.play()
+            } catch (e) {
+                console.error('Ошибка при воспроизведении:', e)
+            }
+        }
     }
 }
+
 
 function playNext() {
     const isLastTrack = queueIndex.value + 1 >= trackQueue.value.length
@@ -105,6 +120,15 @@ async function play(track) {
 
     currentTrack.value = track
     isPlaying.value = true
+
+    // 🔥 Увеличиваем счетчик прослушиваний
+    try {
+        await fetch(`http://localhost:5240/api/track/${track.id}/play`, {
+            method: 'POST'
+        })
+    } catch (e) {
+        console.error('Не удалось увеличить playCount:', e)
+    }
 
     if (audioRef.value) {
         audioRef.value.src = track.audio
