@@ -17,25 +17,9 @@
         <li>
           <button
             class="menu-btn"
-            :class="{ 'active-tab': route.path.startsWith('/admin/users') }"
-            @click="() => router.push('/admin/users')">
-            Пользователи
-          </button>
-        </li>
-        <li>
-          <button
-            class="menu-btn"
             :class="{ 'active-tab': route.path.startsWith('/admin/genres') }"
             @click="() => router.push('/admin/genres')">
             Жанры
-          </button>
-        </li>
-        <li>
-          <button
-            class="menu-btn"
-            :class="{ 'active-tab': route.path.startsWith('/admin/tracks') }"
-            @click="() => router.push('/admin/tracks')">
-            Метаданные
           </button>
         </li>
         <li>
@@ -60,20 +44,19 @@
     <div class="flex-1 overflow-y-auto">
       <Header/>
       <div class="p-6">
-        <div class="p-6 flex items-center justify-between border-b">
+        <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold">Панель администратора</h1>
         <div class="flex items-center gap-2">
           <input
-            v-model="searchQuery"
-            @keyup.enter="onSearch"
+            v-model="searchStore.query"
             type="text"
             placeholder="Поиск…"
             class="border rounded px-3 py-1 text-black"
-            @input="onSearch"
           />
         </div>
       </div>
         <router-view />
+        <audio ref="audioElement" preload="auto" />
       </div>
     </div>
   </div>
@@ -83,6 +66,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/userStore'
+import { useSearchStore } from '../../stores/searchStore.js'
 
 import { useRoute, useRouter } from 'vue-router'
 
@@ -92,15 +76,16 @@ const route = useRoute()
 const router = useRouter()
 
 const userStore = useUserStore()
+const searchStore = useSearchStore()
 
-const searchQuery = ref('')
+import { useAudioStore } from '@/stores/useAudioStore'
 
-function onSearch() {
-  if (!searchQuery.value.trim()) return
-  router.push({ name: 'AdminSearch', query: { q: searchQuery.value } })
-}
+const audioElement = ref(null)
+const { setAudioRef } = useAudioStore()
 
 onMounted(() => {
+  setAudioRef(audioElement.value)
+
   if (userStore.user?.role !== 'Администратор') {
     router.push('/')
   }

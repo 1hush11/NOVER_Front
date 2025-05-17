@@ -68,7 +68,7 @@
     />
 
 
-    <div v-if="user && user.role === 'Пользователь'" class="flex items-center border-2 border-purple-200 rounded-full text-purple-300 bg-white w-full">
+    <div v-if="!user || user.role !== 'Администратор'" class="flex items-center mr-4 bg-white w-full">
       <SearchBar class="ml-2" />
     </div>
     </div>
@@ -232,7 +232,7 @@ function handleProfileUpdate(updatedUser) {
   background: transparent;
   border: transparent;
   height: 48px;
-  width: 70px;
+  width: 68px;
   display: grid;
   grid-auto-flow: column;
   grid-gap: .5em;

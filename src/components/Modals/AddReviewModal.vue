@@ -134,22 +134,22 @@ function showUpdateConfirm() {
         ({ closeToast }) => {
         setTimeout(closeToast, 6000)
 
-        return h('div', { class: 'flex flex-col gap-2' }, [
-            h('div', { class: 'text-center font-medium' }, 'Вы уже оценивали этот трек. Обновить отзыв?'),
-            h('div', { class: 'flex justify-center gap-4 items-center mt-2' }, [
+        return h('div', { class: 'lex flex-col gap-3' }, [
+            h('span', 'Вы уже оценивали этот трек. Обновить отзыв?'),
             h('button', {
-                class: 'bg-gray-200 text-gray-800 rounded-lg px-4 py-1 border-none',
+                class: 'mr-2 bg-gray text-gray-700 rounded-lg border-none px-2 py-1',
+                style: 'width: 40px; height: 30px;',
                 onClick: closeToast
             }, 'Нет'),
             h('button', {
-                class: 'bg-purple-500 text-white rounded-lg px-4 py-1 border-none hover:bg-purple-600',
+                class: 'bg-purple text-gray-700 rounded-lg border-none px-2 py-1',
+                style: 'width: 60px; height: 30px;',
                 onClick: async () => {
                 await updateReview()
                 closeToast()
                 }
             }, 'Обновить')
             ])
-        ])
         },
         {
         position: 'bottom-center',

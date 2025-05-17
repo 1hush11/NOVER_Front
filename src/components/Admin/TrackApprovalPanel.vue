@@ -2,50 +2,44 @@
     <div>
     <h2 class="text-xl font-semibold mb-4">Ожидающие одобрения треки</h2>
 
-    <div v-if="tracks.length" class="space-y-4">
-        <div v-for="track in tracks" :key="track.id">
-        <div class="flex items-center justify-between rounded-lg shadow p-4 w-full">
-        <div class="flex items-center gap-4">
-        <p class="text-sm text-gray-600 text-center">{{ formattedIndex }}</p>
+    <div v-if="filteredTracks.length" class="space-y-4">
+        <div v-for="track in filteredTracks" :key="track.id">
+            <div class="flex items-center justify-between rounded-lg shadow p-4 w-full">
+                <div class="flex items-center gap-4">
+                <img :src="track.cover" :alt="track.title + ' cover'" class="cover-image" />
 
-        <img :src="track.cover" :alt="track.title + ' cover'" class="cover-image" />
+                <div>
+                    <p
+                    class="text-md font-semibold hover:underline cursor-pointer"
+                    @click.stop="goToTrackPage"
+                    >
+                    {{ track.title }}
+                    </p>
+                    <p class="text-sm text-gray-600 cursor-default">{{ track.singer }}</p>
+                </div>
+                </div>
 
-        <div>
-            <p
-            class="text-md font-semibold hover:underline cursor-pointer"
-            @click.stop="goToTrackPage"
-            >
-            {{ track.title }}
-            </p>
-            <p class="text-sm text-gray-600 cursor-default">{{ track.singer }}</p>
-        </div>
-        </div>
-
-        <div class="flex items-center gap-4">
-
-        <div class="flex gap-4">
-            <button @click="approveTrack(track.id)" class="btn bg-green text-green">
-            Одобрить
-            </button>
-            <button @click="rejectTrack(track.id)" class="btn bg-red text-red">
-            Отклонить
-            </button>
-        </div>
-        </div>
-    </div>
-            <!-- <div>
-            <p class="font-bold">{{ track.name }}</p>
-            <p class="text-sm text-gray-600">Исполнитель: {{ track.singers?.join(', ') || '—' }}</p>
-            <audio :src="getTrackAudio(track.audioUrl)" controls class="mt-2 w-full"></audio>
-        </div>
-        <div class="flex gap-2">
-            <button @click="approveTrack(track.id)" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded">
-            Одобрить
-            </button>
-            <button @click="rejectTrack(track.id)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded">
-            Отклонить
-            </button>
-        </div> -->
+                <div class="flex items-center gap-4">
+                    <button class="play-button"  @click.stop="toggleTrackPlay(track)" title="Воспроизвести/Остановить">
+                        <span v-if="!isThisTrackPlaying(track)">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
+                            <path d="M8 5v14l11-7-11-7z" />
+                        </svg>
+                        </span>
+                        <span v-else>
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
+                            <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+                        </svg>
+                        </span>
+                    </button>
+                    <button @click="approveTrack(track.id)" class="btn bg-green text-green">
+                    Одобрить
+                    </button>
+                    <button @click="rejectTrack(track.id)" class="btn bg-red text-red">
+                    Отклонить
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -54,17 +48,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
-import { getTrackCoverPath, getTrackAudioPath, getPlaylistCoverPath } from '/src/utils/PathHelper.js'
+import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
+
+import { useSearchStore } from '@/stores/searchStore'
+
+const searchStore = useSearchStore()
 
 const tracks = ref([])
 
-function getTrackAudio(url) {
-    return getTrackAudioPath(url)
-}
+const filteredTracks = computed(() => {
+    const q = searchStore.query.toLowerCase()
+    return tracks.value.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        t.singer.toLowerCase().includes(q)
+    )
+})
 
 async function fetchPendingTracks() {
     try {
@@ -120,6 +122,37 @@ async function rejectTrack(id) {
     toast.error(err.message || 'Ошибка при отклонении')
     }
 }
+
+
+import { useAudioStore } from '@/stores/useAudioStore'
+const { currentTrack, isPlaying, setQueue, play, togglePlay, isShuffle } = useAudioStore()
+
+function isThisTrackPlaying(track) {
+    return currentTrack.value?.id === track.id && isPlaying.value
+}
+
+function toggleTrackPlay(track) {
+    if (isThisTrackPlaying(track)) {
+        togglePlay()
+    } else {
+        const queue = isShuffle.value
+        ? [track, ...shuffleArray(similarTracks.value.filter(t => t.id !== track.id))]
+        : [track]
+
+        setQueue(queue, 0)
+        play(track)
+
+        try {
+        fetch(`http://localhost:5240/api/track/set_current/${track.id}`, {
+            method: 'POST',
+            credentials: 'include'
+        })
+        } catch (err) {
+        console.error('Ошибка установки текущего трека:', err)
+        }
+    }
+}
+
 
 onMounted(fetchPendingTracks)
 </script>

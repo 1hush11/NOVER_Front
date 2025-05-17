@@ -13,8 +13,15 @@
       <div class="flex flex-col gap-4">
         <h1 class="text-xl font-bold">Редактирование плейлиста</h1>
 
-        <input v-model="editable.name" type="text"/>
-        <textarea v-model="editable.description" rows="2" />
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium mr-4">Название:</label>
+          <input v-model="editable.title" type="text" required />
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium mr-4">Описание:</label>
+          <textarea v-model="editable.description" rows="3" />
+        </div>
         
         <div class="flex items-center gap-2">
           <label class="text-sm font-medium mr-4">Тип:</label>
@@ -95,7 +102,7 @@ const route = useRoute()
 
 const playlist = ref(null)
 const editable = ref({
-  name: '',
+  title: '',
   description: '',
   type: '',
 })
@@ -107,7 +114,7 @@ onMounted(async () => {
   const playlistData = await res.json()
   playlist.value = {
     id: playlistData.id,
-    name: playlistData.title,
+    title: playlistData.title,
     description: playlistData.description,
     cover: getPlaylistCoverPath(playlistData.coverUrl),
     type: playlistData.type,
@@ -120,7 +127,7 @@ onMounted(async () => {
     })),
   }
   editable.value = {
-    name: playlistData.title,
+    title: playlistData.title,
     description: playlistData.description,
     cover: playlistData.cover,
     type: playlistData.type,
@@ -162,8 +169,16 @@ function handleCoverChange(event) {
 }
 
 async function saveChanges() {
+  if (!editable.value.title.trim()) {
+    toast.error("Пожалуйста, введите название плейлиста", {
+      autoClose: 3000,
+      position: 'bottom-center',
+    })
+    return
+  }
+  
   const playlistUpdateData = new FormData()
-  playlistUpdateData.append('title', editable.value.name)
+  playlistUpdateData.append('title', editable.value.title)
   playlistUpdateData.append('description', editable.value.description)
   playlistUpdateData.append('type', editable.value.type)
 
@@ -183,9 +198,6 @@ async function saveChanges() {
       position: 'bottom-center',
     })
     router.back()
-  } else {
-    const error = await res.text()
-    toast.error('Ошибка: ' + error)
   }
 }
 

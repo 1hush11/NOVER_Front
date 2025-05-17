@@ -27,5 +27,6 @@ onMounted(async () => {
   if (!userStore.user) {
     await userStore.fetchCurrentUser()
   }
+  isLoading.value = false
 })
 </script>

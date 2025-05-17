@@ -28,6 +28,10 @@ a {
     background-color: rgb(167, 167, 167);
 }
 
+.opacity {
+    background-color: #e0c8fba8;
+}
+
 .text-white {
     color: white;
 }

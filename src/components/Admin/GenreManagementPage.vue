@@ -8,11 +8,11 @@
         </div>
     </div>
 
-    <div v-if="genres.length" class="genres-grid">
+    <div v-if="filteredGenres.length" class="genres-grid">
         <div
-        v-for="genre in genres"
-        :key="genre.id"
-        class="flex flex-col bg-white shadow rounded-lg overflow-hidden"
+            v-for="genre in filteredGenres"
+            :key="genre.id"
+            class="flex flex-col bg-white shadow rounded-lg overflow-hidden"
         >
         <div class="p-4 flex-1 flex flex-col">
             <img :src="genre.cover" alt="cover" class="cover-image" />
@@ -112,14 +112,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted, h } from 'vue'
+import { ref, onMounted, h, computed } from 'vue'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 import { getGenreCoverPath } from '/src/utils/PathHelper.js'
 
+import { useSearchStore } from '../../stores/searchStore.js'
+
+const searchStore = useSearchStore()
+
 const genres    = ref([])
 const showAdd   = ref(false)
 const showEdit  = ref(false)
+
+const filteredGenres = computed(() => {
+    const q = searchStore.query.toLowerCase()
+    return genres.value.filter(g =>
+        g.name?.toLowerCase().includes(q) ||
+        g.description?.toLowerCase().includes(q)
+    )
+})
 
 const newGenre = ref({
     name: '',
