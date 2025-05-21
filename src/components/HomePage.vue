@@ -12,13 +12,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useUserStore } from '@/userStore'
 
 import Sidebar from '@/components/Sidebar.vue'
 import Header from '@/components/Header.vue'
 import RightPanel from '@/components/RightPanel.vue'
 
+const isLoading = ref(false)
 const userStore = useUserStore()
 
 const isAdmin = computed(() => userStore.user?.role === 'Администратор')

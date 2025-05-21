@@ -32,22 +32,6 @@ a {
     background-color: #e0c8fba8;
 }
 
-.text-white {
-    color: white;
-}
-
-.text-purple-500 {
-    color: #e0c8fb;
-}
-
-.text-gray-600 {
-    color: #4a4a4a;
-}
-
-.text-gray-700 {
-    color: #333;
-}
-
 .text-xs {
     font-size: 0.75rem;
 }
@@ -294,7 +278,13 @@ button:hover {
     cursor: pointer;
 }
 
-.text-red-500 {
+.text-black {
+    color: black;
+}
+.text-white {
+    color: white;
+}
+.text-purple-500 {
     color: #e0c8fb;
 }
 .text-red {
@@ -303,6 +293,15 @@ button:hover {
 .text-green {
     color: #0f5132;
 }
+.text-gray-600 {
+    color: #4a4a4a;
+}
+.text-gray-700 {
+    color: #333;
+}
+.text-yellow-500 {
+    color: #eab308;
+}
 
 .bg-transparent {
     background: transparent;
@@ -310,14 +309,6 @@ button:hover {
 
 .bg-purple-500 {
     background-color: #e0c8fb;
-}
-
-.text-black {
-    color: black;
-}
-
-.text-white {
-    color: white;
 }
 
 .border {
@@ -434,10 +425,6 @@ button:hover {
 
 .gap-3 {
     gap: 0.75rem;
-}
-
-.text-purple-500 {
-    color: #e0c8fb;
 }
 
 .text-sm {

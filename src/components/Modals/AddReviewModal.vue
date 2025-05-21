@@ -44,6 +44,9 @@
 <script setup>
 import { ref, reactive, h } from 'vue'
 import { toast } from 'vue3-toastify'
+import { flatWords } from 'russian-bad-words'  
+
+
 
 const props = defineProps({
     isVisible: Boolean,
@@ -70,21 +73,29 @@ async function submit() {
             comment: form.comment
         }
 
-        const res = await fetch('http://localhost:5240/api/user/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reviewData),
-        credentials: 'include'
+        const hasBadWords = flatWords.some(bad => form.comment.includes(bad))
+
+        if (hasBadWords) {
+        toast.error('Комментарий содержит плохие слова, мы оставим только рейтинг.', {
+            autoClose: 2000,
+            position: 'bottom-center'
+        })
+        }
+
+        const endpoint = hasBadWords
+            ? 'http://localhost:5240/api/user/block_review'
+            : 'http://localhost:5240/api/user/review'
+
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reviewData),
+            credentials: 'include'
         })
 
         if (res.status === 400) {
-        const errorText = await res.text()
-        if (errorText.includes('оценили')) {
             showUpdateConfirm()
             return
-        } else {
-            throw new Error(errorText)
-        }
         }
 
         if (!res.ok) throw new Error(await res.text())
@@ -94,38 +105,49 @@ async function submit() {
         close()
     } catch (err) {
         toast.error(err.message, {
-        autoClose: 2000,
-        position: 'bottom-center'
+            autoClose: 2000,
+            position: 'bottom-center'
         })
     }
 }
 
 async function updateReview() {
     try {
-        const updateData = {
+        const reviewData = {
         trackId: props.trackId,
         rating: form.rating,
         comment: form.comment
         }
 
+        const hasBadWords = flatWords.some(bad => form.comment.includes(bad))
+        if (hasBadWords) {
+            await fetch('http://localhost:5240/api/user/block_review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reviewData),
+            credentials: 'include'
+        })
+        }
+
         const res = await fetch('http://localhost:5240/api/user/update_review', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData),
-        credentials: 'include'
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reviewData),
+            credentials: 'include'
         })
 
+        if (res.status === 400) {
+            const errorText = await res.text()
+            toast.error(errorText, { autoClose: 2000, position: 'bottom-center' })
+            return
+        }
         if (!res.ok) throw new Error(await res.text())
 
-        const result = await res.text()
         toast.success('Отзыв обновлён', { autoClose: 2000, position: 'bottom-center' })
-        emit('submitted', result)
+        emit('submitted')
         close()
     } catch (err) {
-        toast.error(err.message, {
-        autoClose: 2000,
-        position: 'bottom-center'
-        })
+        toast.error(err.message, { autoClose: 2000, position: 'bottom-center' })
     }
 }
 
@@ -133,33 +155,26 @@ function showUpdateConfirm() {
     toast(
         ({ closeToast }) => {
         setTimeout(closeToast, 6000)
-
-        return h('div', { class: 'lex flex-col gap-3' }, [
-            h('span', 'Вы уже оценивали этот трек. Обновить отзыв?'),
+        return h('div', { class: 'flex flex-col gap-3' }, [
+            h('span', 'Вы уже оценили этот трек. Обновить отзыв?'),
             h('button', {
-                class: 'mr-2 bg-gray text-gray-700 rounded-lg border-none px-2 py-1',
-                style: 'width: 40px; height: 30px;',
-                onClick: closeToast
+            class: 'ml-2 bg-gray text-gray-700 rounded-lg border-none px-2 py-1',
+            style: 'width: 40px; height: 30px;',
+            onClick: closeToast
             }, 'Нет'),
             h('button', {
-                class: 'bg-purple text-gray-700 rounded-lg border-none px-2 py-1',
-                style: 'width: 60px; height: 30px;',
-                onClick: async () => {
+            class: 'ml-2 bg-purple text-gray-700 rounded-lg border-none px-2 py-1',
+            style: 'width: 70px; height: 30px;',
+            onClick: async () => {
                 await updateReview()
                 closeToast()
-                }
+            }
             }, 'Обновить')
-            ])
+        ])
         },
-        {
-        position: 'bottom-center',
-        autoClose: false,
-        closeOnClick: false
-        }
+        { position: 'bottom-center', autoClose: false, closeOnClick: false }
     )
 }
-
-
 </script>
 
 <style scoped>

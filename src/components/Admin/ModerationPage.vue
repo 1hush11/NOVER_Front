@@ -1,6 +1,7 @@
 <template>
     <div>
-    <div class="filters flex flex-wrap gap-4 mb-6">
+    <h2 class="text-xl font-semibold mb-4">Фильтр жалоб и отзывов</h2>
+    <div class="flex flex-wrap gap-4 mb-6">
     <div>
         <label class="ml-2">С даты:</label>
         <input type="date" v-model="dateFrom" class="ml-2"/>
@@ -9,18 +10,7 @@
         <label class="ml-2">По дату:</label>
         <input type="date" v-model="dateTo" class="ml-2"/>
     </div>
-    <div class="flex items-center">
-        <label>Мин. рейтинг:</label>
-        <input type="number"
-            v-model.number="minRating"
-            min="1" max="5"
-            placeholder="1–5"
-            class="ml-2 w-1-3 border rounded-lg p-2" />
-    </div>
-    <div class="flex items-center">
-        <input type="checkbox" v-model="onlyWithComments" id="with-cmt" />
-        <label for="with-cmt" class="ml-2">Только с комментарием</label>
-    </div>
+    
     </div>
     <h2 class="text-xl font-semibold mb-4">Жалобы</h2>
     <div v-if="filteredComplaints.length" class="mb-6">
@@ -35,7 +25,7 @@
             </p>
             <p class="mt-2">Пользователь: {{ c.userName }}</p>
             <p class="mt-2 bg-purple opacity p-2">
-            Трек: <strong>{{ c.trackName }}</strong> Исполнитель: <strong>{{ c.singerNames }}</strong></p>
+            Трек: <strong>{{ c.trackName }}</strong> | Исполнитель: <strong>{{ c.singerNames }}</strong></p>
             <p class="mt-2">Текст жалобы: {{ c.content }}</p>
         </div>
         <div class="flex flex-col gap-2">
@@ -76,6 +66,20 @@
     <p v-else class="text-gray-500 mb-6">Нет жалоб для модерации.</p>
 
     <h2 class="text-xl font-semibold mb-4">Отзывы и рейтинги</h2>
+    <div class="flex flex-wrap gap-4 mb-6">
+        <div class="flex items-center">
+        <label class="ml-2">Мин. рейтинг:</label>
+        <input type="number"
+            v-model.number="minRating"
+            min="1" max="5"
+            placeholder="1–5"
+            class="ml-2 w-1-3 border rounded-lg p-2" />
+    </div>
+    <div class="flex items-center">
+        <input type="checkbox" v-model="onlyWithComments" id="with-cmt"/>
+        <label for="with-cmt" class="ml-2">Только с комментарием</label>
+    </div>
+    </div>
     <div v-if="filteredFeedback.length">
         <div
             v-for="f in filteredFeedback"
@@ -89,7 +93,7 @@
 
                 <p class="mt-2">Пользователь: {{ f.userName }}</p>
                 <p class="mt-2 bg-purple opacity p-2">
-                Трек: <strong>{{ f.trackName }}</strong> Исполнитель: <strong>{{ f.singer }}</strong></p>
+                Трек: <strong>{{ f.trackName }}</strong> | Исполнитель: <strong>{{ f.singer }}</strong></p>
 
                 <p class="mt-2">Рейтинг: {{ f.rating }}★</p>
 

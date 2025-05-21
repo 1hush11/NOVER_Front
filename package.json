@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "leo-profanity": "^1.7.0",
     "pinia": "^3.0.2",
+    "russian-bad-words": "^0.5.0",
     "vue": "^3.5.13",
     "vue-fixed-header": "^3.2.15",
     "vue-router": "^4.5.0",

@@ -177,16 +177,34 @@
     <div class="mt-6 cursor-pointer">
       <h2 class="text-xl font-bold mb-4">Отзывы</h2>
       <ul v-if="reviews.length" class="no-list-style ml-2">
-        <li v-for="(review, index) in reviews" :key="index" class="flex flex-col gap-3">
-          <div class="flex justify-between items-center">
+      <li v-for="(review, index) in reviews" :key="index" class="flex flex-col gap-3">
+        <div class="flex justify-between items-center w-full">
+          <div class="flex items-center gap-4">
             <span class="font-semibold">{{ review.user }}</span>
-            <span class="text-sm text-gray-600">{{ new Date(review.createdAt).toLocaleString() }}</span>
+            <div class="text-yellow-500 text-sm flex items-center">
+              <span v-for="star in 5" :key="star">
+                <span v-if="star <= review.rating">
+                  <svg fill="#eab308" width="15" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22,9.81a1,1,0,0,0-.83-.69l-5.7-.78L12.88,3.53a1,1,0,0,0-1.76,0L8.57,8.34l-5.7.78a1,1,0,0,0-.82.69,1,1,0,0,0,.28,1l4.09,3.73-1,5.24A1,1,0,0,0,6.88,20.9L12,18.38l5.12,2.52a1,1,0,0,0,.44.1,1,1,0,0,0,1-1.18l-1-5.24,4.09-3.73A1,1,0,0,0,22,9.81Z"/>
+                  </svg>
+                </span>
+                <span v-else>
+                  <svg fill="#eab308" width="15" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="12 4 9.22 9.27 3 10.11 7.5 14.21 6.44 20 12 17.27 17.56 20 16.5 14.21 21 10.11 14.78 9.27 12 4"
+                      fill="none" stroke="#eab308" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+                </span>
+              </span>
+            </div>
           </div>
-          <div class="border-b mb-4">{{ review.comment }}</div>
-        </li>
-      </ul>
-      <p v-else class="text-gray-500 italic">Отзывов пока нет.</p>
+          <span class="text-sm text-gray-600">{{ new Date(review.createdAt).toLocaleString() }}</span>
+        </div>
+        <div class="border-b mb-4">{{ review.comment }}</div>
+      </li>
+    </ul>
+    <p v-else class="text-gray-500 italic">Отзывов пока нет.</p>
     </div>
+    
   </div>
 </template>
 
