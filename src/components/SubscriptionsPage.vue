@@ -145,6 +145,7 @@ onMounted(async () => {
             year: new Date(a.releaseDate).getFullYear(),
             cover: getAlbumCoverPath(a.coverUrl),
             tracks: a.tracks,
+            singer: a.singer
         }))
         }
 

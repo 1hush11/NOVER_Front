@@ -27,6 +27,16 @@ a {
 .bg-gray {
     background-color: rgb(167, 167, 167);
 }
+.bg-purple-200 {
+    background-color: #e0c8fb;
+}
+.bg-red {
+    background-color: #f8d7da;
+}
+
+.bg-green {
+    background-color: #d1e7dd;
+}
 
 .opacity {
     background-color: #e0c8fba8;
@@ -69,6 +79,7 @@ a {
 
 .text-bold {
     font-weight: bold;
+    
 }
 
 .h-screen {
@@ -350,16 +361,6 @@ button:hover {
 
 .transition {
     transition: all 0.3s ease-in-out;
-}
-
-.bg-purple-200 {
-    background-color: #e0c8fb;
-}
-.bg-red {
-    background-color: #f8d7da;
-}
-.bg-green {
-    background-color: #d1e7dd;
 }
 .p-4 {
     padding: 1rem;

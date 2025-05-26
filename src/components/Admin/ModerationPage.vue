@@ -1,7 +1,7 @@
 <template>
     <div>
     <h2 class="text-xl font-semibold mb-4">Фильтр жалоб и отзывов</h2>
-    <div class="flex flex-wrap gap-4 mb-6">
+    <div class="flex items-center flex-wrap gap-4 mb-6">
     <div>
         <label class="ml-2">С даты:</label>
         <input type="date" v-model="dateFrom" class="ml-2"/>
@@ -10,14 +10,20 @@
         <label class="ml-2">По дату:</label>
         <input type="date" v-model="dateTo" class="ml-2"/>
     </div>
-    
+    <button 
+        class="btn bg-gray-200 ml-4" 
+        style="height: 40px;" 
+        @click="showBadWordModal = true"
+    >
+    + Добавить запрещенное слово
+    </button>
     </div>
     <h2 class="text-xl font-semibold mb-4">Жалобы</h2>
     <div v-if="filteredComplaints.length" class="mb-6">
         <div
             v-for="c in filteredComplaints"
             :key="c.id"
-            class="flex items-center justify-between rounded-lg shadow p-4"
+            class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
         >
         <div>
             <p class="text-sm text-gray-600">
@@ -28,39 +34,56 @@
             Трек: <strong>{{ c.trackName }}</strong> | Исполнитель: <strong>{{ c.singerNames }}</strong></p>
             <p class="mt-2">Текст жалобы: {{ c.content }}</p>
         </div>
-        <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-4">
             <button
-                v-if="c.trackStatus !== 'Заблокирован'"
-                @click="blockTrack(c)"
-                class="btn bg-red text-red mb-2"
+                v-if="!c.complaintDeleted"
+                @click="blockComplaint(c)"
+                class="btn bg-red text-red"
             >
-                Заблокировать трек
+                Заблокировать жалобу
             </button>
             <button
                 v-else
-                @click="unblockTrack(c)"
-                class="btn bg-green text-green mb-2"
+                @click="unblockComplaint(c)"
+                class="btn bg-green text-green"
             >
-                Разблокировать трек
+                Разблокировать жалобу
             </button>
 
-            <template v-if="c.singers.length">
+            <div class="flex flex-col gap-2">
+                <button
+                    v-if="c.trackStatus !== 'Заблокирован'"
+                    @click="blockTrack(c)"
+                    class="btn bg-red text-red mb-2"
+                >
+                Заблокировать трек
+                </button>
+                <button
+                    v-else
+                    @click="unblockTrack(c)"
+                    class="btn bg-green text-green mb-2"
+                >
+                Разблокировать трек
+                </button>
+
+                <template v-if="c.singers.length">
                 <button
                     v-if="c.singers[0].Status !== 'Заблокирован'"
-                    @click="blockSinger(c.singers[0])"
+                    @click="blockSinger(c)"
                     class="btn bg-red text-red"
                 >
                     Заблокировать исполнителя
                 </button>
                 <button
                     v-else
-                    @click="unblockSinger(c.singers[0])"
+                    @click="unblockSinger(c)"
                     class="btn bg-green text-green"
                 >
                     Разблокировать исполнителя
                 </button>
-            </template>
-        </div>
+                </template>
+            </div>
+            </div>
         </div>
     </div>
     <p v-else class="text-gray-500 mb-6">Нет жалоб для модерации.</p>
@@ -75,23 +98,22 @@
             placeholder="1–5"
             class="ml-2 w-1-3 border rounded-lg p-2" />
     </div>
-    <div class="flex items-center">
-        <input type="checkbox" v-model="onlyWithComments" id="with-cmt"/>
-        <label for="with-cmt" class="ml-2">Только с комментарием</label>
-    </div>
+
     </div>
     <div v-if="filteredFeedback.length">
         <div
             v-for="f in filteredFeedback"
             :key="`${f.trackId}-${f.userId}`"
-            class="flex items-center justify-between rounded-lg shadow p-4"
+            class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
+            :class="{ 'bg-red': f.totalBlockedCommentsByUser > 5 }"
         >
-            <div>
+            <div >
                 <p class="text-sm text-gray-600">
-                    Отзыв №{{ f.id }} от {{ formatDate(f.commentCreatedAt) }}
+                    Отзыв №{{ f.commentId }} от {{ formatDate(f.commentCreatedAt) }}
                 </p>
 
-                <p class="mt-2">Пользователь: {{ f.userName }}</p>
+                <p class="mt-2">Пользователь: {{ f.userName }} | Количество блокировок: {{ f.totalBlockedCommentsByUser}}</p>
+                
                 <p class="mt-2 bg-purple opacity p-2">
                 Трек: <strong>{{ f.trackName }}</strong> | Исполнитель: <strong>{{ f.singer }}</strong></p>
 
@@ -101,34 +123,58 @@
                 </p>
             </div>
 
-        <div class="flex flex-wrap gap-3">
+        <div class="flex items-center gap-4">
             <button
                 v-if="f.commentId && !f.commentDeleted"
-                @click="deleteComment(f)"
+                @click="blockComment(f)"
                 class="btn bg-red text-red mt-2"
             >
-                Удалить комментарий
+                Заблокировать комментарий
             </button>
             <button
                 v-else-if="f.commentId && f.commentDeleted"
-                disabled
-                class="btn cursor-not-allowed mt-2"
+                @click="unblockComment(f)"
+                class="btn bg-green text-green mt-2"
             >
-                Комментарий удалён
+                Восстановить комментарий
             </button>
+            <button
+                v-if="f.commentId && f.userStatus === 'Активен'"
+                @click="blockUser(f)"
+                class="btn bg-red text-red mt-2"
+            >
+                Заблокировать пользователя
+            </button>
+            <button
+                v-else-if="f.commentId && f.userStatus === 'Заблокирован'"
+                @click="unblockUser(f)"
+                class="btn bg-green text-green mt-2"
+            >
+                Разблокировать пользователя
+            </button>
+
         </div>
         
         </div>
     </div>
     <p v-else class="text-gray-500 italic">Нет отзывов и рейтингов.</p>
+
+    <AddBadWordModal
+        :isVisible="showBadWordModal"
+        @close="showBadWordModal = false"
+        @submitted="handleBadWordAdded"
+    />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
+
 import { useSearchStore } from '../../stores/searchStore.js'
+import AddBadWordModal from './AddBadWordModal.vue'
 
 const searchStore = useSearchStore()
 const complaints = ref([])
@@ -189,9 +235,10 @@ async function fetchComplaints() {
         complaints.value = complaintsData.map(c => ({
             ...c,
             singerNames: c.singerNames?.length ? c.singerNames.join(', ') : 'Неизвестный исполнитель',
+            complaintDeleted: false,
         }))
     } catch (err) {
-        toast.error(err.message, { position: 'bottom-center' })
+        console.error(err.message)
     }
 }
 
@@ -201,11 +248,15 @@ async function blockTrack(complaint) {
         `http://localhost:5240/api/admin/track/reject/${complaint.trackId}`,
         { method: 'POST', credentials: 'include' }
         )
-        if (!res.ok) throw new Error()
+        const resComplaint = await fetch(
+            `http://localhost:5240/api/admin/complaint/approve/${complaint.id}`,
+            { method: 'PUT', credentials: 'include' }
+        )
+        if (!res.ok) throw new Error('Не удалось заблокировать трек')
         complaint.trackStatus = 'Заблокирован'
         toast.success('Трек заблокирован', { position: 'bottom-center' })
     } catch {
-        toast.error('Не удалось заблокировать трек', { position: 'bottom-center' })
+        console.error(err.message)
     }
 }
 async function unblockTrack(complaint) {
@@ -214,44 +265,48 @@ async function unblockTrack(complaint) {
         `http://localhost:5240/api/admin/track/approve/${complaint.trackId}`,
         { method: 'POST', credentials: 'include' }
         )
-        if (!res.ok) throw new Error()
+        if (!res.ok) throw new Error('Не удалось разблокировать трек')
         complaint.trackStatus = 'Активен'
         toast.success('Трек активен', { position: 'bottom-center' })
     } catch {
-        toast.error('Не удалось разблокировать трек', { position: 'bottom-center' })
+        console.error(err.message)
     }
 }
 
-async function blockSinger(singer) {
+async function blockSinger(complaint) {
     try {
         const res = await fetch(
-        `http://localhost:5240/api/admin/singer/block/${singer.id}`,
-        { method: 'POST', credentials: 'include' }
+            `http://localhost:5240/api/admin/singer/block/${complaint.singers[0].id}`,
+            { method: 'POST', credentials: 'include' }
         )
-        if (!res.ok) throw new Error()
+        const resComplaint = await fetch(
+            `http://localhost:5240/api/admin/complaint/approve/${complaint.id}`,
+            { method: 'PUT', credentials: 'include' }
+        )
+        if (!res.ok) throw new Error('Не удалось заблокировать исполнителя')
         singer.Status = 'Заблокирован'
         toast.success('Исполнитель заблокирован', { position: 'bottom-center' })
     } catch {
-        toast.error('Не удалось заблокировать исполнителя', { position: 'bottom-center' })
+        console.error(err.message)
     }
 }
-async function unblockSinger(singer) {
+async function unblockSinger(complaint) {
     try {
         const res = await fetch(
-        `http://localhost:5240/api/admin/singer/unblock/${singer.id}`,
+        `http://localhost:5240/api/admin/singer/unblock/${complaint.singers[0].id}`,
         { method: 'POST', credentials: 'include' }
         )
-        if (!res.ok) throw new Error()
+        if (!res.ok) throw new Error('Не удалось разблокировать исполнителя')
         singer.Status = 'Активен'
         toast.success('Исполнитель разблокирован', { position: 'bottom-center' })
     } catch {
-        toast.error('Не удалось разблокировать исполнителя', { position: 'bottom-center' })
+        console.error(err.message)
     }
 }
 
 async function fetchFeedback() {
     try {
-    const res = await fetch('http://localhost:5240/api/admin/feedback', {
+    const res = await fetch('http://localhost:5240/api/admin/blocked_feedback', {
         credentials: 'include'
     })
     if (!res.ok) throw new Error('Не удалось загрузить отзывы и рейтинги')
@@ -261,36 +316,95 @@ async function fetchFeedback() {
         commentDeleted: false
     }))
     } catch (err) {
-    toast.error(err.message, { position: 'bottom-center' })
+        console.error(err.message)
     }
 }
 
-async function removeComplaint(id) {
+async function blockComplaint(complaint) {
     try {
     const res = await fetch(
-        `http://localhost:5240/api/admin/complaint/${id}`,
-        { method: 'DELETE', credentials: 'include' }
+        `http://localhost:5240/api/admin/complaint/block/${complaint.id}`,
+        { method: 'PUT', credentials: 'include' }
     )
-    if (!res.ok) throw new Error('Не удалось удалить жалобу')
-    complaints.value = complaints.value.filter(c => c.id !== id)
-    toast.success('Жалоба удалена', { position: 'bottom-center' })
+    if (!res.ok) throw new Error('Не удалось отклонить жалобу')
+    complaint.complaintDeleted = true
+    toast.success('Жалоба отклонена', { position: 'bottom-center' })
     } catch (err) {
-    toast.error(err.message, { position: 'bottom-center' })
+        console.error(err.message)
+    }
+}
+async function unblockComplaint(complaint) {
+    try {
+        const res = await fetch(
+        `http://localhost:5240/api/admin/complaint/unblock/${complaint.id}`,
+        { method: 'PUT', credentials: 'include' }
+        )
+        if (!res.ok) throw new Error('Не удалось разблокировать жалобу')
+        complaint.complaintDeleted = false
+        toast.success('Жалоба разблокирована', { position: 'bottom-center' })
+    } catch {
+        console.error(err.message)
     }
 }
 
-async function deleteComment(item) {
+async function blockComment(comment) {
     try {
     const res = await fetch(
-        `http://localhost:5240/api/admin/comment/${item.commentId}`,
-        { method: 'DELETE', credentials: 'include' }
+        `http://localhost:5240/api/admin/comment/block/${comment.commentId}`,
+        { method: 'PUT', credentials: 'include' }
     )
     if (!res.ok) throw new Error('Не удалось удалить комментарий')
-    item.commentDeleted = true
+    comment.commentDeleted = true
     toast.success('Комментарий удалён', { position: 'bottom-center' })
     } catch (err) {
-    toast.error(err.message, { position: 'bottom-center' })
+        console.error(err.message)
     }
+}
+async function unblockComment(comment) {
+    try {
+        const res = await fetch(
+        `http://localhost:5240/api/admin/comment/unblock/${comment.commentId}`,
+        { method: 'PUT', credentials: 'include' }
+        )
+        if (!res.ok) throw new Error('Не удалось восстановить комментарий')
+        comment.commentDeleted = false
+        toast.success('Комментарий восстановлен', { position: 'bottom-center' })
+    } catch {
+        console.error(err.message)
+    }
+}
+
+async function blockUser(comment) {
+    try {
+    const res = await fetch(
+        `http://localhost:5240/api/admin/user/block/${comment.userId}`,
+        { method: 'PUT', credentials: 'include' }
+    )
+        if (!res.ok) throw new Error('Не удалось заблокировать пользователя')
+        comment.userStatus = 'Заблокирован'
+        toast.success('Пользователь заблокирован, письмо отправлено', { position: 'bottom-center' })
+    } catch (err) {
+        console.error(err.message)
+    }
+}
+async function unblockUser(comment) {
+    try {
+        const res = await fetch(
+        `http://localhost:5240/api/admin/user/unblock/${comment.userId}`,
+        { method: 'PUT', credentials: 'include' }
+        )
+        if (!res.ok) throw new Error('Не удалость разблокировать пользователя')
+        comment.userStatus = 'Активен'
+        toast.success('Пользователь разблокирован', { position: 'bottom-center' })
+    } catch {
+        console.error(err.message)
+    }
+}
+
+const showBadWordModal = ref(false)
+
+function handleBadWordAdded() {
+    showBadWordModal.value = false
 }
 
 onMounted(() => {
