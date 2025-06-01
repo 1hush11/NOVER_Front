@@ -1,11 +1,11 @@
 <template>
   <div class="p-4 cursor-pointer">
-    <h2 class="text-xl font-bold mb-2">ТОП исполнители</h2>
-    <div v-if="topSingers.length" class="flex flex-col gap-4 transition rounded-lg shadow">
+    <h2 class="text-xl font-bold mb-2 p-2">ТОП исполнители</h2>
+    <div v-if="topSingers.length" class="flex flex-col gap-4 transition rounded-lg shadow p-2">
       <div
         v-for="(singer, index) in topSingers"
         :key="index"
-        class="flex items-center" @click="goToSinger(singer)"
+        class="flex items-center mb-2" @click="goToSinger(singer)"
       >
         <img
           :src="singer.photo"

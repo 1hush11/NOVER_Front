@@ -51,8 +51,8 @@
             </button>
         </li>
         </ul>
-        <p class="text-sm mt-6 mb-2 uppercase text-bold">Медиатека</p>
-        <ul class="no-list-style">
+        <p v-if="userStore.user" class="text-sm mt-6 mb-2 uppercase text-bold">Медиатека</p>
+        <ul v-if="userStore.user" class="no-list-style">
           <li class="mb-2">
             <button 
               class="menu-btn"
@@ -171,8 +171,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useUserStore } from '@/stores/userStore'
+import { useAudioStore } from '@/stores/audioStore'
 
+const userStore = useUserStore()
 const audioStore = useAudioStore()
 
 const audio = ref(null)
@@ -421,11 +423,11 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  transition: transform 0.5s ea, box-shadow 0.5s ease-in-out;
+  transition: transform 0.3s ease;
 }
+
 .player-container:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+  transform: scale(1.02);
 }
 
 .nav-button {

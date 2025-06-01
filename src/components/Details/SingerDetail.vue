@@ -110,7 +110,7 @@ import TrackCard from '/src/components/Cards/TrackCard.vue'
 import SingerCard from '/src/components/Cards/SingerCard.vue'
 import AlbumCard from '/src/components/Cards/AlbumCard.vue'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

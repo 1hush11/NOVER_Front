@@ -210,6 +210,28 @@ function handleTrackEnd() {
     }
 }
 
+async function fetchRecommendations(userId) {
+    try {
+        const response = await fetch(`http://localhost:5240/api/user/recommendations/${userId}`);
+        if (!response.ok) {
+            console.error('Ошибка при запросе рекомендаций:', response.statusText);
+            return;
+        }
+        // При успешном ответе получаем JSON со списком объектов треков
+        const recommendedTracks = await response.json();
+        // Устанавливаем очередь из этих треков (начиная с нулевого индекса)
+        // Предполагается, что recommendedTracks — это массив объектов вида:
+        // { id, name, album_id, album_title, duration, genre_id, genre_name, release_date, play_count, audio_url, cover_url, status, singers: [...] }
+        if (recommendedTracks.length > 0) {
+            // Если вам нужно именно хранить сущности «треков» (с теми же полями, что вы используете),
+            // то просто передаём их в очередь.
+            setQueue(recommendedTracks, 0);
+        }
+    } catch (e) {
+        console.error('Не удалось получить рекомендации:', e);
+    }
+}
+
 
 export function useAudioStore() {
     return {
@@ -235,5 +257,6 @@ export function useAudioStore() {
         shuffleArray,
         repeatMode,
         toggleRepeatMode,
+        fetchRecommendations,
     }
 }

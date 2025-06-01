@@ -216,7 +216,7 @@ import TrackCard from '/src/components/Cards/TrackCard.vue'
 import AddPlaylistModal from '/src/components/Modals/AddPlaylistModal.vue'
 import AddReviewModal from '/src/components/Modals/AddReviewModal.vue'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'

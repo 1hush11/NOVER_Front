@@ -65,7 +65,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useUserStore } from '@/userStore'
+import { useUserStore } from '@/stores/userStore'
 import { useSearchStore } from '../../stores/searchStore.js'
 
 import { useRoute, useRouter } from 'vue-router'
@@ -78,7 +78,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const searchStore = useSearchStore()
 
-import { useAudioStore } from '@/stores/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore.js'
 
 const audioElement = ref(null)
 const { setAudioRef } = useAudioStore()

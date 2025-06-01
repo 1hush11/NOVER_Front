@@ -82,7 +82,7 @@ import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudio
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 const isAuthorized = ref(false)
 const inLibrary = ref(false)

@@ -58,7 +58,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 const isAuthorized = ref(false)
 

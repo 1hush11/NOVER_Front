@@ -187,15 +187,18 @@ const onlyWithComments = ref(false)
 
 const filteredComplaints = computed(() => {
     const q = searchStore.query.toLowerCase()
-    return complaints.value.filter(c =>{
+    return complaints.value.filter(c => {
         const dt = new Date(c.createdAt)
         if (dateFrom.value && dt < new Date(dateFrom.value)) return false
         if (dateTo.value && dt > new Date(dateTo.value)) return false
-        c.userName.toLowerCase().includes(q) ||
-        c.content.toLowerCase().includes(q) ||
-        c.trackName.toLowerCase().includes(q) ||
-        c.singer.toLowerCase().includes(q)
-        return true
+
+        const matchesQuery =
+            c.userName.toLowerCase().includes(q) ||
+            c.content.toLowerCase().includes(q) ||
+            c.trackName.toLowerCase().includes(q) ||
+            c.singerNames.toLowerCase().includes(q)
+
+        return matchesQuery
     })
 })
 
@@ -204,17 +207,18 @@ const filteredFeedback = computed(() => {
     return feedback.value.filter(f => {
         const dt = f.createdAt ? new Date(f.createdAt) : null
         if (dateFrom.value && (!dt || dt < new Date(dateFrom.value))) return false
-        if (dateTo.value   && (!dt || dt > new Date(dateTo.value)))   return false
-        if (minRating.value && f.rating < minRating.value)            return false
-        if (onlyWithComments.value && !f.commentText)                 return false
-        
-        f.userName.toLowerCase().includes(q) ||
-        f.trackName.toLowerCase().includes(q) ||
-        (f.commentText && f.commentText.toLowerCase().includes(q)) ||
-        f.singer.toLowerCase().includes(q) ||
-        String(f.rating).includes(q)
+        if (dateTo.value && (!dt || dt > new Date(dateTo.value))) return false
+        if (minRating.value && f.rating < minRating.value) return false
+        if (onlyWithComments.value && !f.commentText) return false
 
-        return true
+        const matchesQuery =
+            f.userName.toLowerCase().includes(q) ||
+            f.trackName.toLowerCase().includes(q) ||
+            (f.commentText && f.commentText.toLowerCase().includes(q)) ||
+            f.singer.toLowerCase().includes(q) ||
+            String(f.rating).includes(q)
+
+        return matchesQuery
     })
 })
 

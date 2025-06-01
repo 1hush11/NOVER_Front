@@ -99,7 +99,7 @@ import TrackCard from '/src/components/Cards/TrackCard.vue'
 import { toast } from 'vue3-toastify'
 import 'vue3-toastify/dist/index.css'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { getPlaylistCoverPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

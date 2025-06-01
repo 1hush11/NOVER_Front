@@ -13,7 +13,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useUserStore } from '@/userStore'
+import { useUserStore } from '@/stores/userStore'
 
 import Sidebar from '@/components/Sidebar.vue'
 import Header from '@/components/Header.vue'

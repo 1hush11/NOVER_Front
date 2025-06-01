@@ -124,7 +124,7 @@ async function rejectTrack(id) {
 }
 
 
-import { useAudioStore } from '@/stores/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 const { currentTrack, isPlaying, setQueue, play, togglePlay, isShuffle } = useAudioStore()
 
 function isThisTrackPlaying(track) {

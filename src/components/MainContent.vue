@@ -1,67 +1,71 @@
 <template>
   <div class="flex flex-1 flex-col p-4 cursor-pointer overflow-y-auto">
-    <div class="flex-col flex">
-      <div>
-        <section>
-          <h2 class="text-xl font-bold mb-4">Плейлисты популярных жанров</h2>
-          <div v-if="pagedGenres.length" class="flex justify-center overflow-hidden transition gap-2 rounded-lg p-2">
-            <button 
-              class="text-2xl text-bold p-4 bg-transparent border-none" 
-              @click="prev" 
-              :disabled="currentPage === 0"
-            >
-              ‹
-            </button>
-            <PlaylistCard
-              v-for="playlist in pagedGenres"
-              :key="playlist.id"
-              :playlist="playlist"
-              @click="goToPlaylist(playlist)"
-            />
-            <button
-              class="text-2xl text-bold p-4 bg-transparent border-none"
-              @click="next"
-              :disabled="currentPage + itemsPerPage >= genrePlaylists.length"
-            >
-              ›
+    <section v-if="userStore.user">
+      <div class="flex flex-col gap-3 mt-6-">
+        <div
+          class="recommendation-gradient-block flex flex-col items-center justify-center text-white rounded-lg shadow-lg cursor-pointer transition hover:scale-105"
+          @click="handlePlayRecommendations"
+        >
+          <div class="text-black rounded-full mb-4">
+            <button class="play-button" @click.stop="handlePlayRecommendations" title="Воспроизвести рекомендации">
+              <span v-if="!isRecommendationPlaying">
+                <svg width="30" height="30" viewBox="0 0 24 20" fill="currentColor">
+                  <path d="M8 5v14l11-7-11-7z" />
+                </svg>
+              </span>
+              <span v-else>
+                <svg width="30" height="30" viewBox="0 0 24 20" fill="currentColor">
+                  <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+                </svg>
+              </span>
             </button>
           </div>
-          <p v-else class="text-gray-500 italic">Нет доступных плейлистов по жанрам.</p>
-        </section>
+          <div class="text-xl text-gray-600 font-bold mb-1">Слушать рекомендации</div>
+          <div class="text-sm text-gray-500 opacity-80">Персональная музыка для вас</div>
         </div>
       </div>
+    </section>
+    <p v-else class="text-gray-500 italic">Рекомендации не найдены.</p>
 
     <div class="mt-6">
-      <button class="text-xl font-bold mb-4 bg-transparent border-none">Популярно сейчас</button>
+      <button class="text-xl font-bold mb-4 bg-transparent border-none">
+        Популярно сейчас
+      </button>
       <div v-if="popularTracks.length" class="flex flex-col gap-3">
         <TrackCard
           v-for="(track, index) in popularTracks"
           :key="track.id"
           :track="track"
           :index="index"
-          @play="() => handleTrackPlay({ track, index })"
+          @play="() => handleTrackPlay(track, index, 'popular')"
         />
       </div>
       <p v-else class="text-gray-500 italic">Популярные треки не найдены.</p>
     </div>
+
+    <audio ref="audioElement" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
 
 import TrackCard from './Cards/TrackCard.vue'
-import PlaylistCard from './Cards/PlaylistCard.vue'
 
-import { audioRef } from '@/audioRef'
-import { useAudioStore } from '@/useAudioStore'
+import { audioRef } from '@/stores/audioRef'
+import { useAudioStore } from '@/stores/audioStore'
+import { useUserStore } from '@/stores/userStore'
 
-import { getTrackCoverPath, getTrackAudioPath, getPlaylistCoverPath } from '/src/utils/PathHelper.js'
+import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 const audioStore = useAudioStore()
+const userStore = useUserStore()
+const isLoadingRecs = ref(false)
 
-function handleTrackPlay({ track, index }) {
+const recommendedTracks = ref([])
+const popularTracks = ref([])
+
+function handleTrackPlay(track, index, source) {
   const isSame = audioStore.currentTrack.value?.id === track.id
   const isPlaying = audioStore.isPlaying.value
 
@@ -70,21 +74,52 @@ function handleTrackPlay({ track, index }) {
   } else if (isSame && !isPlaying) {
     audioStore.togglePlay()
   } else {
-    audioStore.setQueue(popularTracks.value, index)
+    const queue = source === 'recommendations'
+      ? recommendedTracks.value
+      : popularTracks.value
+
+    audioStore.setQueue(queue, index)
     audioStore.playCurrent()
   }
 }
 
+function handlePlayRecommendations() {
+  const firstRecTrack = recommendedTracks.value[0]
+  const current = audioStore.currentTrack.value
+  const isSame = current?.id === firstRecTrack?.id
+  const isPlaying = audioStore.isPlaying.value
+
+  if (isSame && isPlaying) {
+    audioStore.pause()
+  } else if (isSame && !isPlaying) {
+    audioStore.togglePlay()
+  } else {
+    audioStore.setQueue(recommendedTracks.value, 0)
+    audioStore.playCurrent()
+  }
+}
+
+const currentTrack = computed(() => audioStore.currentTrack.value)
+
+const isRecommendationPlaying = computed(() => {
+  return (
+    recommendedTracks.value.length > 0 &&
+    currentTrack.value?.id === recommendedTracks.value[0].id &&
+    audioStore.isPlaying.value
+  )
+})
+
 const audioElement = ref(null)
 
-const popularTracks = ref([])
-const genrePlaylists = ref([])
-
 onMounted(async () => {
+  audioRef.value = audioElement.value
+
   try {
     const topRes = await fetch('http://localhost:5240/api/track/top?count=10')
-    if (!topRes.ok) throw new Error(await topRes.text())
-
+    if (!topRes.ok) {
+      const text = await topRes.text()
+      throw new Error(`status ${topRes.status}: ${text}`)
+    }
     const topTracksData = await topRes.json()
     popularTracks.value = topTracksData.map(t => ({
       id: t.id,
@@ -94,59 +129,42 @@ onMounted(async () => {
       cover: getTrackCoverPath(t.coverUrl),
       audio: getTrackAudioPath(t.audioUrl)
     }))
-
-    const playlistsRes = await fetch('http://localhost:5240/api/review/playlists_by_genre')
-    if (!playlistsRes.ok) throw new Error(await playlistsRes.text())
-
-    const playlistsData = await playlistsRes.json()
-
-    genrePlaylists.value = playlistsData
-      .filter(p => Array.isArray(p.tracks) && p.tracks.length > 0)
-      .map((p, index) => ({
-        id: p.id,
-        title: p.title,
-        user: p.user,
-        userRole: p.creatorRole,
-        cover: getPlaylistCoverPath(p.coverUrl),
-        tracks: p.tracks.map(t => ({
-          id: t.id,
-          title: t.name,
-          singer: t.singers?.join(', ') || 'Неизвестный исполнитель',
-          cover: getTrackCoverPath(t.coverUrl),
-          audio: getTrackAudioPath(t.audioUrl)
-        }))
-      }))
-
-    audioRef.value = audioElement.value
   } catch (err) {
-    console.error('Ошибка при загрузке данных:', err.message)
+    console.error('Ошибка при загрузке популярных треков:', err)
   }
+
+  try {
+    if (!userStore.user) {
+      await userStore.fetchCurrentUser()
+    }
+    if (userStore.user && userStore.user.id) {
+      isLoadingRecs.value = true
+
+      const recRes = await fetch(
+        `http://127.0.0.1:8000/api/user/recommendations/${userStore.user.id}`
+      )
+      if (!recRes.ok) {
+        const text = await recRes.text()
+        throw new Error(`status ${recRes.status}: ${text}`)
+      }
+      const recData = await recRes.json()
+      recommendedTracks.value = recData.map(t => ({
+        id: t.id,
+        title: t.name,
+        singer: Array.isArray(t.singers) && t.singers.length
+          ? t.singers.join(', ')
+          : 'Неизвестный исполнитель',
+        albumId: t.album_id,
+        cover: getTrackCoverPath(t.cover_url),
+        audio: getTrackAudioPath(t.audio_url)
+      }))
+    }
+  } catch (err) {
+    console.error('Ошибка при загрузке рекомендаций:', err)
+  } finally {
+      isLoadingRecs.value = false
+    }
 })
-
-
-const itemsPerPage = 3
-const currentPage = ref(0)
-const pagedGenres = computed(() =>
-  genrePlaylists.value.slice(currentPage.value, currentPage.value + itemsPerPage)
-)
-
-const next = () => {
-  if (currentPage.value + itemsPerPage < genrePlaylists.value.length) {
-    currentPage.value += 1
-  }
-}
-
-const prev = () => {
-  if (currentPage.value > 0) {
-    currentPage.value -= 1
-  }
-}
-
-  const router = useRouter()
-
-  function goToPlaylist(playlist) {
-  router.push(`/playlist/${playlist.id}`)
-}
 </script>
 
 
@@ -161,5 +179,38 @@ const prev = () => {
 button:disabled {
   opacity: 0.3;
   cursor: default;
+}
+
+.recommendation-gradient-block {
+  width: 100%;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #a18cd1 0%, #e0c8fb 30%, #fbc2eb 100%);
+  border-radius: 24px;
+  text-align: center;
+  margin-top: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.recommendation-gradient-block:hover {
+  transform: scale(1.02);
+}
+
+.play-button {
+  width: 60px;
+  height: 60px;
+  background: #1c1c1c;
+  color: #e0c8fb;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.play-button:hover {
+  background: #333;
 }
 </style>

@@ -43,7 +43,7 @@
 import { ref, onMounted, computed } from 'vue'
 import TrackCard from './Cards/TrackCard.vue'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

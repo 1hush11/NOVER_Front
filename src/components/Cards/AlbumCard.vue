@@ -3,7 +3,7 @@
         <img :src="album.cover" alt="Album Cover" class="cover-image" />
         <p class="font-semibold">{{ album.name }}</p>
         <p v-if="album.singer" class="text-sm text-gray-500">{{ album.singer.name }} · {{ album.year }}</p>
-        <p class="text-sm text-gray-500">{{ album.year }}</p>
+        <p v-else class="text-sm text-gray-500">{{ album.year }}</p>
     </div>
 </template>
 <script setup>

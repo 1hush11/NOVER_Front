@@ -85,7 +85,7 @@ import { useRouter } from 'vue-router'
 import AlbumCard from '@/components/Cards/AlbumCard.vue'
 import TrackCard from '@/components/Cards/TrackCard.vue'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

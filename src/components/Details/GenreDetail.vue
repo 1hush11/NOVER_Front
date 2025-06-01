@@ -1,6 +1,6 @@
 <template>
-  <div class="flex-1 p-4 ml-2">
-    <div class="flex justify-end">
+  <div class="flex-1 p-8">
+    <div class="flex justify-end mt-6-">
     <button class="bg-transparent border-none" @click="close">
         <svg width="24" height="24" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
         <path fill="#1c1c1" d="M3.21878,2.15448L9.99679,8.92745L16.70268,2.22183C17.15981,1.81458 17.63394,2.05757 17.8219,2.26259C18.00986,2.46761 18.11719,2.95117 17.77817,3.29732L11.07079,10.0014L17.77817,16.7027C18.07648,16.9529 18.07648,17.4434 17.83701,17.7166C17.59753,17.9897 17.15756,18.1484 16.74155,17.8244L9.99679,11.0754L3.24361,17.8271C2.94835,18.092 2.46049,18.0382 2.21878,17.7746C1.97707,17.5111 1.88533,17.0549 2.19441,16.733L8.92279,10.0014L2.22183,3.29732C1.97729,3.02649 1.8919,2.53265 2.22183,2.22183C2.55175,1.911 3.04367,1.95438 3.21878,2.15448Z"/>
@@ -8,7 +8,7 @@
     </button>
     </div>
 
-    <h1 class="text-2xl font-bold mb-4 mt-6-">{{ genre.name }}</h1>
+    <h1 class="text-2xl font-bold mb-6 mt-6-">{{ genre.name }}</h1>
     <p class="text-gray-700 mb-6">{{ genre.description }}</p>
 
     <h2 class="text-xl font-semibold mb-4">Лучшие исполнители</h2>
@@ -49,7 +49,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ref, watchEffect } from 'vue'
 import TrackCard from '/src/components/Cards/TrackCard.vue'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { getGenreCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 

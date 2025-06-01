@@ -44,7 +44,7 @@
         <div class="flex justify-center overflow-hidden transition rounded-lg mb-4">
           <button
             class="text-2xl text-bold bg-transparent border-none"
-            @click="prev"
+            @click="prevAlbum"
             :disabled="currentPage === 0"
           >
             ‹
@@ -57,7 +57,7 @@
           />
           <button
             class="text-2xl text-bold bg-transparent border-none"
-            @click="next"
+            @click="nextAlbum"
             :disabled="(currentPage + 1) * itemsPerPage >= albums.length"
           >
             ›
@@ -68,12 +68,30 @@
       <div v-if="playlists.length">
         <h3 class="text-lg font-semibold mb-4">Плейлисты</h3>
         <div class="flex flex-wrap gap-4 mb-4">
-          <PlaylistCard
-            v-for="playlist in playlists"
-            :key="'playlist-' + playlist.id"
-            :playlist="playlist"
-            @click="goToPlaylist(playlist)"
-          />
+          <button
+            class="text-2xl font-bold bg-transparent border-none px-4"
+            @click="prevPlaylist"
+            :disabled="currentPlaylistPage === 0"
+          >
+            ‹
+          </button>
+
+          <div class="flex space-x-4">
+            <PlaylistCard
+              v-for="playlist in pagedPlaylists"
+              :key="'playlist-' + playlist.id"
+              :playlist="playlist"
+              @click="goToPlaylist(playlist)"
+            />
+          </div>
+
+          <button
+            class="text-2xl font-bold bg-transparent border-none px-4"
+            @click="nextPlaylist"
+            :disabled="(currentPlaylistPage + 1) * playlistsPerPage >= playlists.length"
+          >
+            ›
+          </button>
         </div>
       </div>
 
@@ -107,10 +125,9 @@ import SingerCard from './Cards/SingerCard.vue'
 import AlbumCard from './Cards/AlbumCard.vue'
 import PlaylistCard from './Cards/PlaylistCard.vue'
 
-import { useAudioStore } from '@/useAudioStore'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { getAlbumCoverPath, getSingerPhotoPath, getTrackCoverPath, getTrackAudioPath, getPlaylistCoverPath, getGenreCoverPath } from '/src/utils/PathHelper.js'
-
 
 const audioStore = useAudioStore()
 
@@ -166,7 +183,7 @@ const albums = computed(() =>
     id: a.id,
     name: a.name,
     year: a.releaseDate?.split('-')[0] || 'Неизвестно',
-    singer: a.singer.name,
+    singer: a.singer,
     cover: getAlbumCoverPath(a.coverUrl),
   }))
 )
@@ -214,24 +231,38 @@ function close() {
   router.back()
 }
 
-const itemsPerPage = 3
-const currentPage = ref(0)
-
+const albumsPerPage = 3
+const currentAlbumPage = ref(0)
 const pagedAlbums = computed(() =>
-  albums.value.slice(currentPage.value * itemsPerPage, (currentPage.value + 1) * itemsPerPage)
+  albums.value.slice(currentAlbumPage.value * albumsPerPage, (currentAlbumPage.value + 1) * albumsPerPage)
 )
-
-function next() {
-  if (currentPage.value + 1 < Math.ceil(albums.value.length / itemsPerPage)) {
-    currentPage.value++
+function nextAlbum() {
+  if ((currentAlbumPage.value + 1) * albumsPerPage < albums.value.length) {
+    currentAlbumPage.value++
+  }
+}
+function prevAlbum() {
+  if (currentAlbumPage.value > 0) {
+    currentAlbumPage.value--
   }
 }
 
-function prev() {
-  if (currentPage.value > 0) {
-    currentPage.value--
+const playlistsPerPage = 4
+const currentPlaylistPage = ref(0)
+const pagedPlaylists = computed(() =>
+  playlists.value.slice(currentPlaylistPage.value * playlistsPerPage, (currentPlaylistPage.value + 1) * playlistsPerPage)
+)
+function nextPlaylist() {
+  if ((currentPlaylistPage.value + 1) * playlistsPerPage < playlists.value.length) {
+    currentPlaylistPage.value++
   }
 }
+function prevPlaylist() {
+  if (currentPlaylistPage.value > 0) {
+    currentPlaylistPage.value--
+  }
+}
+
 
 async function fetchSearchResults() {
   if (!searchQuery.value) return

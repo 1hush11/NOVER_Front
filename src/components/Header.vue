@@ -92,7 +92,7 @@ import AddAlbumModal from './Modals/AddAlbumModal.vue'
 import { getUserAvatarPath } from '/src/utils/PathHelper.js'
 
 
-import { useUserStore } from '@/userStore'
+import { useUserStore } from '@/stores/userStore'
 
 const userStore = useUserStore()
 const user = computed(() => userStore.user)
