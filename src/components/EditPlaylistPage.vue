@@ -64,7 +64,15 @@
               >
                 {{ track.title }}
               </p>
-              <p class="text-sm text-gray-600 cursor-default">{{ track.singer }}</p>
+              <template v-for="(item, idx) in track.singers" :key="item.id">
+              <button
+                class="bg-transparent border-none text-sm text-gray-600 cursor-default"
+                @click="goToSinger(item.id)"
+              >
+                {{ item.name }}
+              </button>
+              <span v-if="idx < track.singers.length - 1">, </span>
+            </template>
             </div>
           </div>
 
@@ -121,7 +129,9 @@ onMounted(async () => {
     tracks: playlistData.tracks.map(t => ({
       id: t.id,
       title: t.name,
-      singer: t.singers?.join(', ') || 'Неизвестный исполнитель',
+      singers: Array.isArray(t.singers) 
+                  ? t.singers 
+                  : 'Неизвестный исполнитель',
       cover: getTrackCoverPath(t.coverUrl),
       audio: getTrackAudioPath(t.audioUrl)
     })),

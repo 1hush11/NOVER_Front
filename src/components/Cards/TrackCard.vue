@@ -1,9 +1,9 @@
 <template>
   <div class="flex items-center justify-between rounded-lg shadow p-4 w-full">
     <div class="flex items-center gap-4">
-      <p class="text-sm text-gray-600 text-center">{{ formattedIndex }}</p>
+      <p class="text-sm text-gray-600 text-center cursor-pointer">{{ formattedIndex }}</p>
 
-      <img :src="track.cover" :alt="track.title + ' cover'" class="cover-image" />
+      <img :src="track.cover" :alt="track.title + ' cover'" class="cover-image cursor-pointer" />
 
       <div>
         <p
@@ -12,12 +12,23 @@
         >
           {{ track.title }}
         </p>
-        <p class="text-sm text-gray-600 cursor-default">{{ track.singer }}</p>
+        <div class="flex flex-wrap items-center text-sm text-gray-600">
+          <template v-for="(item, idx) in track.singers" :key="item.id">
+            <span
+              class="hover:underline cursor-pointer"
+              @click="goToSinger(item.id)"
+            >
+              {{ item.name }}
+            </span>
+            <span v-if="idx < track.singers.length - 1">,&nbsp;</span>
+          </template>
+        </div>
+
       </div>
     </div>
 
     <div class="flex items-center gap-4">
-      <button class="play-button"  @click.stop="$emit('play')" title="Воспроизвести/Остановить">
+      <button class="play-button"  @click.stop="$emit('play', track, index)" title="Воспроизвести/Остановить">
         <span v-if="!isThisTrackPlaying">
           <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
             <path d="M8 5v14l11-7-11-7z" />
@@ -83,6 +94,13 @@ const isThisTrackPlaying = computed(() =>
 
 function goToTrackPage() {
   router.push(`/track/${props.track.id}`)
+}
+function goToSinger(singerId) {
+  if (singerId) {
+    router.push(`/singers/${singerId}`)
+  } else {
+    console.warn('singerId отсутствует')
+  }
 }
 
 async function fetchCurrentUser() {

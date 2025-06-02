@@ -37,7 +37,6 @@ async function playCurrent() {
     currentTrack.value = track
     isPlaying.value = true
 
-    // ✅ Увеличиваем playCount
     try {
         await fetch(`http://localhost:5240/api/track/${track.id}/play`, {
             method: 'POST'
@@ -108,20 +107,11 @@ function setQueue(tracks, index) {
 }
 
 async function play(track) {
-    if (currentTrack.value?.id === track.id) {
-        try {
-            await audioRef.value?.play()
-            isPlaying.value = true
-        } catch (e) {
-            console.error('Ошибка воспроизведения:', e)
-        }
-        return
-    }
+    if (!track) return
 
     currentTrack.value = track
     isPlaying.value = true
 
-    // 🔥 Увеличиваем счетчик прослушиваний
     try {
         await fetch(`http://localhost:5240/api/track/${track.id}/play`, {
             method: 'POST'
@@ -133,11 +123,12 @@ async function play(track) {
     if (audioRef.value) {
         audioRef.value.src = track.audio
         audioRef.value.load()
+
         audioRef.value.oncanplay = async () => {
             try {
                 await audioRef.value.play()
-            } catch (e) {
-                console.error('Ошибка при попытке воспроизведения:', e)
+            } catch (err) {
+                console.error('Ошибка при воспроизведении:', err)
             }
         }
     }
@@ -217,21 +208,14 @@ async function fetchRecommendations(userId) {
             console.error('Ошибка при запросе рекомендаций:', response.statusText);
             return;
         }
-        // При успешном ответе получаем JSON со списком объектов треков
         const recommendedTracks = await response.json();
-        // Устанавливаем очередь из этих треков (начиная с нулевого индекса)
-        // Предполагается, что recommendedTracks — это массив объектов вида:
-        // { id, name, album_id, album_title, duration, genre_id, genre_name, release_date, play_count, audio_url, cover_url, status, singers: [...] }
         if (recommendedTracks.length > 0) {
-            // Если вам нужно именно хранить сущности «треков» (с теми же полями, что вы используете),
-            // то просто передаём их в очередь.
             setQueue(recommendedTracks, 0);
         }
     } catch (e) {
         console.error('Не удалось получить рекомендации:', e);
     }
 }
-
 
 export function useAudioStore() {
     return {

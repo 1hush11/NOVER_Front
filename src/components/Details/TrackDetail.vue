@@ -12,13 +12,27 @@
       <img v-if="track.cover" :src="track.cover" alt="track cover" class="cover-image ml-2 mr-4" />
       <div class="flex-1 ml-2">
         <h1 class="text-4xl font-bold mb-4">{{ track.title }}</h1>
-        <div class="flex flex-col items-start mb-4">
-          <button class="bg-transparent border-none text-lg font-semibold text-gray-700 hover:underline" @click="goToSinger(track.singer)">
-            {{ track.singer }}
-          </button>
-          <button class="bg-transparent border-none text-lg text-gray-500 hover:underline mt-1" @click="goToGenre(track.genre)">
-            {{ track.genre }}
-          </button>
+        <div class="mb-4">
+          <div class="flex flex-wrap items-center">
+            <template v-for="(item, idx) in track.singers" :key="item.id">
+              <button
+                class="bg-transparent border-none text-lg font-semibold text-gray-700 hover:underline"
+                @click="goToSinger(item.id)"
+              >
+                {{ item.name }}
+              </button>
+              <span v-if="idx < track.singers.length - 1">, </span>
+            </template>
+          </div>
+
+          <div class="mt-1">
+            <button
+              class="bg-transparent border-none text-lg text-gray-500 hover:underline"
+              @click="goToGenre()"
+            >
+              {{ track.genre }}
+            </button>
+          </div>
         </div>
 
         <div class="flex items-center gap-6 ml-4">
@@ -158,22 +172,26 @@
           position: 'bottom-center'
         })"
       />
-
     </div>
 
     <div class="mt-6">
-      <h2 class="text-xl font-bold mb-4">Похожие треки</h2>
-      <div v-if="similarTracks.length" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <TrackCard 
-          v-for="(track, index) in similarTracks" 
-          :key="index" 
-          :track="track" 
-          :index="index" 
-          @play="() => handleTrackPlay({ track, index })"
+    <h2 class="text-xl font-bold mb-4">Похожие треки</h2>
+
+    <div v-if="Array.isArray(similarTracks) && similarTracks.length > 0" >
+        <TrackCard
+          v-for="(track, index) in similarTracks"
+          :key="track.id || index"
+          :track="track"
+          :index="index"
+          @play="() => handleTrackPlay({ track: track, index: index })"
         />
       </div>
-      <p v-else class="text-gray-500 italic">Похожие треки не найдены.</p>
+
+      <p v-else class="text-gray-500 italic">
+        Похожие треки не найдены или ещё загружаются.
+      </p>
     </div>
+
     <div class="mt-6 cursor-pointer">
       <h2 class="text-xl font-bold mb-4">Отзывы</h2>
       <ul v-if="reviews.length" class="no-list-style ml-2">
@@ -204,7 +222,21 @@
     </ul>
     <p v-else class="text-gray-500 italic">Отзывов пока нет.</p>
     </div>
-    
+    <div class="mt-6">
+      <button class="btn flex justify-center items-center" style="width: 740px;"  @click="isComplaintModalOpen = true" title="Пожаловаться на трек">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 s10-4.48 10-10S17.52 2 12 2zm0 18 c-4.41 0-8-3.59-8-8s3.59-8 8-8 s8 3.59 8 8-3.59 8-8 8zm.88-12h-1.75 v6h1.75v-6zm0 8h-1.75v2h1.75v-2z"/>
+        </svg>
+        Пожаловаться
+      </button>
+
+      <AddComplaintModal
+        :isVisible="isComplaintModalOpen"
+        :trackId="String(track.id)"
+        @close="isComplaintModalOpen = false"
+        @submitted="() => toast.success('Жалоба отправлена!', { autoClose: 2000, position: 'bottom-center' })"
+      />
+    </div>
   </div>
 </template>
 
@@ -215,6 +247,7 @@ import { ref, onMounted, computed, watch, h } from 'vue'
 import TrackCard from '/src/components/Cards/TrackCard.vue'
 import AddPlaylistModal from '/src/components/Modals/AddPlaylistModal.vue'
 import AddReviewModal from '/src/components/Modals/AddReviewModal.vue'
+import AddComplaintModal from '/src/components/Modals/AddComplaintModal.vue'
 
 import { useAudioStore } from '@/stores/audioStore'
 
@@ -231,6 +264,7 @@ const menuPosition = ref({ top: 0, left: 0 })
 
 const isCreateModalOpen = ref(false)
 const isReviewModalOpen = ref(false)
+const isComplaintModalOpen = ref(false)
 
 const inLibrary = ref(false)
 
@@ -290,9 +324,10 @@ const router = useRouter()
 const track = ref({
   id: null,
   title: '',
-  singer: '',
+  singers: [],    
   albumId: '',
   genre: '',
+  genreId: '',
   cover: '',
   duration: 0,
   audioUrl: '',
@@ -335,6 +370,21 @@ function nextTrack() {
 }
 function shuffleTracks() {
   toggleShuffle()
+}
+
+function goToSinger(singerId) {
+  if (singerId) {
+    router.push(`/singers/${singerId}`)
+  } else {
+    console.warn('singerId отсутствует')
+  }
+}
+function goToGenre() {
+  if (track.value.genreId) {
+    router.push(`/genres/${track.value.genreId}`)
+  } else {
+    console.warn('genreId отсутствует')
+  }
 }
 function goToAlbum() {
   if (track.value.albumId) {
@@ -475,40 +525,44 @@ async function loadData(id) {
     track.value = {
       id: trackData.id,
       title: trackData.name,
-      singer: trackData.singers?.join(', ') || 'Неизвестный исполнитель',
+      singers: Array.isArray(trackData.singers) 
+                  ? trackData.singers 
+                  : [],
+
       albumId: trackData.albumId,
       genre: trackData.genreName,
+      genreId: trackData.genreId,
       cover: getTrackCoverPath(trackData.coverUrl),
       audio: getTrackAudioPath(trackData.audioUrl),
-      duration: trackData.duration,
+      duration: trackData.duration
     }
 
-    const similarRes = await fetch(`http://localhost:5240/api/track/similar/${id}?count=5`)
+    const similarRes = await fetch(`http://127.0.0.1:8000/api/track/similar/${id}?count=5`)
     if (!similarRes.ok) throw new Error(await similarRes.text())
-
     const similarData = await similarRes.json()
-    similarTracks.value = similarData.map(t => ({
-      id: t.id,
-      title: t.name,
-      singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
-      albumId: t.albumId,
-      cover: getTrackCoverPath(t.coverUrl),
-      audio: getTrackAudioPath(t.audioUrl),
-    }))
+
+    similarTracks.value = similarData.map(t => {
+      return {
+        id: t.id,
+        title: t.name,
+        singers: Array.isArray(t.singers) ? t.singers : [],
+        albumId: t.albumId,
+        cover: getTrackCoverPath(t.cover_url),
+        audio: getTrackAudioPath(t.audio_url),
+      }
+    })
 
     await loadTrackReviews(id)
-
   } catch (err) {
     console.error('Ошибка загрузки трека и похожих треков:', err)
   }
 }
 
-watch(() => route.params.id, async (newId) => {
-  await loadData(newId)
-  scrollToTop()
-})
+
+
 
 async function openPlaylistMenu(event) {
+  console.log(track.value.audioUrl)
   const rect = event.currentTarget.getBoundingClientRect()
   menuPosition.value = {
     top: rect.bottom + window.scrollY,
@@ -545,21 +599,6 @@ async function loadTrackReviews(trackId) {
     })
   }
 }
-
-onMounted(async () => {
-  await fetchCurrentUser()
-  await loadData(route.params.id)
-
-  if (isAuthorized.value) {
-    await checkIfInLibrary()
-  }
-})
-
-onMounted(() => {
-  document.addEventListener('click', () => {
-    showPlaylistMenu.value = false
-  })
-})
 
 async function addTrackToPlaylist(playlistId) {
   try {
@@ -621,6 +660,24 @@ async function handleNewPlaylist(newPlaylist) {
     })
   }
 }
+
+watch(() => route.params.id, async (newId) => {
+  await loadData(newId)
+  scrollToTop()
+})
+
+onMounted(async () => {
+  document.addEventListener('click', () => {
+    showPlaylistMenu.value = false
+  })
+
+  await fetchCurrentUser()
+  await loadData(route.params.id)
+
+  if (isAuthorized.value) {
+    await checkIfInLibrary()
+  }
+})
 </script>
 
 

@@ -25,7 +25,6 @@
         </div>
       </div>
     </section>
-    <p v-else class="text-gray-500 italic">Рекомендации не найдены.</p>
 
     <div class="mt-6">
       <button class="text-xl font-bold mb-4 bg-transparent border-none">
@@ -37,13 +36,11 @@
           :key="track.id"
           :track="track"
           :index="index"
-          @play="() => handleTrackPlay(track, index, 'popular')"
+          @play="() => handleTrackPlay({ track: track, index: index })"
         />
       </div>
       <p v-else class="text-gray-500 italic">Популярные треки не найдены.</p>
     </div>
-
-    <audio ref="audioElement" />
   </div>
 </template>
 
@@ -65,7 +62,7 @@ const isLoadingRecs = ref(false)
 const recommendedTracks = ref([])
 const popularTracks = ref([])
 
-function handleTrackPlay(track, index, source) {
+function handleTrackPlay({ track, index }) {
   const isSame = audioStore.currentTrack.value?.id === track.id
   const isPlaying = audioStore.isPlaying.value
 
@@ -74,11 +71,7 @@ function handleTrackPlay(track, index, source) {
   } else if (isSame && !isPlaying) {
     audioStore.togglePlay()
   } else {
-    const queue = source === 'recommendations'
-      ? recommendedTracks.value
-      : popularTracks.value
-
-    audioStore.setQueue(queue, index)
+    audioStore.setQueue(popularTracks.value, index)
     audioStore.playCurrent()
   }
 }
@@ -109,11 +102,7 @@ const isRecommendationPlaying = computed(() => {
   )
 })
 
-const audioElement = ref(null)
-
 onMounted(async () => {
-  audioRef.value = audioElement.value
-
   try {
     const topRes = await fetch('http://localhost:5240/api/track/top?count=10')
     if (!topRes.ok) {
@@ -124,7 +113,9 @@ onMounted(async () => {
     popularTracks.value = topTracksData.map(t => ({
       id: t.id,
       title: t.name,
-      singer: t.singers?.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      singers: Array.isArray(t.singers) 
+                  ? t.singers 
+                  : 'Неизвестный исполнитель',
       albumId: t.albumId,
       cover: getTrackCoverPath(t.coverUrl),
       audio: getTrackAudioPath(t.audioUrl)
@@ -151,9 +142,9 @@ onMounted(async () => {
       recommendedTracks.value = recData.map(t => ({
         id: t.id,
         title: t.name,
-        singer: Array.isArray(t.singers) && t.singers.length
-          ? t.singers.join(', ')
-          : 'Неизвестный исполнитель',
+        singers: Array.isArray(t.singers) 
+                  ? t.singers 
+                  : 'Неизвестный исполнитель',
         albumId: t.album_id,
         cover: getTrackCoverPath(t.cover_url),
         audio: getTrackAudioPath(t.audio_url)

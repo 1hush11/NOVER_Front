@@ -17,9 +17,9 @@
 
           <div class="flex items-center mt-2">
             <img :src="album.singerPhoto" alt="Singer cover" class="cover-singer-image" />
-            <p class="text-purple-600 font-medium cursor-pointer hover:underline">
+            <button class="bg-transparent border-none text-md text-purple-600 font-medium cursor-pointer hover:underline" @click="goToSinger">
               {{ album.singer }}
-            </p>
+            </button>
           </div>
 
           <p class="text-sm text-gray-500 mt-2">Дата выпуска: {{ album.releaseDate }}</p>
@@ -150,6 +150,7 @@ const album = ref({
   cover: '',
   releaseDate: '',
   singer: '',
+  singerId: '',
   singerPhoto: '',
   tracks: []
 })
@@ -180,10 +181,17 @@ function shuffleTracks() {
 function close() {
   router.back()
 }
+function goToSinger() {
+  if (!album.value.singerId) {
+    console.warn('singerId отсутствует')
+    return
+  }
+  router.push(`/singers/${album.value.singerId}`)
+}
 
 async function loadAlbumData(albumId) {
   try {
-    const response = await fetch(`http://localhost:5240/api/album/album/${albumId}`)
+    const response = await fetch(`http://localhost:5240/api/album/albums/${albumId}`)
     if (!response.ok) {
       throw new Error(`Ошибка при загрузке: статус ${response.status}`)
     }
@@ -195,11 +203,14 @@ async function loadAlbumData(albumId) {
       cover: getAlbumCoverPath(albumData.coverUrl),
       releaseDate: albumData.releaseDate,
       singer: albumData.singer.name,
+      singerId: albumData.singerId,
       singerPhoto: getSingerPhotoPath(albumData.singer.photoUrl),
       tracks: albumData.tracks.map(t => ({
         id: t.id,
         title: t.name,
-        singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+        singers: Array.isArray(t.singers) 
+                  ? t.singers 
+                  : 'Неизвестный исполнитель',
         cover: getTrackCoverPath(t.coverUrl),
         audio: getTrackAudioPath(t.audioUrl)
       }))

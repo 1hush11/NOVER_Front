@@ -114,7 +114,9 @@ onMounted(async () => {
     tracks.value = tracksData.map(t => ({
       id: t.id,
       title: t.name,
-      singer: t.singers.length ? t.singers.join(', ') : 'Неизвестный исполнитель',
+      singers: Array.isArray(t.singers) 
+                  ? t.singers 
+                  : 'Неизвестный исполнитель',
       albumId: t.albumId,
       cover: getTrackCoverPath(t.coverUrl),
       audio: getTrackAudioPath(t.audioUrl)

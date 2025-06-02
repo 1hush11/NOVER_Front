@@ -151,7 +151,18 @@
 
             <div class="song-info">
               <div class="title">{{ currentTrack?.title || 'Неизвестно' }}</div>
-              <div class="singer">{{ currentTrack?.singer || 'Неизвестный' }}</div>
+              <div class="flex flex-wrap items-center text-sm text-gray-600">
+                <template v-for="(item, idx) in currentTrack?.singers" :key="item.id">
+                  <span
+                    class="hover:underline cursor-pointer"
+                    @click="goToSinger(item.id)"
+                  >
+                    {{ item.name }}
+                  </span>
+                  <span v-if="idx < currentTrack.singers.length - 1">,&nbsp;</span>
+                </template>
+              </div>
+
             </div>
           </div>
 
@@ -168,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 import { useUserStore } from '@/stores/userStore'
@@ -275,7 +286,6 @@ function goSubscriptionsPage() {
 onMounted(() => {
   audioStore.setAudioRef(audio.value)
 })
-
 </script>
 
 <style scoped>
@@ -392,6 +402,11 @@ onMounted(() => {
   box-sizing: border-box;
   font-family: sans-serif;
   color: white;
+  transition: transform 0.3s ease;
+}
+
+.player-container:hover {
+  transform: scale(1.02);
 }
 
 .play-button-wrapper {
@@ -423,11 +438,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  transition: transform 0.3s ease;
-}
-
-.player-container:hover {
-  transform: scale(1.02);
 }
 
 .nav-button {
