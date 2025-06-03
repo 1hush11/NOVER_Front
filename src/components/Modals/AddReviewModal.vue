@@ -42,11 +42,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, h } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { toast } from 'vue3-toastify'
-import { flatWords } from 'russian-bad-words'  
-
-
+import { flatWords } from 'russian-bad-words'
 
 const props = defineProps({
     isVisible: Boolean,
@@ -60,9 +58,16 @@ const form = reactive({
 })
 
 const hoverRating = ref(0)
+const adminWords = ref([])
 
 function close() {
     emit('close')
+}
+
+function containsBadWord(text) {
+    const allWords = [...flatWords, ...adminWords.value]
+    const lower = text.toLowerCase()
+    return allWords.some(w => lower.includes(w.toLowerCase()))
 }
 
 async function submit() {
@@ -73,39 +78,24 @@ async function submit() {
             comment: form.comment
         }
 
-        const hasBadWords = flatWords.some(bad => form.comment.includes(bad))
+        await loadAdminWords()
+        const hasBadWords = containsBadWord(form.comment)
 
-        const res = await fetch('http://localhost:5240/api/user/review', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reviewData),
+        const checkRes = await fetch(`http://localhost:5240/api/user/review_exists/${props.trackId}`, {
             credentials: 'include'
         })
 
-        if (res.status === 400) {
-            showUpdateConfirm()
-            return
+        if (!checkRes.ok) throw new Error('Ошибка при проверке отзыва')
+
+        const alreadyExists = await checkRes.json()
+
+        if (alreadyExists === true) {
+            await updateReview(reviewData, hasBadWords)
+        } else {
+            await addReview(reviewData, hasBadWords)
         }
 
-        if (!res.ok) throw new Error(await res.text())
-
-        // Дополнительный запрос при плохих словах
-        if (hasBadWords) {
-            await fetch('http://localhost:5240/api/user/block_review', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reviewData),
-                credentials: 'include'
-            })
-
-            toast.error('Комментарий содержит плохие слова, мы оставим только рейтинг.', {
-                autoClose: 2000,
-                position: 'bottom-center'
-            })
-        }
-
-        const result = await res.text()
-        emit('submitted', result)
+        emit('submitted')
         close()
     } catch (err) {
         toast.error(err.message, {
@@ -115,79 +105,80 @@ async function submit() {
     }
 }
 
-async function updateReview() {
-    try {
-        const reviewData = {
-            trackId: props.trackId,
-            rating: form.rating,
-            comment: form.comment
-        }
+async function addReview(reviewData, hasBadWords) {
+    const res = await fetch('http://localhost:5240/api/user/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewData),
+        credentials: 'include'
+    })
 
-        const hasBadWords = flatWords.some(bad => form.comment.includes(bad))
+    if (!res.ok) throw new Error(await res.text())
 
-        const res = await fetch('http://localhost:5240/api/user/update_review', {
-            method: 'PUT',
+    if (hasBadWords) {
+        await fetch('http://localhost:5240/api/user/block_review', {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reviewData),
             credentials: 'include'
         })
 
-        if (!res.ok) {
-            const errorText = await res.text()
-            toast.error(errorText, { autoClose: 2000, position: 'bottom-center' })
-            return
-        }
-
-        // Дополнительный вызов при наличии плохих слов
-        if (hasBadWords) {
-            await fetch('http://localhost:5240/api/user/block_review', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reviewData),
-                credentials: 'include'
-            })
-
-            toast.error('Комментарий содержит плохие слова, мы обновили только рейтинг.', {
-                autoClose: 2000,
-                position: 'bottom-center'
-            })
-        } else {
-            toast.success('Отзыв обновлён', { autoClose: 2000, position: 'bottom-center' })
-        }
-
-        emit('submitted')
-        close()
-    } catch (err) {
-        toast.error(err.message, { autoClose: 2000, position: 'bottom-center' })
+        toast.error('Комментарий содержит запрещённые платформой слова, мы сохранили только рейтинг.', {
+            autoClose: 2000,
+            position: 'bottom-center'
+        })
+    } else {
+        toast.success('Отзыв отправлен', {
+            autoClose: 2000,
+            position: 'bottom-center'
+        })
     }
 }
 
+async function updateReview(reviewData, hasBadWords) {
+    const res = await fetch('http://localhost:5240/api/user/update_review', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewData),
+        credentials: 'include'
+    })
 
-function showUpdateConfirm() {
-    toast(
-        ({ closeToast }) => {
-        setTimeout(closeToast, 6000)
-        return h('div', { class: 'lex flex-col gap-3' }, [
-            h('span', 'Вы уже оценивали этот трек. Обновить отзыв?'),
+    if (!res.ok) throw new Error(await res.text())
 
-            h('button', {
-                class: 'ml-2 bg-gray text-gray-700 rounded-lg border-none px-2 py-1',
-                style: 'width: 40px; height: 30px;',
-                onClick: closeToast
-            }, 'Нет'),
-            h('button', {
-                class: 'ml-2 bg-purple text-gray-700 rounded-lg border-none px-2 py-1',
-                style: 'width: 70px; height: 30px;',
-                onClick: async () => {
-                await updateReview()
-                closeToast()
-                }
-            }, 'Обновить')
-            ])
+    if (hasBadWords) {
+        await fetch('http://localhost:5240/api/user/block_review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reviewData),
+            credentials: 'include'
+        })
 
-        },
-        { position: 'bottom-center', autoClose: false, closeOnClick: false }
-    )
+        toast.error('Комментарий содержит запрещённые платформой слова, мы обновили только рейтинг.', {
+            autoClose: 2000,
+            position: 'bottom-center'
+        })
+    } else {
+        toast.success('Отзыв обновлён', {
+            autoClose: 2000,
+            position: 'bottom-center'
+        })
+    }
+}
+
+async function loadAdminWords() {
+    try {
+        const res = await fetch('http://localhost:5240/api/admin/bad_words')
+        if (res.ok) {
+            adminWords.value = await res.json()
+        } else {
+            throw new Error('Ошибка загрузки')
+        }
+    } catch (e) {
+        toast.error('Не удалось загрузить слова', {
+            autoClose: 2000,
+            position: 'bottom-center'
+        })
+    }
 }
 </script>
 

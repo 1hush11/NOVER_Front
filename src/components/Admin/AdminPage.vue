@@ -59,6 +59,13 @@
         <audio ref="audioElement" preload="auto" />
       </div>
     </div>
+    <audio
+        ref="audio"
+        :src="currentTrack?.audioUrl"
+        @timeupdate="updateProgress"
+        @loadedmetadata="initDuration"
+        autoplay
+      />
   </div>
 </template>
 
@@ -67,6 +74,7 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import { useSearchStore } from '../../stores/searchStore.js'
+import { useAudioStore } from '@/stores/audioStore'
 
 import { useRoute, useRouter } from 'vue-router'
 
@@ -78,8 +86,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const searchStore = useSearchStore()
 
-import { useAudioStore } from '@/stores/audioStore.js'
-
+const { currentTrack } = useAudioStore()
 const audioElement = ref(null)
 const { setAudioRef } = useAudioStore()
 

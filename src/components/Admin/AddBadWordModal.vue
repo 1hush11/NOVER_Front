@@ -46,18 +46,30 @@ function close() {
 
 async function submit() {
     try {
-    const res = await fetch('http://localhost:5240/api/admin/add_bad_word', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word: word.value.trim() }),
-        credentials: 'include'
-    })
-    if (!res.ok) throw new Error(await res.text())
-    toast.success('Слово добавлено', { position: 'bottom-center' })
-    emit('submitted')
-    close()
+        const response = await fetch('http://localhost:5240/api/admin/bad_words', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(word.value.trim()),
+            credentials: 'include'
+        })
+
+        if (response.status === 409) {
+            toast.error('Слово уже существует', { position: 'bottom-center' })
+            return
+        }
+
+        if (!response.ok) {
+            const errMsg = await response.text()
+            throw new Error(errMsg)
+        }
+
+        toast.success('Слово добавлено', { position: 'bottom-center' })
+        emit('submitted')
+        close()
     } catch (err) {
-    toast.error(err.message, { position: 'bottom-center' })
+        toast.error(err.message, { position: 'bottom-center' })
     }
 }
 </script>

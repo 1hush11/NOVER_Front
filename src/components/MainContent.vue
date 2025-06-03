@@ -28,7 +28,7 @@
 
     <div class="mt-6">
       <button class="text-xl font-bold mb-4 bg-transparent border-none">
-        Популярно сейчас
+        Популярные треки
       </button>
       <div v-if="popularTracks.length" class="flex flex-col gap-3">
         <TrackCard

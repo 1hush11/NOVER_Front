@@ -92,6 +92,24 @@
 
         </div>
       </div>
+      <div class="mr-4 mt-2 flex flex-col items-center">
+        <svg width="24" height="24" viewBox="-2 0 32 32">
+          <path d="M13.635 5.274l-7.686 6.127h-5.949v4.742l-0.004 0.003 0.004 0.003v4.693h5.98l7.656 6.008v-6.008h0.002v-9.441h-0.002v-6.127h0zM12.588 19.794h-0.002v4.9l-6.244-4.9h-5.293v-7.343h5.267l6.271-4.999v3.95l0.002 1.049v7.343h0z" fill="currentColor"/>
+          <path d="M16.087 10.729c1.141 1.521 1.745 3.333 1.745 5.241 0 1.948-0.627 3.791-1.812 5.33l0.832 0.64c1.328-1.724 2.029-3.788 2.029-5.97 0-2.137-0.676-4.167-1.955-5.87l-0.839 0.63z" fill="currentColor"/>
+          <path d="M20.313 6.927l-0.809 0.668c1.971 2.387 3.057 5.41 3.057 8.512 0 3.066-1.009 5.949-2.917 8.339l0.821 0.655c2.057-2.578 3.145-5.687 3.145-8.994 0-3.346-1.171-6.606-3.297-9.18z" fill="currentColor"/>
+          <path d="M23.578 3.521l-0.787 0.693c2.893 3.285 4.486 7.51 4.486 11.897 0 4.298-1.538 8.458-4.329 11.715l0.796 0.682c2.956-3.446 4.582-7.849 4.582-12.397-0-4.642-1.686-9.113-4.748-12.59z" fill="currentColor"/>
+        </svg>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          v-model="volume"
+          @input="changeVolume"
+          class="volume-slider mt-2"
+          orient="vertical"
+        />
+      </div>
     </div>
 
     <div class="flex gap-4 mt-4 mb-6">
@@ -175,24 +193,34 @@
     </div>
 
     <div class="mt-6">
-    <h2 class="text-xl font-bold mb-4">Похожие треки</h2>
+      <div v-if="isSimilarLoading" class="flex items-center gap-4 text-gray-500 italic">
+        <span>Загрузка похожих треков</span>
+        <div class="loader"></div>
+      </div>
+      <div v-else>
+      <h2 class="text-xl font-bold mb-4">Похожие треки</h2>
 
-    <div v-if="Array.isArray(similarTracks) && similarTracks.length > 0" >
-        <TrackCard
-          v-for="(track, index) in similarTracks"
-          :key="track.id || index"
-          :track="track"
-          :index="index"
-          @play="() => handleTrackPlay({ track: track, index: index })"
-        />
+      <div v-if="Array.isArray(similarTracks) && similarTracks.length > 0" >
+          <TrackCard
+            v-for="(track, index) in similarTracks"
+            :key="track.id || index"
+            :track="track"
+            :index="index"
+            @play="() => handleTrackPlay({ track: track, index: index })"
+          />
+      </div>
+      <p v-else class="text-gray-500 italic">
+        Похожие треки не найдены.
+      </p>
+      </div>
+    </div>
+    <div class="mt-6">
+      <div v-if="isReviewsLoading" class="flex items-center gap-4 text-gray-500 italic">
+        <span>Загрузка отзывов</span>
+        <div class="loader"></div>
       </div>
 
-      <p v-else class="text-gray-500 italic">
-        Похожие треки не найдены или ещё загружаются.
-      </p>
-    </div>
-
-    <div class="mt-6 cursor-pointer">
+    <div v-else class="mt-6 cursor-pointer">
       <h2 class="text-xl font-bold mb-4">Отзывы</h2>
       <ul v-if="reviews.length" class="no-list-style ml-2">
       <li v-for="(review, index) in reviews" :key="index" class="flex flex-col gap-3">
@@ -221,6 +249,7 @@
       </li>
     </ul>
     <p v-else class="text-gray-500 italic">Отзывов пока нет.</p>
+    </div>
     </div>
     <div class="mt-6">
       <button class="btn flex justify-center items-center" style="width: 740px;"  @click="isComplaintModalOpen = true" title="Пожаловаться на трек">
@@ -271,6 +300,7 @@ const inLibrary = ref(false)
 const audioStore = useAudioStore()
 const {
   currentTrack,
+  setVolume,
   isPlaying,
   play,
   togglePlay,
@@ -396,7 +426,6 @@ function goToAlbum() {
 function close() {
   router.back()
 }
-
 function scrollToTop() {
   if (scrollContainer.value) {
     scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' })
@@ -516,7 +545,7 @@ function showRemoveConfirm() {
   )
 }
 
-async function loadData(id) {
+async function loadTrackInfo(id) {
   try {
     const res = await fetch(`http://localhost:5240/api/track/tracks/${id}`)
     if (!res.ok) throw new Error(await res.text())
@@ -525,10 +554,7 @@ async function loadData(id) {
     track.value = {
       id: trackData.id,
       title: trackData.name,
-      singers: Array.isArray(trackData.singers) 
-                  ? trackData.singers 
-                  : [],
-
+      singers: Array.isArray(trackData.singers) ? trackData.singers : [],
       albumId: trackData.albumId,
       genre: trackData.genreName,
       genreId: trackData.genreId,
@@ -536,30 +562,63 @@ async function loadData(id) {
       audio: getTrackAudioPath(trackData.audioUrl),
       duration: trackData.duration
     }
-
-    const similarRes = await fetch(`http://127.0.0.1:8000/api/track/similar/${id}?count=5`)
-    if (!similarRes.ok) throw new Error(await similarRes.text())
-    const similarData = await similarRes.json()
-
-    similarTracks.value = similarData.map(t => {
-      return {
-        id: t.id,
-        title: t.name,
-        singers: Array.isArray(t.singers) ? t.singers : [],
-        albumId: t.albumId,
-        cover: getTrackCoverPath(t.cover_url),
-        audio: getTrackAudioPath(t.audio_url),
-      }
-    })
-
-    await loadTrackReviews(id)
   } catch (err) {
-    console.error('Ошибка загрузки трека и похожих треков:', err)
+    console.error('Ошибка загрузки информации о треке:', err)
+    toast.error('Не удалось загрузить информацию о треке', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
   }
 }
 
+const isSimilarLoading = ref(true)
+async function loadSimilarTracks(id) {
+  try {
+    isSimilarLoading.value = true
 
+    const res = await fetch(`http://127.0.0.1:8000/api/track/similar/${id}?count=5`)
+    if (!res.ok) throw new Error(await res.text())
 
+    const data = await res.json()
+    similarTracks.value = data.map(t => ({
+      id: t.id,
+      title: t.name,
+      singers: Array.isArray(t.singers) ? t.singers : [],
+      albumId: t.albumId,
+      cover: getTrackCoverPath(t.cover_url),
+      audio: getTrackAudioPath(t.audio_url),
+    }))
+  } catch (err) {
+    console.error('Ошибка загрузки похожих треков:', err)
+    toast.error('Не удалось загрузить похожие треки', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  } finally {
+    isSimilarLoading.value = false
+  }
+}
+
+const isReviewsLoading = ref(true)
+const reviews = ref([])
+async function loadTrackReviews(trackId) {
+  try {
+    isReviewsLoading.value = true
+
+    const res = await fetch(`http://localhost:5240/api/review/track/${trackId}`)
+    if (!res.ok) throw new Error(await res.text())
+
+    reviews.value = await res.json()
+  } catch (err) {
+    console.error('Ошибка загрузки отзывов:', err)
+    toast.error('Не удалось загрузить отзывы', {
+      autoClose: 3000,
+      position: 'bottom-center'
+    })
+  } finally {
+    isReviewsLoading.value = false
+  }
+}
 
 async function openPlaylistMenu(event) {
   console.log(track.value.audioUrl)
@@ -581,22 +640,6 @@ async function openPlaylistMenu(event) {
     playlists.value = data.created 
   } catch (err) {
     toast.error('Не удалось загрузить плейлисты')
-  }
-}
-
-const reviews = ref([])
-
-async function loadTrackReviews(trackId) {
-  try {
-    const res = await fetch(`http://localhost:5240/api/review/track/${trackId}`)
-    if (!res.ok) throw new Error(await res.text())
-    reviews.value = await res.json()
-  } catch (err) {
-    console.error('Ошибка загрузки отзывов:', err)
-    toast.error('Не удалось загрузить отзывы', {
-      autoClose: 3000,
-      position: 'bottom-center'
-    })
   }
 }
 
@@ -661,10 +704,12 @@ async function handleNewPlaylist(newPlaylist) {
   }
 }
 
-watch(() => route.params.id, async (newId) => {
-  await loadData(newId)
-  scrollToTop()
-})
+const volume = ref(100)
+function changeVolume(event) {
+  const newVolume = parseInt(event.target.value, 10)
+  volume.value = newVolume
+  setVolume(newVolume / 100)
+}
 
 onMounted(async () => {
   document.addEventListener('click', () => {
@@ -672,11 +717,26 @@ onMounted(async () => {
   })
 
   await fetchCurrentUser()
-  await loadData(route.params.id)
+
+  const trackId = route.params.id
+  await loadTrackInfo(trackId)
+  await Promise.all([
+    loadSimilarTracks(trackId),
+    loadTrackReviews(trackId),
+  ])
 
   if (isAuthorized.value) {
     await checkIfInLibrary()
   }
+})
+
+watch(() => route.params.id, async (newId) => {
+  await loadTrackInfo(newId)
+  await Promise.all([
+    loadSimilarTracks(newId),
+    loadTrackReviews(newId),
+  ])
+  scrollToTop()
 })
 </script>
 
@@ -716,38 +776,48 @@ onMounted(async () => {
   border: 1px solid #1c1c1c;
 }
 
-.track-slider {
+.volume-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  height: 120px;
+  width: 6px;
+  background: #ccc;
+  border-radius: 6px;
   appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(to right, #e0c8fb var(--progress, 0%), #e4e4e4 var(--progress, 0%));
-  outline: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
 }
-
-.track-slider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
+.volume-slider::-webkit-slider-thumb {
   appearance: none;
   width: 14px;
   height: 14px;
-  background-color: #e0c8fb;
-  border: 2px solid #e0c8fb;
+  background: black;
   border-radius: 50%;
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-  margin-top: -5px;
 }
-
-.track-slider::-moz-range-thumb {
+.volume-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background-color: #e0c8fb;
-  border: 2px solid #e0c8fb;
+  background: black;
   border-radius: 50%;
   cursor: pointer;
+}
+.volume-slider::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  background: black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.loader {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #d1b6ee;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>

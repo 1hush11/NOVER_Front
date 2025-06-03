@@ -23,6 +23,12 @@ function setAudioRef(ref) {
     }
 }
 
+function setVolume(val) {
+    if (audioRef.value) {
+        audioRef.value.volume = val
+    }
+}
+
 function setTrack(track) {
     currentTrack.value = track
 }
@@ -220,6 +226,7 @@ async function fetchRecommendations(userId) {
 export function useAudioStore() {
     return {
         currentTrack,
+        setVolume,
         isPlaying,
         duration,
         currentTime,

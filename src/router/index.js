@@ -22,6 +22,7 @@ import ModerationPage from '@/components/Admin/ModerationPage.vue'
 import TopTracksPage from '@/components/Admin/TopTracksPage.vue'
 import UserManagementPage from '@/components/Admin/UserManagementPage.vue'
 import AdminSearchResults from '@/components/Admin/AdminSearchResults.vue'
+import AdminTrackDetail from '@/components/Admin/AdminTrackDetail.vue'
 
 const routes = [
     {
@@ -59,12 +60,8 @@ const routes = [
             { path: 'tracks', name: 'TrackMetadata', component: TrackMetadataPage },
             { path: 'moderation', name: 'Moderation', component: ModerationPage },
             { path: 'top', name: 'TopTracks', component: TopTracksPage },
-            {
-                path: 'search',
-                name: 'AdminSearch',
-                component: AdminSearchResults,
-                props: route => ({ q: route.query.q })
-            }
+            { path: 'search', name: 'AdminSearch', component: AdminSearchResults, props: route => ({ q: route.query.q }) },
+            { path: 'track/:id', name: 'AdminTrackDetail', component: AdminTrackDetail },
         ]
     }
 ]

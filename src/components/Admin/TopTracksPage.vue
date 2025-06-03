@@ -22,32 +22,54 @@
             <div
                 v-for="track in playlist.filteredTracks"
                 :key="track.id"
-                class="flex items-center justify-between rounded-lg shadow p-4 w-full gap-4"
+                class="flex items-center justify-between rounded-lg shadow p-4 w-full"
             >
             <div class="flex items-center gap-4">
                 <img
-                    :src="getTrackCoverPath(track.coverUrl)"
-                    alt="Cover"
-                    class="cover-image"
+                :src="getTrackCoverPath(track.coverUrl)"
+                alt="Cover"
+                class="cover-image"
                 />
-                <div class="mt-2">
-                    <p class="font-medium truncate">{{ track.name }}</p>
-                    <p class="text-sm text-gray-600 truncate">{{ track.singers.join(', ') }}</p>
+                <div>
+                <p class="text-md font-semibold truncate cursor-default">
+                    {{ track.name }}
+                </p>
+                <p class="text-sm text-gray-600 truncate cursor-default">
+                    {{ track.singers.join(', ') }}
+                </p>
                 </div>
             </div>
+
+            <button class="play-button" @click.stop="toggleTrackPlay(track)" title="Воспроизвести/Остановить">
+                <span v-if="!isThisTrackPlaying(track)">
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
+                    <path d="M8 5v14l11-7-11-7z" />
+                </svg>
+                </span>
+                <span v-else>
+                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 20">
+                    <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
+                </svg>
+                </span>
+            </button>
             </div>
         </div>
         </div>
     </div>
+
     <p v-else class="text-gray-500">Данные не найдены.</p>
     </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { getTrackCoverPath } from '/src/utils/PathHelper.js'
+import { getTrackCoverPath, getTrackAudioPath } from '/src/utils/PathHelper.js'
 
 import { useSearchStore } from '../../stores/searchStore.js'
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 const searchStore = useSearchStore()
 
@@ -68,13 +90,25 @@ const filteredPlaylists = computed(() => {
 
 async function fetchPlaylists() {
     try {
-        const res = await fetch('http://localhost:5240/api/admin/playlists_by_genre', { credentials: 'include' })
+        const res = await fetch('http://localhost:5240/api/admin/playlists_by_genre', {
+        credentials: 'include'
+        })
         if (!res.ok) throw new Error(await res.text())
-        playlists.value = await res.json()
+
+        const playlistData = await res.json()
+
+        playlists.value = playlistData.map(playlist => ({
+        ...playlist,
+        tracks: playlist.tracks.map(t => ({
+            ...t,
+            audio: getTrackAudioPath(t.audioUrl),
+        }))
+        }))
     } catch (err) {
         console.error('Ошибка загрузки плейлистов:', err)
     }
 }
+
 
 async function refreshRatings() {
     updating.value = true
@@ -91,7 +125,31 @@ async function refreshRatings() {
         updating.value = false
     }
 }
+import { useAudioStore } from '@/stores/audioStore'
+const { currentTrack, isPlaying, setQueue, play, togglePlay, isShuffle } = useAudioStore()
 
+function isThisTrackPlaying(track) {
+    return currentTrack.value?.id === track.id && isPlaying.value
+    }
+
+    function toggleTrackPlay(track) {
+    if (isThisTrackPlaying(track)) {
+        togglePlay()
+    } else {
+        const queue = [track]
+        setQueue(queue, 0)
+        play(track)
+
+        try {
+        fetch(`http://localhost:5240/api/track/set_current/${track.id}`, {
+            method: 'POST',
+            credentials: 'include'
+        })
+        } catch (err) {
+        console.error('Ошибка установки текущего трека:', err)
+        }
+    }
+}
 onMounted(() => {
     fetchPlaylists()
 })
@@ -128,4 +186,50 @@ onMounted(() => {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
 }
+
+.cover-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 25%;
+    object-fit: cover;
+}
+
+.btn {
+    color: #1c1c1c;
+    border: 1px solid #ccc;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: 0.2s;
+}
+.btn:hover:not(:disabled) {
+    background-color: #f3f3f3;
+}
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.play-button {
+    width: 45px;
+    height: 45px;
+    background: #e0c8fb;
+    color: #1c1c1c;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
 </style>

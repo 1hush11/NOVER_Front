@@ -150,7 +150,7 @@
             <img :src="validCover(currentTrack?.cover)" class="cover-image" />
 
             <div class="song-info">
-              <div class="title">{{ currentTrack?.title || 'Неизвестно' }}</div>
+              <div class="title hover:underline">{{ currentTrack?.title || 'Неизвестно' }}</div>
               <div class="flex flex-wrap items-center text-sm text-gray-600">
                 <template v-for="(item, idx) in currentTrack?.singers" :key="item.id">
                   <span

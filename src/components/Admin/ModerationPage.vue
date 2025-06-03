@@ -1,6 +1,6 @@
 <template>
     <div>
-    <h2 class="text-xl font-semibold mb-4">Фильтр жалоб и отзывов</h2>
+    <h2 class="text-xl font-semibold mb-4">Фильтровать жалоб и отзывов</h2>
     <div class="flex items-center flex-wrap gap-4 mb-6">
     <div>
         <label class="ml-2">С даты:</label>
@@ -10,8 +10,9 @@
         <label class="ml-2">По дату:</label>
         <input type="date" v-model="dateTo" class="ml-2"/>
     </div>
+
     <button 
-        class="btn bg-gray-200 ml-4" 
+        class="btn bg-gray-200 ml-4 flex items-center" 
         style="height: 40px;" 
         @click="showBadWordModal = true"
     >
@@ -19,6 +20,14 @@
     </button>
     </div>
     <h2 class="text-xl font-semibold mb-4">Жалобы</h2>
+    <div class="flex items-center gap-4">
+    <label>Сортировать жалобы:</label>
+    <select v-model="complaintSort" class="p-2 border rounded w-3">
+        <option value="newest">Сначала новые</option>
+        <option value="oldest">Сначала старые</option>
+        <option value="track">По названию трека</option>
+    </select>
+    </div>
     <div v-if="filteredComplaints.length" class="mb-6">
         <div
             v-for="c in filteredComplaints"
@@ -83,29 +92,36 @@
                 </button>
                 </template>
             </div>
-            </div>
+        </div>
         </div>
     </div>
     <p v-else class="text-gray-500 mb-6">Нет жалоб для модерации.</p>
 
-    <h2 class="text-xl font-semibold mb-4">Отзывы и рейтинги</h2>
+    <h2 class="text-xl font-semibold mb-4">Отзывы</h2>
     <div class="flex flex-wrap gap-4 mb-6">
-        <div class="flex items-center">
-        <label class="ml-2">Мин. рейтинг:</label>
+        <div class="flex items-center gap-4">
+        <label>Сортировать отзывы:</label>
+        <select v-model="feedbackSort" class="p-2 border rounded w-3">
+            <option value="newest">Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+            <option value="track">По названию трека</option>
+        </select>
+        </div>
+        <div class="flex items-center gap-4">
+        <label class="ml-2 w-1-5">Мин. рейтинг:</label>
         <input type="number"
             v-model.number="minRating"
             min="1" max="5"
             placeholder="1–5"
-            class="ml-2 w-1-3 border rounded-lg p-2" />
-    </div>
-
+            class="w-1-3 border rounded-lg p-2" />
+        </div>
     </div>
     <div v-if="filteredFeedback.length">
         <div
             v-for="f in filteredFeedback"
             :key="`${f.trackId}-${f.userId}`"
             class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
-            :class="{ 'bg-red': f.totalBlockedCommentsByUser > 5 }"
+            :class="{ 'bg-red-200' : f.totalBlockedCommentsByUser > 5 }"
         >
             <div >
                 <p class="text-sm text-gray-600">
@@ -125,18 +141,18 @@
 
         <div class="flex items-center gap-4">
             <button
-                v-if="f.commentId && !f.commentDeleted"
-                @click="blockComment(f)"
-                class="btn bg-red text-red mt-2"
-            >
-                Заблокировать комментарий
-            </button>
-            <button
-                v-else-if="f.commentId && f.commentDeleted"
+                v-if="f.commentId && f.commentStatus ==='Заблокирован'"
                 @click="unblockComment(f)"
                 class="btn bg-green text-green mt-2"
             >
                 Восстановить комментарий
+            </button>
+            <button
+                v-else-if="f.commentStatus === 'Активен'"
+                @click="blockComment(f)"
+                class="btn bg-red text-red mt-2"
+            >
+                Заблокировать комментарий
             </button>
             <button
                 v-if="f.commentId && f.userStatus === 'Активен'"
@@ -152,9 +168,7 @@
             >
                 Разблокировать пользователя
             </button>
-
         </div>
-        
         </div>
     </div>
     <p v-else class="text-gray-500 italic">Нет отзывов и рейтингов.</p>
@@ -176,6 +190,9 @@ import 'vue3-toastify/dist/index.css'
 import { useSearchStore } from '../../stores/searchStore.js'
 import AddBadWordModal from './AddBadWordModal.vue'
 
+const complaintSort = ref('newest')
+const feedbackSort = ref('newest')
+
 const searchStore = useSearchStore()
 const complaints = ref([])
 const feedback = ref([])
@@ -187,24 +204,39 @@ const onlyWithComments = ref(false)
 
 const filteredComplaints = computed(() => {
     const q = searchStore.query.toLowerCase()
-    return complaints.value.filter(c => {
+
+    let result = complaints.value.filter(c => {
         const dt = new Date(c.createdAt)
         if (dateFrom.value && dt < new Date(dateFrom.value)) return false
         if (dateTo.value && dt > new Date(dateTo.value)) return false
 
         const matchesQuery =
-            c.userName.toLowerCase().includes(q) ||
-            c.content.toLowerCase().includes(q) ||
-            c.trackName.toLowerCase().includes(q) ||
-            c.singerNames.toLowerCase().includes(q)
+        c.userName.toLowerCase().includes(q) ||
+        c.content.toLowerCase().includes(q) ||
+        c.trackName.toLowerCase().includes(q) ||
+        c.singerNames.toLowerCase().includes(q)
 
         return matchesQuery
     })
+
+    result = result.slice().sort((a, b) => {
+        if (complaintSort.value === 'newest') {
+        return new Date(b.createdAt) - new Date(a.createdAt)
+        } else if (complaintSort.value === 'oldest') {
+        return new Date(a.createdAt) - new Date(b.createdAt)
+        } else if (complaintSort.value === 'track') {
+        return a.trackName.localeCompare(b.trackName)
+        }
+        return 0
+    })
+
+    return result
 })
 
 const filteredFeedback = computed(() => {
     const q = searchStore.query.toLowerCase()
-    return feedback.value.filter(f => {
+
+    let result = feedback.value.filter(f => {
         const dt = f.createdAt ? new Date(f.createdAt) : null
         if (dateFrom.value && (!dt || dt < new Date(dateFrom.value))) return false
         if (dateTo.value && (!dt || dt > new Date(dateTo.value))) return false
@@ -212,14 +244,27 @@ const filteredFeedback = computed(() => {
         if (onlyWithComments.value && !f.commentText) return false
 
         const matchesQuery =
-            f.userName.toLowerCase().includes(q) ||
-            f.trackName.toLowerCase().includes(q) ||
-            (f.commentText && f.commentText.toLowerCase().includes(q)) ||
-            f.singer.toLowerCase().includes(q) ||
-            String(f.rating).includes(q)
+        f.userName.toLowerCase().includes(q) ||
+        f.trackName.toLowerCase().includes(q) ||
+        (f.commentText && f.commentText.toLowerCase().includes(q)) ||
+        f.singer.toLowerCase().includes(q) ||
+        String(f.rating).includes(q)
 
         return matchesQuery
     })
+
+    result = result.slice().sort((a, b) => {
+        if (feedbackSort.value === 'newest') {
+        return new Date(b.commentCreatedAt) - new Date(a.commentCreatedAt)
+        } else if (feedbackSort.value === 'oldest') {
+        return new Date(a.commentCreatedAt) - new Date(b.commentCreatedAt)
+        } else if (feedbackSort.value === 'track') {
+        return a.trackName.localeCompare(b.trackName)
+        }
+        return 0
+    })
+
+    return result
 })
 
 function formatDate(iso) {
@@ -358,7 +403,13 @@ async function blockComment(comment) {
         { method: 'PUT', credentials: 'include' }
     )
     if (!res.ok) throw new Error('Не удалось удалить комментарий')
-    comment.commentDeleted = true
+    comment.commentStatus = 'Заблокирован'
+    if (typeof comment.totalBlockedCommentsByUser === 'number') {
+        comment.totalBlockedCommentsByUser += 1
+    } else {
+        comment.totalBlockedCommentsByUser = 1
+    }
+
     toast.success('Комментарий удалён', { position: 'bottom-center' })
     } catch (err) {
         console.error(err.message)
@@ -371,7 +422,11 @@ async function unblockComment(comment) {
         { method: 'PUT', credentials: 'include' }
         )
         if (!res.ok) throw new Error('Не удалось восстановить комментарий')
-        comment.commentDeleted = false
+        comment.commentStatus = 'Активен'
+        if (typeof comment.totalBlockedCommentsByUser === 'number' && comment.totalBlockedCommentsByUser > 0) {
+            comment.totalBlockedCommentsByUser -= 1
+        }
+
         toast.success('Комментарий восстановлен', { position: 'bottom-center' })
     } catch {
         console.error(err.message)

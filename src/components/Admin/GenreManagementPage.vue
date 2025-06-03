@@ -128,8 +128,7 @@ const showEdit  = ref(false)
 const filteredGenres = computed(() => {
     const q = searchStore.query.toLowerCase()
     return genres.value.filter(g =>
-        g.name?.toLowerCase().includes(q) ||
-        g.description?.toLowerCase().includes(q)
+        g.name?.toLowerCase().includes(q)
     )
 })
 
