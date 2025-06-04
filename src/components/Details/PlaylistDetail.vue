@@ -269,7 +269,6 @@ onMounted(async () => {
     console.error('Ошибка при загрузке данных о плейлисте:', error)
   }
 })
-
 </script>
 
 

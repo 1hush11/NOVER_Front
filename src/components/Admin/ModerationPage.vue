@@ -1,178 +1,248 @@
 <template>
     <div>
-    <h2 class="text-xl font-semibold mb-4">Фильтровать жалоб и отзывов</h2>
-    <div class="flex items-center flex-wrap gap-4 mb-6">
-    <div>
-        <label class="ml-2">С даты:</label>
-        <input type="date" v-model="dateFrom" class="ml-2"/>
-    </div>
-    <div>
-        <label class="ml-2">По дату:</label>
-        <input type="date" v-model="dateTo" class="ml-2"/>
-    </div>
-
-    <button 
-        class="btn bg-gray-200 ml-4 flex items-center" 
-        style="height: 40px;" 
-        @click="showBadWordModal = true"
-    >
-    + Добавить запрещенное слово
-    </button>
-    </div>
-    <h2 class="text-xl font-semibold mb-4">Жалобы</h2>
-    <div class="flex items-center gap-4">
-    <label>Сортировать жалобы:</label>
-    <select v-model="complaintSort" class="p-2 border rounded w-3">
-        <option value="newest">Сначала новые</option>
-        <option value="oldest">Сначала старые</option>
-        <option value="track">По названию трека</option>
-    </select>
-    </div>
-    <div v-if="filteredComplaints.length" class="mb-6">
-        <div
-            v-for="c in filteredComplaints"
-            :key="c.id"
-            class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
-        >
-        <div>
-            <p class="text-sm text-gray-600">
-                Жалоба №{{ c.id }} от {{ formatDate(c.createdAt) }}
-            </p>
-            <p class="mt-2">Пользователь: {{ c.userName }}</p>
-            <p class="mt-2 bg-purple opacity p-2">
-            Трек: <strong>{{ c.trackName }}</strong> | Исполнитель: <strong>{{ c.singerNames }}</strong></p>
-            <p class="mt-2">Текст жалобы: {{ c.content }}</p>
+        <div class="flex gap-4 mb-6">
+            <button
+                :class="['tab-btn', { active: activeTab === 'complaints' }]"
+                @click="activeTab = 'complaints'"
+            >
+                Жалобы
+            </button>
+            <button
+                :class="['tab-btn', { active: activeTab === 'feedback' }]"
+                @click="activeTab = 'feedback'"
+            >
+                Отзывы
+            </button>
+            
+            <button 
+                class="btn bg-gray-200 ml-auto flex items-center" 
+                style="height: 40px;" 
+                @click="showBadWordModal = true"
+            >
+                + Добавить запрещенное слово
+            </button>
         </div>
-        <div class="flex items-center gap-4">
-            <button
-                v-if="!c.complaintDeleted"
-                @click="blockComplaint(c)"
-                class="btn bg-red text-red"
-            >
-                Заблокировать жалобу
-            </button>
-            <button
-                v-else
-                @click="unblockComplaint(c)"
-                class="btn bg-green text-green"
-            >
-                Разблокировать жалобу
-            </button>
 
-            <div class="flex flex-col gap-2">
-                <button
-                    v-if="c.trackStatus !== 'Заблокирован'"
-                    @click="blockTrack(c)"
-                    class="btn bg-red text-red mb-2"
-                >
-                Заблокировать трек
-                </button>
-                <button
-                    v-else
-                    @click="unblockTrack(c)"
-                    class="btn bg-green text-green mb-2"
-                >
-                Разблокировать трек
-                </button>
-
-                <template v-if="c.singers.length">
-                <button
-                    v-if="c.singers[0].Status !== 'Заблокирован'"
-                    @click="blockSinger(c)"
-                    class="btn bg-red text-red"
-                >
-                    Заблокировать исполнителя
-                </button>
-                <button
-                    v-else
-                    @click="unblockSinger(c)"
-                    class="btn bg-green text-green"
-                >
-                    Разблокировать исполнителя
-                </button>
-                </template>
+        <div v-if="activeTab === 'complaints'">
+            <div class="flex items-center flex-wrap gap-4 mb-6">
+            <div>
+                <label class="ml-2">С даты:</label>
+                <input type="date" v-model="dateFrom" class="ml-2"/>
             </div>
-        </div>
-        </div>
-    </div>
-    <p v-else class="text-gray-500 mb-6">Нет жалоб для модерации.</p>
-
-    <h2 class="text-xl font-semibold mb-4">Отзывы</h2>
-    <div class="flex flex-wrap gap-4 mb-6">
-        <div class="flex items-center gap-4">
-        <label>Сортировать отзывы:</label>
-        <select v-model="feedbackSort" class="p-2 border rounded w-3">
-            <option value="newest">Сначала новые</option>
-            <option value="oldest">Сначала старые</option>
-            <option value="track">По названию трека</option>
-        </select>
-        </div>
-        <div class="flex items-center gap-4">
-        <label class="ml-2 w-1-5">Мин. рейтинг:</label>
-        <input type="number"
-            v-model.number="minRating"
-            min="1" max="5"
-            placeholder="1–5"
-            class="w-1-3 border rounded-lg p-2" />
-        </div>
-    </div>
-    <div v-if="filteredFeedback.length">
-        <div
-            v-for="f in filteredFeedback"
-            :key="`${f.trackId}-${f.userId}`"
-            class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
-            :class="{ 'bg-red-200' : f.totalBlockedCommentsByUser > 5 }"
-        >
-            <div >
-                <p class="text-sm text-gray-600">
-                    Отзыв №{{ f.commentId }} от {{ formatDate(f.commentCreatedAt) }}
-                </p>
-
-                <p class="mt-2">Пользователь: {{ f.userName }} | Количество блокировок: {{ f.totalBlockedCommentsByUser}}</p>
-                
-                <p class="mt-2 bg-purple opacity p-2">
-                Трек: <strong>{{ f.trackName }}</strong> | Исполнитель: <strong>{{ f.singer }}</strong></p>
-
-                <p class="mt-2">Рейтинг: {{ f.rating }}★</p>
-
-                <p v-if="f.commentText"> Комментарий: {{ f.commentText }}
-                </p>
+            <div>
+                <label class="ml-2">По дату:</label>
+                <input type="date" v-model="dateTo" class="ml-2"/>
             </div>
 
-        <div class="flex items-center gap-4">
-            <button
-                v-if="f.commentId && f.commentStatus ==='Заблокирован'"
-                @click="unblockComment(f)"
-                class="btn bg-green text-green mt-2"
-            >
-                Восстановить комментарий
-            </button>
-            <button
-                v-else-if="f.commentStatus === 'Активен'"
-                @click="blockComment(f)"
-                class="btn bg-red text-red mt-2"
-            >
-                Заблокировать комментарий
-            </button>
-            <button
-                v-if="f.commentId && f.userStatus === 'Активен'"
-                @click="blockUser(f)"
-                class="btn bg-red text-red mt-2"
-            >
-                Заблокировать пользователя
-            </button>
-            <button
-                v-else-if="f.commentId && f.userStatus === 'Заблокирован'"
-                @click="unblockUser(f)"
-                class="btn bg-green text-green mt-2"
-            >
-                Разблокировать пользователя
-            </button>
-        </div>
-        </div>
-    </div>
-    <p v-else class="text-gray-500 italic">Нет отзывов и рейтингов.</p>
+            <div class="ml-4">
+                <label>Статус:</label>
+                <select v-model="complaintStatusFilter" class="border rounded">
+                    <option value="all">Все</option>
+                    <option value="active">На рассмотрении</option>
+                    <option value="approved">Рассмотрено</option>
+                    <option value="rejected">Отклонено</option>
+                </select>
+            </div>
 
+            <div>
+                <label class="">Сортировать:</label>
+                <select v-model="complaintSort" class="border rounded">
+                    <option value="newest">Сначала новые</option>
+                    <option value="oldest">Сначала старые</option>
+                    <option value="track">По названию трека</option>
+                </select>
+            </div>
+            </div>
+
+            <div v-if="filteredComplaints.length" class="mb-6">
+                <div
+                    v-for="c in filteredComplaints"
+                    :key="c.id"
+                    class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
+                >
+                    <div>
+                        <p class="text-sm text-gray-600">
+                            Жалоба №{{ c.id }} от {{ formatDate(c.createdAt) }}
+                        </p>
+                        <p class="mt-2">Пользователь: {{ c.userName }}</p>
+                        <p class="mt-2 bg-purple opacity p-2">
+                        Трек: <strong>{{ c.trackName }}</strong> | Исполнитель: <strong>{{ c.singerNames }}</strong></p>
+                        <p class="mt-2">Текст жалобы: {{ c.content }}</p>
+                    </div>
+                <div class="flex items-center gap-4">
+                    <button
+                        v-if="!c.complaintDeleted"
+                        @click="blockComplaint(c)"
+                        class="btn bg-red text-red"
+                    >
+                        Заблокировать жалобу
+                    </button>
+                    <button
+                        v-else
+                        @click="unblockComplaint(c)"
+                        class="btn bg-green text-green"
+                    >
+                        Разблокировать жалобу
+                    </button>
+
+                    <div class="flex flex-col gap-2">
+                        <button
+                            v-if="c.trackStatus !== 'Заблокирован'"
+                            @click="blockTrack(c)"
+                            class="btn bg-red text-red mb-2"
+                        >
+                        Заблокировать трек
+                        </button>
+                        <button
+                            v-else
+                            @click="unblockTrack(c)"
+                            class="btn bg-green text-green mb-2"
+                        >
+                        Разблокировать трек
+                        </button>
+
+                        <template v-if="c.singers.length">
+                        <button
+                            v-if="c.singers[0].Status !== 'Заблокирован'"
+                            @click="blockSinger(c)"
+                            class="btn bg-red text-red"
+                        >
+                            Заблокировать исполнителя
+                        </button>
+                        <button
+                            v-else
+                            @click="unblockSinger(c)"
+                            class="btn bg-green text-green"
+                        >
+                            Разблокировать исполнителя
+                        </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p v-else class="text-gray-500 mb-6">Нет жалоб для модерации.</p>
+        </div>
+
+        <div v-if="activeTab === 'feedback'">
+            <div class="flex items-center flex-wrap gap-4 mb-6">
+                <div>
+                    <label class="ml-2">С даты:</label>
+                    <input type="date" v-model="dateFrom" class="ml-2"/>
+                </div>
+                <div>
+                    <label class="ml-2">По дату:</label>
+                    <input type="date" v-model="dateTo" class="ml-2"/>
+                </div>
+
+                <div class="ml-4">
+                    <label>Сортировать:</label>
+                    <select v-model="feedbackSort" class="border rounded">
+                        <option value="newest">Сначала новые</option>
+                        <option value="oldest">Сначала старые</option>
+                        <option value="track">По названию трека</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Мин. рейтинг:</label>
+                    <input type="number"
+                        v-model.number="minRating"
+                        min="1" max="5"
+                        placeholder="1–5"
+                        class="ml-2 border rounded-lg p-2" 
+                    />
+                </div>
+            </div>
+
+        <div v-if="filteredFeedback.length">
+            <div
+                v-for="f in filteredFeedback"
+                :key="`${f.trackId}-${f.userId}`"
+                class="flex items-center justify-between rounded-lg shadow p-4 mb-2"
+                :class="{ 'bg-red-200' : f.totalBlockedCommentsByUser > 5 }"
+            >
+                <div >
+                    <p class="text-sm text-gray-600">
+                        Отзыв №{{ f.commentId }} от {{ formatDate(f.commentCreatedAt) }}
+                    </p>
+
+                    <p class="mt-2">Пользователь: {{ f.userName }} | Количество блокировок: {{ f.totalBlockedCommentsByUser}}</p>
+                    
+                    <p class="mt-2 bg-purple opacity p-2">
+                    Трек: <strong>{{ f.trackName }}</strong> | Исполнитель: <strong>{{ f.singer }}</strong></p>
+
+                    <div class="mt-2 flex items-center">
+                        <span>Рейтинг:</span>
+                        <span class="flex ml-2">
+                            <span v-for="star in 5" :key="star">
+                            <svg
+                                v-if="star <= f.ratingValue"
+                                fill="#eab308"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path d="M22,9.81a1,1,0,0,0-.83-.69l-5.7-.78L12.88,3.53a1,1,0,0,0-1.76,0L8.57,8.34l-5.7.78a1,1,0,0,0-.82.69,1,1,0,0,0,.28,1l4.09,3.73-1,5.24A1,1,0,0,0,6.88,20.9L12,18.38l5.12,2.52a1,1,0,0,0,.44.1,1,1,0,0,0,1-1.18l-1-5.24,4.09-3.73A1,1,0,0,0,22,9.81Z"/>
+                            </svg>
+                            <svg
+                                v-else
+                                fill="none"
+                                stroke="#eab308"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <polygon
+                                points="12 4 9.22 9.27 3 10.11 7.5 14.21 6.44 20 12 17.27 17.56 20 16.5 14.21 21 10.11 14.78 9.27 12 4"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                />
+                            </svg>
+                            </span>
+                        </span>
+                        </div>
+
+                    <p v-if="f.commentText"> Комментарий: {{ f.commentText }}</p>
+                </div>
+
+            <div class="flex items-center gap-4">
+                <button
+                    v-if="f.commentId && f.commentStatus ==='Заблокирован'"
+                    @click="unblockComment(f)"
+                    class="btn bg-green text-green mt-2"
+                >
+                    Восстановить комментарий
+                </button>
+                <button
+                    v-else-if="f.commentStatus === 'Активен'"
+                    @click="blockComment(f)"
+                    class="btn bg-red text-red mt-2"
+                >
+                    Заблокировать комментарий
+                </button>
+                <button
+                    v-if="f.commentId && f.userStatus === 'Активен'"
+                    @click="blockUser(f)"
+                    class="btn bg-red text-red mt-2"
+                >
+                    Заблокировать пользователя
+                </button>
+                <button
+                    v-else-if="f.commentId && f.userStatus === 'Заблокирован'"
+                    @click="unblockUser(f)"
+                    class="btn bg-green text-green mt-2"
+                >
+                    Разблокировать пользователя
+                </button>
+            </div>
+            </div>
+        </div>
+        <p v-else class="text-gray-500 italic">Нет отзывов и рейтингов.</p>
+    </div>
+    
     <AddBadWordModal
         :isVisible="showBadWordModal"
         @close="showBadWordModal = false"
@@ -190,7 +260,11 @@ import 'vue3-toastify/dist/index.css'
 import { useSearchStore } from '../../stores/searchStore.js'
 import AddBadWordModal from './AddBadWordModal.vue'
 
+const activeTab = ref('complaints')
+
 const complaintSort = ref('newest')
+const complaintStatusFilter = ref('all');
+
 const feedbackSort = ref('newest')
 
 const searchStore = useSearchStore()
@@ -206,18 +280,23 @@ const filteredComplaints = computed(() => {
     const q = searchStore.query.toLowerCase()
 
     let result = complaints.value.filter(c => {
-        const dt = new Date(c.createdAt)
-        if (dateFrom.value && dt < new Date(dateFrom.value)) return false
-        if (dateTo.value && dt > new Date(dateTo.value)) return false
+        const dt = new Date(c.createdAt);
+        if (dateFrom.value && dt < new Date(dateFrom.value)) return false;
+        if (dateTo.value && dt > new Date(dateTo.value)) return false;
+
+        if (complaintStatusFilter.value === 'active' && c.complaintDeleted) return false;
+        if (complaintStatusFilter.value === 'approved' && (!c.trackStatus || c.trackStatus !== 'Заблокирован')) return false;
+        if (complaintStatusFilter.value === 'rejected' && !c.complaintDeleted) return false;
 
         const matchesQuery =
-        c.userName.toLowerCase().includes(q) ||
-        c.content.toLowerCase().includes(q) ||
-        c.trackName.toLowerCase().includes(q) ||
-        c.singerNames.toLowerCase().includes(q)
+            c.userName.toLowerCase().includes(q) ||
+            c.content.toLowerCase().includes(q) ||
+            c.trackName.toLowerCase().includes(q) ||
+            c.singerNames.toLowerCase().includes(q);
 
-        return matchesQuery
-    })
+        return matchesQuery;
+    });
+
 
     result = result.slice().sort((a, b) => {
         if (complaintSort.value === 'newest') {
@@ -481,6 +560,28 @@ onMounted(() => {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
+.tab-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    background-color: #f1f5f9;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #1c1c1c;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.tab-btn:hover {
+    background-color: #e2e8f0;
+}
+
+.tab-btn.active {
+    background-color: #e0c8fb;
+    color: #1c1c1c;
+    border-color: #e0c8fb;
+}
+
 .bg-gray-200 {
     background-color: #e2e8f0;
 }

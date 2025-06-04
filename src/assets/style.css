@@ -153,6 +153,9 @@ a {
 .mx-auto {
     margin: auto;
 }
+.ml-auto {
+    margin-left: auto;
+}
 
 .m-6 {
     margin: 1.5rem;

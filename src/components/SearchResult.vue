@@ -67,26 +67,25 @@
 
       <div v-if="playlists.length">
         <h3 class="text-lg font-semibold mb-4">Плейлисты</h3>
-        <div class="flex flex-wrap gap-4 mb-4">
+        <div class="flex overflow-hidden transition rounded-lg mb-4">
           <button
-            class="text-2xl font-bold bg-transparent border-none px-4"
+            class="text-2xl font-bold bg-transparent border-none p-2"
             @click="prevPlaylist"
             :disabled="currentPlaylistPage === 0"
           >
             ‹
           </button>
 
-          <div class="flex space-x-4">
-            <PlaylistCard
-              v-for="playlist in pagedPlaylists"
-              :key="'playlist-' + playlist.id"
-              :playlist="playlist"
-              @click="goToPlaylist(playlist)"
-            />
-          </div>
+          <PlaylistCard
+            v-for="playlist in pagedPlaylists"
+            :key="'playlist-' + playlist.id"
+            :playlist="playlist"
+            @click="goToPlaylist(playlist)"
+            class="m-2"
+          />
 
           <button
-            class="text-2xl font-bold bg-transparent border-none px-4"
+            class="text-2xl font-bold bg-transparent border-none p-2"
             @click="nextPlaylist"
             :disabled="(currentPlaylistPage + 1) * playlistsPerPage >= playlists.length"
           >

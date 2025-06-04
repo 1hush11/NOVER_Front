@@ -43,4 +43,3 @@ export function getUserAvatarPath(fileName) {
     }
     return `http://localhost:5240/Resources/UserCovers/${fileName}`
 }
-
