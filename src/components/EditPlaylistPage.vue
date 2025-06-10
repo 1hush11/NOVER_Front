@@ -207,7 +207,6 @@ async function saveChanges() {
       autoClose: 2000,
       position: 'bottom-center',
     })
-    router.back()
   }
 }
 

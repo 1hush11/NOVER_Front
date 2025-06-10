@@ -36,7 +36,7 @@ const filteredSingers = computed(() =>
     .sort((a, b) => b.totalPlayCount - a.totalPlayCount)
 )
 
-const fetchAllSingersWithStats = async () => {
+const fetchSingers = async () => {
   try {
     const baseUrl = 'http://localhost:5240/api/singer/singers'
 
@@ -61,7 +61,7 @@ const fetchAllSingersWithStats = async () => {
 }
 
 onMounted(() => {
-  fetchAllSingersWithStats()
+  fetchSingers()
 })
 
 function goToSinger(singer) {
